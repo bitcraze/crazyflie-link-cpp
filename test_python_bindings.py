@@ -15,6 +15,11 @@ if __name__ == "__main__":
 
   # send a packet
   p = nativelink.Packet()
+  p.port = 15     # CRTP_PORT_LINK
+  p.channel = 0   # ECHO
+  p.size = 1
+  p.data[0] = 5
+  print(p)
   con.send(p)
 
   # receive a packet

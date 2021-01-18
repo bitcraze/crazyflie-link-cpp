@@ -3,6 +3,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
+#include <pybind11/numpy.h>
 
 #include "Packet.hpp"
 #include "Connection.h"
@@ -28,11 +29,15 @@ PYBIND11_MODULE(nativelink, m) {
   // Packet
   py::class_<Packet>(m, "Packet")
       .def(py::init<>())
-      // .def_readwrite("channel", &Packet::channel)
-      // .def_readwrite("port", &Packet::port)
-      .def_readonly("data", &Packet::data)
-      .def_readwrite("size", &Packet::size)
-      // .def_property("size", &Packet::size, &Packet::setSize)
+      .def_property("channel", &Packet::channel, &Packet::setChannel)
+      .def_property("port", &Packet::port, &Packet::setPort)
+      .def_property(
+          "data", [](Packet &p) -> py::array {
+            auto dtype = py::dtype(py::format_descriptor<uint8_t>::format());
+            auto base = py::array(dtype, {p.size()}, {sizeof(uint8_t)});
+            return py::array(
+                dtype, {p.size()}, {sizeof(uint8_t)}, p.data(), base); }, [](Packet &) {})
+      .def_property("size", &Packet::size, &Packet::setSize)
       .def("__repr__", &toString<Packet>);
 
   //
