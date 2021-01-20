@@ -7,7 +7,10 @@ if __name__ == "__main__":
   print(cfs)
 
   # connect to a CF
-  con = nativelink.Connection("test")
+  # con = nativelink.Connection("usb://0")
+  con = nativelink.Connection("radio://0/80/2M/E7E7E7E7E7")
+
+
   print(con)
 
   # print connection statistics

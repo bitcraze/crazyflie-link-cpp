@@ -44,6 +44,11 @@ public:
             return getBitBieldValue<uint8_t, 0, 1>(data_[0]);
         }
 
+        operator bool() const
+        {
+            return ack();
+        }
+
         bool powerDet() const
         {
             return getBitBieldValue<uint8_t, 1, 1>(data_[0]);

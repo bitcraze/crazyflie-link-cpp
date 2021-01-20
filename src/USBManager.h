@@ -1,9 +1,10 @@
 #pragma once
 
 #include <vector>
-// #include <thread>
 
 #include <libusb-1.0/libusb.h>
+
+#include "CrazyradioThread.h"
 
 class USBManager {
 public :
@@ -28,24 +29,27 @@ public :
         return crazyfliesUSB_.size();
     }
 
-    size_t numCrazyradios() const {
-        return crazyradios_.size();
+    std::vector<CrazyradioThread>& crazyradioThreads() {
+        return radioThreads_;
     }
 
-    const std::vector<libusb_device *>& crazyradios()
-    {
-        return crazyradios_;
-    }
+        // size_t numCrazyradios() const {
+        //     return crazyradios_.size();
+        // }
 
-private :
-    // constructor
-    USBManager();
+        // const std::vector<libusb_device *>& crazyradios()
+        // {
+        //     return crazyradios_;
+        // }
+
+        private :
+        // constructor
+        USBManager();
 
 private :
     libusb_context * ctx_;
-    std::vector<libusb_device*> crazyradios_;
+    // std::vector<libusb_device*> crazyradios_;
     std::vector<libusb_device*> crazyfliesUSB_;
 
-    // std::vector<std::thread>
-        // radioThreads_;
+    std::vector<CrazyradioThread> radioThreads_;
 };

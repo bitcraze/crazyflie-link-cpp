@@ -6,11 +6,16 @@
 #include <ostream>
 #include <vector>
 #include <queue>
+#include <mutex>
 
 #include "Packet.hpp"
+#include "Crazyradio.h"
+
+class CrazyradioThread;
 
 class Connection
 {
+  friend class CrazyradioThread;
 public:
   class Statistics
   {
@@ -77,8 +82,19 @@ public:
 
 private:
   std::string uri_;
+  int channel_;
+  Crazyradio::Datarate datarate_;
+  uint64_t address_;
+  bool useSafelink_;
+  bool safelinkInitialized_;
+  bool safelinkDown_;
+  bool safelinkUp_;
+
   Connection::Statistics statistics_;
 
+  std::mutex queue_send_mutex_;
   std::priority_queue<Packet> queue_send_;
+
+  std::mutex queue_recv_mutex_;
   std::priority_queue<Packet> queue_recv_;
 };

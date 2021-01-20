@@ -53,7 +53,7 @@ USBManager::USBManager()
                      deviceDescriptor.idProduct == 0x7777)
             {
                 libusb_ref_device(device);
-                crazyradios_.push_back(device);
+                radioThreads_.push_back(CrazyradioThread(device));
             }
         }
     }
@@ -102,8 +102,8 @@ USBManager::~USBManager()
     // TODO: deregister hotplug callbacks
 
     // deregister devices
-    for (auto dev : crazyradios_) {
-        libusb_unref_device(dev);
+    for (auto& t : radioThreads_) {
+        libusb_unref_device(t.device());
     }
     for (auto dev : crazyfliesUSB_)
     {

@@ -26,6 +26,7 @@ add_library(crazyflieNativeLink
   src/Connection.cpp
   src/USBDevice.cpp
   src/Crazyradio.cpp
+  src/CrazyradioThread.cpp
 )
 
 # target_include_directories(libCrazyflieNativeLink

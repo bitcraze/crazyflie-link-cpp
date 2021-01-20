@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 #include <array>
 #include <algorithm>
 
@@ -17,6 +18,12 @@ public:
   Packet() 
     : size_(0)
   {
+  }
+
+  Packet(const uint8_t* data, size_t size)
+  {
+    std::memcpy(data_.data(), data, size);
+    size_ = size - 1;
   }
 
   uint8_t channel() const
@@ -39,6 +46,16 @@ public:
     setBitBieldValue<uint8_t, 4, 4>(data_[0], port);
   }
 
+  uint8_t safelink() const
+  {
+    return getBitBieldValue<uint8_t, 2, 2>(data_[0]);
+  }
+
+  void setSafelink(uint8_t safelink)
+  {
+    setBitBieldValue<uint8_t, 2, 2>(data_[0], safelink);
+  }
+
   uint8_t size() const
   {
     return size_;
@@ -52,6 +69,11 @@ public:
   uint8_t* data()
   {
     return &data_[1];
+  }
+
+  const uint8_t* raw() const
+  {
+    return &data_[0];
   }
 
   friend std::ostream& operator<<(std::ostream& out, const Packet& p)

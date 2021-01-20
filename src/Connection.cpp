@@ -1,3 +1,6 @@
+#include <regex>
+#include <iostream>
+
 #include "Connection.h"
 
 #include "USBManager.h"
@@ -9,6 +12,50 @@
 Connection::Connection(const std::string& uri)
   : uri_(uri)
 {
+  // Examples:
+  // "usb://0" -> connect over USB
+  // "radio://0/80/2M/E7E7E7E7E7" -> connect over radio
+  // "radio://*/80/2M/E7E7E7E7E7" -> auto-pick radio
+  // "radio://*/80/2M/*" -> broadcast/P2P sniffing on channel 80
+
+  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]{10}|\\*))");
+  std::smatch match;
+  if (!std::regex_match(uri, match, uri_regex)) {
+    throw std::runtime_error("Invalid uri!");
+  }
+
+  for (size_t i = 0; i < match.size(); ++i) {
+    std::cout << i << " " << match[i].str() << std::endl;
+  }
+  // std::cout << match.size() << std::endl;
+
+  if (match[2].matched) {
+    // usb://
+    // int devid = std::stoi(match[2].str());
+    // TODO
+  } else {
+    // radio
+    int devid = std::stoi(match[3].str());
+
+    channel_ = std::stoi(match[4].str());
+    if (match[5].str() == "250K") {
+      datarate_ = Crazyradio::Datarate_250KPS;
+    } else if (match[5].str() == "1M") {
+      datarate_ = Crazyradio::Datarate_1MPS;
+    } else if (match[5].str() == "2M") {
+      datarate_ = Crazyradio::Datarate_2MPS;
+    }
+    address_ = std::stoul(match[6].str(), nullptr, 16);
+    useSafelink_ = true;
+    safelinkInitialized_ = false;
+    safelinkUp_ = false;
+    safelinkDown_ = false;
+
+    USBManager::get()
+        .crazyradioThreads()
+        .at(devid)
+        .addConnection(this);
+  }
 
 }
 
@@ -34,12 +81,21 @@ std::vector<std::string> Connection::scan(const std::string& /*address*/)
 
 void Connection::send(const Packet& p)
 {
+  const std::lock_guard<std::mutex> lock(queue_send_mutex_);
   queue_send_.push(p);
 }
 
 Packet Connection::recv(bool /*blocking*/)
 {
-  return Packet();
+  Packet result;
+  const std::lock_guard<std::mutex> lock(queue_recv_mutex_);
+  if (queue_recv_.empty()) {
+    return result;
+  } else {
+    result = queue_recv_.top();
+    queue_recv_.pop();
+  }
+  return result;
 }
 
 std::ostream& operator<<(std::ostream& out, const Connection& p)
