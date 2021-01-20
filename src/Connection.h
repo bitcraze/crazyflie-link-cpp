@@ -5,6 +5,7 @@
 #include <cmath>
 #include <ostream>
 #include <vector>
+#include <queue>
 
 #include "Packet.hpp"
 
@@ -78,4 +79,6 @@ private:
   std::string uri_;
   Connection::Statistics statistics_;
 
+  std::priority_queue<Packet> queue_send_;
+  std::priority_queue<Packet> queue_recv_;
 };

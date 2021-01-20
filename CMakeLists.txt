@@ -22,7 +22,10 @@ find_library(USB_LIB usb-1.0)
 # C++ library
 
 add_library(crazyflieNativeLink
+  src/USBManager.cpp
   src/Connection.cpp
+  src/USBDevice.cpp
+  src/Crazyradio.cpp
 )
 
 # target_include_directories(libCrazyflieNativeLink
@@ -35,6 +38,7 @@ target_link_libraries(crazyflieNativeLink
   PRIVATE
     ${USB_LIB}
 )
+set_property(TARGET crazyflieNativeLink PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Python bindings
 add_subdirectory(pybind11)

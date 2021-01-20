@@ -7,6 +7,9 @@
 
 #include "Packet.hpp"
 #include "Connection.h"
+// #include "USBManager.h"
+
+// USBManager* g_usbMgr;
 
 PYBIND11_MAKE_OPAQUE(std::array<uint8_t, CRTP_MAXSIZE>)
 
@@ -25,6 +28,7 @@ PYBIND11_MODULE(nativelink, m) {
 
   // Helper for Packet
   // py::bind_vector<std::array<uint8_t, CRTP_MAXSIZE>>(m, "ByteArray");
+  // g_usbMgr = new USBManager();
 
   // Packet
   py::class_<Packet>(m, "Packet")
