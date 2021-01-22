@@ -38,8 +38,24 @@ add_library(crazyflieNativeLink
 target_link_libraries(crazyflieNativeLink
   PRIVATE
     ${USB_LIB}
+    pthread
 )
 set_property(TARGET crazyflieNativeLink PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+# C++ test application
+
+include_directories(
+  src
+)
+
+# scan
+add_executable(test
+  test/main.cpp
+)
+target_link_libraries(test
+  crazyflieNativeLink
+)
+
 
 # Python bindings
 add_subdirectory(pybind11)

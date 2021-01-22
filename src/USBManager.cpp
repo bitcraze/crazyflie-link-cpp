@@ -53,7 +53,7 @@ USBManager::USBManager()
                      deviceDescriptor.idProduct == 0x7777)
             {
                 libusb_ref_device(device);
-                radioThreads_.push_back(CrazyradioThread(device));
+                radioThreads_.emplace_back(CrazyradioThread(device));
             }
         }
     }
@@ -99,7 +99,13 @@ USBManager::USBManager()
 
 USBManager::~USBManager()
 {
+    std::cout << "dtor USBManager" << std::endl;
     // TODO: deregister hotplug callbacks
+
+    crazyfliesUSB_.clear();
+    radioThreads_.clear();
+
+    std::cout << "  deregister libusb devices" << std::endl;
 
     // deregister devices
     for (auto& t : radioThreads_) {

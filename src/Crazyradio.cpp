@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <iostream>
 
 #include <libusb-1.0/libusb.h>
 
@@ -15,7 +16,7 @@ enum
     SET_RADIO_ARC       = 0x06,
     ACK_ENABLE          = 0x10,
     SET_CONT_CARRIER    = 0x20,
-    SCANN_CHANNELS      = 0x21,
+    // SCANN_CHANNELS      = 0x21,
     LAUNCH_BOOTLOADER   = 0xFF,
 };
 
@@ -27,10 +28,13 @@ Crazyradio::Crazyradio(
     , datarate_(Datarate_250KPS)
     , ackEnabled_(true)
 {
+    std::cout << versionMajor_ << "." << versionMinor_ << std::endl;
+
+
     setDatarate(Datarate_2MPS);
     setChannel(2);
     setContCarrier(false);
-    setAddress(0xE7E7E7E7E7);
+    // setAddress(0xE7E7E7E7E7);
     setPower(Power_0DBM);
     setArc(3);
     setArdBytes(32);
@@ -56,21 +60,7 @@ void Crazyradio::setAddress(uint64_t address)
     a[1] = (address >> 24) & 0xFF;
     a[0] = (address >> 32) & 0xFF;
 
-    // sendVendorSetup(SET_RADIO_ADDRESS, 0, 0, a, 5);
-    // unsigned char a[] = {0xe7, 0xe7, 0xe7, 0xe7, 0x02};
-
-    /*int status =*/ libusb_control_transfer(
-        dev_handle_,
-        LIBUSB_REQUEST_TYPE_VENDOR,
-        SET_RADIO_ADDRESS,
-        0,
-        0,
-        a,
-        5,
-        /*timeout*/ 1000);
-    // if (status != LIBUSB_SUCCESS) {
-    //     std::cerr << "sendVendorSetup: " << libusb_error_name(status) << std::endl;
-    // }
+    sendVendorSetup(SET_RADIO_ADDRESS, 0, 0, a, 5);
     address_ = address;
 }
 
@@ -135,6 +125,8 @@ Crazyradio::Ack Crazyradio::sendPacket(
     int status;
     int transferred;
 
+    std::cout << "S " << length << std::endl;
+
     // Send data
     status = libusb_bulk_transfer(
         dev_handle_,
@@ -159,8 +151,8 @@ Crazyradio::Ack Crazyradio::sendPacket(
     status = libusb_bulk_transfer(
         dev_handle_,
         /* endpoint*/ (0x81 | LIBUSB_ENDPOINT_IN),
-        ack.data(),
-        ACK_MAXSIZE,
+        ack.data_.data(),
+        ack.data_.size(),
         &transferred,
         /*timeout*/ 10);
     if (status == LIBUSB_ERROR_TIMEOUT) {
@@ -171,6 +163,9 @@ Crazyradio::Ack Crazyradio::sendPacket(
     }
 
     ack.size_ = transferred - 1;
+
+    std::cout << "ack " << ack.size_ << " " << (int) ack.data_[0] << std::endl;
+
     return ack;
 }
 

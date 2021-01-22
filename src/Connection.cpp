@@ -35,7 +35,7 @@ Connection::Connection(const std::string& uri)
     // TODO
   } else {
     // radio
-    int devid = std::stoi(match[3].str());
+    devid_ = std::stoi(match[3].str());
 
     channel_ = std::stoi(match[4].str());
     if (match[5].str() == "250K") {
@@ -51,9 +51,11 @@ Connection::Connection(const std::string& uri)
     safelinkUp_ = false;
     safelinkDown_ = false;
 
+    alive_ = true;
+
     USBManager::get()
         .crazyradioThreads()
-        .at(devid)
+        .at(devid_)
         .addConnection(this);
   }
 
@@ -61,7 +63,9 @@ Connection::Connection(const std::string& uri)
 
 Connection::~Connection()
 {
-
+  const std::lock_guard<std::mutex> lock(alive_mutex_);
+  alive_ = false;
+  USBManager::get().crazyradioThreads().at(devid_).removeConnection(this);
 }
 
 std::vector<std::string> Connection::scan(const std::string& /*address*/)

@@ -2,6 +2,7 @@
 
 #include <set>
 #include <thread>
+#include <mutex>
 
 #include <libusb-1.0/libusb.h>
 
@@ -12,6 +13,16 @@ class CrazyradioThread
 {
 public:
     CrazyradioThread(libusb_device * dev);
+
+    CrazyradioThread(CrazyradioThread &&other)
+    {
+        std::unique_lock<std::mutex> rhs_lk(other.connections_mutex_);
+        dev_ = std::move(other.dev_);
+        thread_ = std::move(other.thread_);
+        connections_ = std::move(other.connections_);
+    }
+
+    ~CrazyradioThread();
 
     bool isActive() const;
 
@@ -30,6 +41,6 @@ private:
     libusb_device* dev_;
     std::thread thread_;
 
-    // TODO: this needs to be threadsafe!
+    std::mutex connections_mutex_;
     std::set<Connection*> connections_;
 };

@@ -22,4 +22,7 @@ protected:
 protected:
   libusb_device* dev_;
   libusb_device_handle* dev_handle_;
+
+  int versionMajor_;
+  int versionMinor_;
 };

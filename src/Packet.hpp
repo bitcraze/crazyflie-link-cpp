@@ -23,7 +23,12 @@ public:
   Packet(const uint8_t* data, size_t size)
   {
     std::memcpy(data_.data(), data, size);
-    size_ = size - 1;
+    size_ = size;
+  }
+
+  operator bool() const
+  {
+    return size_ > 0;
   }
 
   uint8_t channel() const
@@ -58,7 +63,7 @@ public:
 
   uint8_t size() const
   {
-    return size_;
+    return size_ - 1;
   }
 
   void setSize(size_t size)
@@ -82,7 +87,7 @@ public:
     out << "channel=" << (int)p.channel();
     out << ",port=" << (int)p.port();
     out << ",data=";
-    for (size_t i = 1; i < p.size_+1; ++i) {
+    for (size_t i = 1; i < p.size_; ++i) {
       out << (int)p.data_[i] << " ";
     }
     out << ")";
@@ -97,7 +102,7 @@ public:
 
 private:
   // use a fixed-size array to avoid dynamic allocation
-  std::array<uint8_t, CRTP_MAXSIZE+1> data_;
+  std::array<uint8_t, CRTP_MAXSIZE> data_;
 
   // actual size of data
   size_t size_;

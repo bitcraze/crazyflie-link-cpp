@@ -82,6 +82,7 @@ public:
 
 private:
   std::string uri_;
+  int devid_;
   int channel_;
   Crazyradio::Datarate datarate_;
   uint64_t address_;
@@ -97,4 +98,7 @@ private:
 
   std::mutex queue_recv_mutex_;
   std::priority_queue<Packet> queue_recv_;
+
+  std::mutex alive_mutex_;
+  bool alive_;
 };

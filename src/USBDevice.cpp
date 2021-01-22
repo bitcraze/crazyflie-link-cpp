@@ -13,17 +13,26 @@ USBDevice::USBDevice(
         throw std::runtime_error(libusb_error_name(err));
     }
 
-    err = libusb_set_configuration(dev_handle_, 1);
-    if (err != LIBUSB_SUCCESS)
-    {
-        throw std::runtime_error(libusb_error_name(err));
-    }
+    // err = libusb_set_configuration(dev_handle_, 1);
+    // if (err != LIBUSB_SUCCESS)
+    // {
+    //     throw std::runtime_error(libusb_error_name(err));
+    // }
 
     err = libusb_claim_interface(dev_handle_, 0);
     if (err != LIBUSB_SUCCESS)
     {
         throw std::runtime_error(libusb_error_name(err));
     }
+
+    libusb_device_descriptor deviceDescriptor;
+    err = libusb_get_device_descriptor(dev, &deviceDescriptor);
+    if (err != LIBUSB_SUCCESS)
+    {
+        throw std::runtime_error(libusb_error_name(err));
+    }
+    versionMajor_ = deviceDescriptor.bcdDevice >> 8;
+    versionMinor_ = deviceDescriptor.bcdDevice & 0xFF;
 }
 
 
@@ -45,7 +54,7 @@ void USBDevice::sendVendorSetup(
     const unsigned char* data,
     uint16_t length)
 {
-    int err = libusb_control_transfer(
+    int transferred = libusb_control_transfer(
         dev_handle_,
         LIBUSB_REQUEST_TYPE_VENDOR,
         request,
@@ -54,7 +63,8 @@ void USBDevice::sendVendorSetup(
         (unsigned char*)data,
         length,
         /*timeout*/ 1000);
-    if (err != LIBUSB_SUCCESS) {
-        throw std::runtime_error(libusb_error_name(err));
+    if (transferred < 0) {
+        // if negative, see LIBUSB_ERROR enum
+        throw std::runtime_error(libusb_error_name(transferred));
     }
 }
