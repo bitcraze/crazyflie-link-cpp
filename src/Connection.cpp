@@ -86,7 +86,9 @@ std::vector<std::string> Connection::scan(const std::string& /*address*/)
 void Connection::send(const Packet& p)
 {
   const std::lock_guard<std::mutex> lock(queue_send_mutex_);
+  p.seq_ = statistics_.enqueued_count;
   queue_send_.push(p);
+  ++statistics_.enqueued_count;
 }
 
 Packet Connection::recv(bool blocking)
@@ -94,8 +96,7 @@ Packet Connection::recv(bool blocking)
   if (blocking) {
     std::unique_lock<std::mutex> lk(queue_recv_mutex_);
     queue_recv_cv_.wait(lk, [this] { return !queue_recv_.empty(); });
-    // auto result = queue_recv_.top();
-    auto result = queue_recv_.front();
+    auto result = queue_recv_.top();
     queue_recv_.pop();
     return result;
   } else {
@@ -106,8 +107,7 @@ Packet Connection::recv(bool blocking)
     {
       return result;
     } else {
-      // result = queue_recv_.top();
-      result = queue_recv_.front();
+      result = queue_recv_.top();
       queue_recv_.pop();
     }
     return result;

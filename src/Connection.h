@@ -30,6 +30,7 @@ public:
     {
       sent_count = 0;
       receive_count = 0;
+      enqueued_count = 0;
       rssi_latest = 0;
     }
 
@@ -38,6 +39,7 @@ public:
       out << "Statistics(";
       out << "sent_count=" << s.sent_count;
       out << ",receive_count=" << s.receive_count;
+      out << ",enqueued_count=" << s.enqueued_count;
       out << ",rssi_latest=" << (int)s.rssi_latest;
       out << ")";
 
@@ -46,6 +48,7 @@ public:
 
     size_t sent_count;
     size_t receive_count;
+    size_t enqueued_count;
     uint8_t rssi_latest;
   };
 
@@ -99,8 +102,7 @@ private:
 
   std::mutex queue_recv_mutex_;
   std::condition_variable queue_recv_cv_;
-  // std::priority_queue<Packet> queue_recv_;
-  std::queue<Packet> queue_recv_;
+  std::priority_queue<Packet> queue_recv_;
 
   std::mutex alive_mutex_;
   bool alive_;

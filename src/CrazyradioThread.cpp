@@ -145,7 +145,9 @@ void CrazyradioThread::run()
                 {
                     {
                         const std::lock_guard<std::mutex> lock(con->queue_recv_mutex_);
+                        p_ack.seq_ = con->statistics_.receive_count;
                         con->queue_recv_.push(p_ack);
+                        ++con->statistics_.receive_count;
                     }
                     con->queue_recv_cv_.notify_one();
                 }
