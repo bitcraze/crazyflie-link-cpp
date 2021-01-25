@@ -99,13 +99,13 @@ USBManager::USBManager()
 
 USBManager::~USBManager()
 {
-    std::cout << "dtor USBManager" << std::endl;
+    // std::cout << "dtor USBManager" << std::endl;
     // TODO: deregister hotplug callbacks
 
     crazyfliesUSB_.clear();
     radioThreads_.clear();
 
-    std::cout << "  deregister libusb devices" << std::endl;
+    // std::cout << "  deregister libusb devices" << std::endl;
 
     // deregister devices
     for (auto& t : radioThreads_) {

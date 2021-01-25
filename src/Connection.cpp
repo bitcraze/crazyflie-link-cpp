@@ -8,9 +8,8 @@
 
 #include <libusb-1.0/libusb.h>
 
-
-Connection::Connection(const std::string& uri)
-  : uri_(uri)
+Connection::Connection(const std::string &uri, const Connection::Settings &settings)
+    : uri_(uri)
 {
   // Examples:
   // "usb://0" -> connect over USB
@@ -24,9 +23,9 @@ Connection::Connection(const std::string& uri)
     throw std::runtime_error("Invalid uri!");
   }
 
-  for (size_t i = 0; i < match.size(); ++i) {
-    std::cout << i << " " << match[i].str() << std::endl;
-  }
+  // for (size_t i = 0; i < match.size(); ++i) {
+  //   std::cout << i << " " << match[i].str() << std::endl;
+  // }
   // std::cout << match.size() << std::endl;
 
   if (match[2].matched) {
@@ -46,7 +45,7 @@ Connection::Connection(const std::string& uri)
       datarate_ = Crazyradio::Datarate_2MPS;
     }
     address_ = std::stoul(match[6].str(), nullptr, 16);
-    useSafelink_ = true;
+    useSafelink_ = settings.use_safelink;
     safelinkInitialized_ = false;
     safelinkUp_ = false;
     safelinkDown_ = false;
@@ -63,12 +62,14 @@ Connection::Connection(const std::string& uri)
 
 Connection::~Connection()
 {
-  const std::lock_guard<std::mutex> lock(alive_mutex_);
-  alive_ = false;
   USBManager::get().crazyradioThreads().at(devid_).removeConnection(this);
+  {
+    const std::lock_guard<std::mutex> lock(alive_mutex_);
+    alive_ = false;
+  }
 }
 
-std::vector<std::string> Connection::scan(const std::string& /*address*/)
+std::vector<std::string> Connection::scan(const std::string& address)
 {
   std::vector<std::string> result;
 
@@ -78,7 +79,33 @@ std::vector<std::string> Connection::scan(const std::string& /*address*/)
   }
 
   // Crazyflies over radio
-  // TODO: use connection istances to support multiple radios
+  std::string a = address;
+  if (address.empty()) {
+    a = "E7E7E7E7E7";
+  }
+
+  // TODO: use async here
+  for (auto datarate : {"250K", "1M", "2M"}) {
+    for (int channel = 0; channel < 125; ++channel) {
+      std::string uri = "radio://0/" + std::to_string(channel) + "/" + datarate + "/" + a;
+
+      Connection con(uri);
+      bool success;
+      while (true)
+      {
+        if (con.statistics_.sent_count >= 2) {
+          success = con.statistics_.ack_count >= 1;
+          break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      };
+      if (success) {
+        result.push_back(uri);
+      }
+
+      //  auto a3 = std::async(std::launch::async, X(), 43);
+    }
+  }
 
   return result;
 }

@@ -16,15 +16,18 @@ public:
 
     CrazyradioThread(CrazyradioThread &&other)
     {
-        std::unique_lock<std::mutex> rhs_lk(other.connections_mutex_);
+        std::unique_lock<std::mutex> rhs_lk1(other.thread_mutex_, std::defer_lock);
+        std::unique_lock<std::mutex> rhs_lk2(other.connections_mutex_, std::defer_lock);
+        std::lock(rhs_lk1, rhs_lk2);
         dev_ = std::move(other.dev_);
         thread_ = std::move(other.thread_);
+        thread_ending_ = std::move(other.thread_ending_);
         connections_ = std::move(other.connections_);
     }
 
     ~CrazyradioThread();
 
-    bool isActive() const;
+    // bool isActive() const;
 
     libusb_device* device() {
         return dev_;
@@ -39,7 +42,10 @@ private:
 
 private:
     libusb_device* dev_;
+
+    std::mutex thread_mutex_;
     std::thread thread_;
+    bool thread_ending_;
 
     std::mutex connections_mutex_;
     std::set<Connection*> connections_;

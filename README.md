@@ -35,9 +35,9 @@ python3 test_python_binding.py
 
 ## To Do
 
+* use async for scan
 * add condition variables to lower CPU usage
   * in radio loop
-* add scanning based on connection instances and async (single radio)
 * add radio scheduler (* notation)
 * switch scanning to radio scheduler to use multiple radios
 * add test examples to measure bandwidth/latency/packet droprate

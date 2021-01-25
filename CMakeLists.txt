@@ -56,6 +56,14 @@ target_link_libraries(test_console
   crazyflieNativeLink
 )
 
+# test_scan
+add_executable(test_scan
+  test/scan.cpp
+)
+target_link_libraries(test_scan
+  crazyflieNativeLink
+)
+
 # scan
 add_executable(test
   test/main.cpp

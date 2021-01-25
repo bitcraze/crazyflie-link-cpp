@@ -6,35 +6,72 @@
 
 CrazyradioThread::CrazyradioThread(libusb_device *dev)
     : dev_(dev)
+    , thread_ending_(false)
 {
 
 }
 
 CrazyradioThread::~CrazyradioThread()
 {
-    if (isActive()) {
+    const std::lock_guard<std::mutex> lock(thread_mutex_);
+    if (thread_.joinable()) {
         thread_.join();
     }
 }
 
-bool CrazyradioThread::isActive() const
-{
-    return thread_.joinable();
-}
+// bool CrazyradioThread::isActive() const
+// {
+//     return thread_.joinable();
+// }
 
 void CrazyradioThread::addConnection(Connection *con)
 {
-    const std::lock_guard<std::mutex> lock(connections_mutex_);
-    connections_.insert(con);
-    if (!isActive()) {
-        thread_ = std::thread(&CrazyradioThread::run, this);
+    // bool startThread;
+    {
+        const std::lock_guard<std::mutex> lock(connections_mutex_);
+        connections_.insert(con);
+        // startThread = thread_ended_;
+        // std::cout << "add con " << connections_.size() << std::endl;
     }
+
+    {
+        const std::lock_guard<std::mutex> lock(thread_mutex_);
+        if (!thread_.joinable()) {
+            // std::cout << "add con " << startThread << std::endl;
+            thread_ = std::thread(&CrazyradioThread::run, this);
+        }
+    }
+
+    // if (startThread) {
+    //     if (thread_.joinable()) {
+    //         thread_.join();
+    //     }
+    //     {
+    //         const std::lock_guard<std::mutex> lock(connections_mutex_);
+    //         thread_ended_ = false;
+    //     }
+    //     thread_ = std::thread(&CrazyradioThread::run, this);
+    // }
 }
 
 void CrazyradioThread::removeConnection(Connection *con)
 {
-    const std::lock_guard<std::mutex> lock(connections_mutex_);
-    connections_.erase(con);
+    bool endThread;
+    {
+        const std::lock_guard<std::mutex> lock(connections_mutex_);
+        connections_.erase(con);
+        endThread = connections_.empty();
+        // thread_ended_ = endThread;
+        // std::cout << "rm con " << connections_.size() << std::endl;
+    }
+
+    if (endThread) {
+        const std::lock_guard<std::mutex> lock(thread_mutex_);
+        thread_ending_ = true;
+        thread_.join();
+        thread_ = std::thread();
+        thread_ending_ = false;
+    }
 }
 
 void CrazyradioThread::run()
@@ -53,10 +90,11 @@ void CrazyradioThread::run()
         // copy connections_
         {
             const std::lock_guard<std::mutex> lock(connections_mutex_);
+            if (thread_ending_) {
+                // std::cout << "ending..." << std::endl;
+                break;
+            }
             connections_copy = connections_;
-        }
-        if (connections_copy.empty()) {
-            break;
         }
 
         for (auto con : connections_copy) {
@@ -89,6 +127,7 @@ void CrazyradioThread::run()
             if (con->useSafelink_) {
                 if (!con->safelinkInitialized_) {
                     auto ack = radio.sendPacket(enableSafelink, sizeof(enableSafelink));
+                    ++con->statistics_.sent_count;
                     if (ack) {
                         con->safelinkInitialized_ = true;
                     }
@@ -104,6 +143,7 @@ void CrazyradioThread::run()
 
                     p.setSafelink(con->safelinkUp_ << 1 | con->safelinkDown_);
                     ack = radio.sendPacket(p.raw(), p.size() + 1);
+                    ++con->statistics_.sent_count;
                     if (ack && ack.size() > 0 && (ack.data()[0] & 0x04) == (con->safelinkDown_ << 2)) {
                         con->safelinkDown_ = !con->safelinkDown_;
                     }
@@ -122,6 +162,7 @@ void CrazyradioThread::run()
                 {
                     const auto p = con->queue_send_.top();
                     ack = radio.sendPacket(p.raw(), p.size() + 1);
+                    ++con->statistics_.sent_count;
                     if (ack)
                     {
                         con->queue_send_.pop();
@@ -130,11 +171,13 @@ void CrazyradioThread::run()
                 else
                 {
                     ack = radio.sendPacket(ping, sizeof(ping));
+                    ++con->statistics_.sent_count;
                 }
             }
 
             // enqueue result
             if (ack) {
+                ++con->statistics_.ack_count;
                 Packet p_ack(ack.data(), ack.size());
                 if (p_ack.port() == 15 && p_ack.channel() == 3)
                 {
