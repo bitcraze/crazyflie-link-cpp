@@ -31,16 +31,33 @@ PYBIND11_MODULE(nativelink, m) {
   // g_usbMgr = new USBManager();
 
   // Packet
-  py::class_<Packet>(m, "Packet")
+  py::class_<Packet>(m, "Packet", py::buffer_protocol())
       .def(py::init<>())
       .def_property("channel", &Packet::channel, &Packet::setChannel)
       .def_property("port", &Packet::port, &Packet::setPort)
-      .def_property(
-          "data", [](Packet &p) -> py::array {
-            auto dtype = py::dtype(py::format_descriptor<uint8_t>::format());
-            auto base = py::array(dtype, {p.size()}, {sizeof(uint8_t)});
-            return py::array(
-                dtype, {p.size()}, {sizeof(uint8_t)}, p.data(), base); }, [](Packet &) {})
+      // .def_property(
+      //     "data", [](Packet &p) -> py::array {
+      //       auto dtype = py::dtype(py::format_descriptor<uint8_t>::format());
+      //       auto base = py::array(dtype, {p.size()}, {sizeof(uint8_t)});
+      //       return py::array(
+      //           dtype, {p.size()}, {sizeof(uint8_t)}, p.data(), base); }, [](Packet &) {})
+      .def_buffer([](Packet &p) -> py::buffer_info {
+        return py::buffer_info(p.data(), p.size(), /*readonly*/ false);
+      })
+      .def("__len__", [](const Packet &p) {
+        return p.size();
+      })
+      .def("__getitem__", [](const Packet &p, py::ssize_t i) {
+        if (i >= p.size())
+          throw py::index_error();
+        return p.raw()[i+1];
+      })
+      // .def("__setitem__", [](Matrix &m, std::pair<py::ssize_t, py::ssize_t> i, float v) {
+      //   if (i.first >= m.rows() || i.second >= m.cols())
+      //     throw py::index_error();
+      //   m(i.first, i.second) = v;
+      // })
+
       .def_property("size", &Packet::size, &Packet::setSize)
       .def_property_readonly("valid", &Packet::valid)
       .def("__repr__", &toString<Packet>);

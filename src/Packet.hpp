@@ -4,19 +4,26 @@
 #include <cstring>
 #include <array>
 #include <algorithm>
+#include <tuple>
 
 #include "utils.hpp"
 
 #define CRTP_MAXSIZE 31
 
+class Connection;
+class CrazyradioThread;
+
 class Packet
 {
 // private:
   // constexpr size_t CRTP_MAXSIZE() { return 31; }
+  friend class Connection;
+  friend class CrazyradioThread;
 
 public:
   Packet() 
     : size_(-1)
+    , seq_(0)
   {
   }
 
@@ -56,16 +63,6 @@ public:
     setBitBieldValue<uint8_t, 4, 4>(data_[0], port);
   }
 
-  uint8_t safelink() const
-  {
-    return getBitBieldValue<uint8_t, 2, 2>(data_[0]);
-  }
-
-  void setSafelink(uint8_t safelink)
-  {
-    setBitBieldValue<uint8_t, 2, 2>(data_[0], safelink);
-  }
-
   uint8_t size() const
   {
     return std::max(0, size_ - 1);
@@ -95,6 +92,7 @@ public:
     for (int i = 1; i < p.size_; ++i) {
       out << (int)p.data_[i] << " ";
     }
+    out << ",seq=" << p.seq_;
     out << ")";
 
     return out;
@@ -102,7 +100,18 @@ public:
 
   friend bool operator<(const Packet &l, const Packet &r)
   {
-    return l.port() < r.port();
+    return std::forward_as_tuple(l.port(), l.seq_) < std::forward_as_tuple(r.port(), r.seq_);
+  }
+
+private:
+  uint8_t safelink() const
+  {
+    return getBitBieldValue<uint8_t, 2, 2>(data_[0]);
+  }
+
+  void setSafelink(uint8_t safelink)
+  {
+    setBitBieldValue<uint8_t, 2, 2>(data_[0], safelink);
   }
 
 private:
@@ -111,4 +120,7 @@ private:
 
   // actual size of data
   int size_;
+
+  // sequence number for strict weak ordering
+  mutable size_t seq_;
 };
