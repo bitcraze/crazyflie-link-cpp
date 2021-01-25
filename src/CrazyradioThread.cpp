@@ -126,7 +126,7 @@ void CrazyradioThread::run()
             // initialize safelink if needed
             if (con->useSafelink_) {
                 if (!con->safelinkInitialized_) {
-                    auto ack = radio.sendPacket(enableSafelink, sizeof(enableSafelink));
+                    ack = radio.sendPacket(enableSafelink, sizeof(enableSafelink));
                     ++con->statistics_.sent_count;
                     if (ack) {
                         con->safelinkInitialized_ = true;

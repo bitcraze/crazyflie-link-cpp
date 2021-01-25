@@ -35,7 +35,6 @@ python3 test_python_binding.py
 
 ## To Do
 
-* use async for scan
 * add condition variables to lower CPU usage
   * in radio loop
 * add radio scheduler (* notation)

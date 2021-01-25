@@ -1,5 +1,6 @@
 #include <regex>
 #include <iostream>
+#include <future>
 
 #include "Connection.h"
 
@@ -84,26 +85,38 @@ std::vector<std::string> Connection::scan(const std::string& address)
     a = "E7E7E7E7E7";
   }
 
-  // TODO: use async here
-  for (auto datarate : {"250K", "1M", "2M"}) {
+  std::vector<std::future<std::string>> futures;
+  for (auto datarate : {"250K", "1M", "2M"})
+  {
     for (int channel = 0; channel < 125; ++channel) {
       std::string uri = "radio://0/" + std::to_string(channel) + "/" + datarate + "/" + a;
 
-      Connection con(uri);
-      bool success;
-      while (true)
-      {
-        if (con.statistics_.sent_count >= 2) {
-          success = con.statistics_.ack_count >= 1;
-          break;
+      futures.emplace_back(std::async(std::launch::async,
+      [uri]() {
+        Connection con(uri);
+        bool success;
+        while (true)
+        {
+          if (con.statistics_.sent_count >= 1)
+          {
+            success = con.statistics_.ack_count >= 1;
+            break;
+          }
+          std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        };
+        if (success) {
+          return uri;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      };
-      if (success) {
-        result.push_back(uri);
-      }
+        return std::string();
+      }));
+    }
+  }
 
-      //  auto a3 = std::async(std::launch::async, X(), 43);
+  for (auto& future : futures) {
+    auto uri = future.get();
+    if (!uri.empty())
+    {
+      result.push_back(uri);
     }
   }
 
