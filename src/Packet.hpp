@@ -16,7 +16,7 @@ class Packet
 
 public:
   Packet() 
-    : size_(0)
+    : size_(-1)
   {
   }
 
@@ -26,9 +26,14 @@ public:
     size_ = size;
   }
 
+  bool valid() const
+  {
+    return size_ >= 1;
+  }
+
   operator bool() const
   {
-    return size_ > 0;
+    return valid();
   }
 
   uint8_t channel() const
@@ -63,7 +68,7 @@ public:
 
   uint8_t size() const
   {
-    return size_ - 1;
+    return std::max(0, size_ - 1);
   }
 
   void setSize(size_t size)
@@ -87,7 +92,7 @@ public:
     out << "channel=" << (int)p.channel();
     out << ",port=" << (int)p.port();
     out << ",data=";
-    for (size_t i = 1; i < p.size_; ++i) {
+    for (int i = 1; i < p.size_; ++i) {
       out << (int)p.data_[i] << " ";
     }
     out << ")";
@@ -105,5 +110,5 @@ private:
   std::array<uint8_t, CRTP_MAXSIZE> data_;
 
   // actual size of data
-  size_t size_;
+  int size_;
 };

@@ -42,6 +42,7 @@ PYBIND11_MODULE(nativelink, m) {
             return py::array(
                 dtype, {p.size()}, {sizeof(uint8_t)}, p.data(), base); }, [](Packet &) {})
       .def_property("size", &Packet::size, &Packet::setSize)
+      .def_property_readonly("valid", &Packet::valid)
       .def("__repr__", &toString<Packet>);
 
   //

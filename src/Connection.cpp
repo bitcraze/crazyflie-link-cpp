@@ -89,17 +89,29 @@ void Connection::send(const Packet& p)
   queue_send_.push(p);
 }
 
-Packet Connection::recv(bool /*blocking*/)
+Packet Connection::recv(bool blocking)
 {
-  Packet result;
-  const std::lock_guard<std::mutex> lock(queue_recv_mutex_);
-  if (queue_recv_.empty()) {
+  if (blocking) {
+    std::unique_lock<std::mutex> lk(queue_recv_mutex_);
+    queue_recv_cv_.wait(lk, [this] { return !queue_recv_.empty(); });
+    // auto result = queue_recv_.top();
+    auto result = queue_recv_.front();
+    queue_recv_.pop();
     return result;
   } else {
-    result = queue_recv_.top();
-    queue_recv_.pop();
+    const std::lock_guard<std::mutex> lock(queue_recv_mutex_);
+
+    Packet result;
+    if (queue_recv_.empty())
+    {
+      return result;
+    } else {
+      // result = queue_recv_.top();
+      result = queue_recv_.front();
+      queue_recv_.pop();
+    }
+    return result;
   }
-  return result;
 }
 
 std::ostream& operator<<(std::ostream& out, const Connection& p)

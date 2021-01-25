@@ -2,7 +2,6 @@
 
 #include <sstream>
 #include <stdexcept>
-#include <iostream>
 
 #include <libusb-1.0/libusb.h>
 
@@ -28,13 +27,10 @@ Crazyradio::Crazyradio(
     , datarate_(Datarate_250KPS)
     , ackEnabled_(true)
 {
-    std::cout << versionMajor_ << "." << versionMinor_ << std::endl;
-
-
     setDatarate(Datarate_2MPS);
     setChannel(2);
     setContCarrier(false);
-    // setAddress(0xE7E7E7E7E7);
+    setAddress(0xE7E7E7E7E7);
     setPower(Power_0DBM);
     setArc(3);
     setArdBytes(32);
@@ -125,8 +121,6 @@ Crazyradio::Ack Crazyradio::sendPacket(
     int status;
     int transferred;
 
-    std::cout << "S " << length << std::endl;
-
     // Send data
     status = libusb_bulk_transfer(
         dev_handle_,
@@ -163,8 +157,6 @@ Crazyradio::Ack Crazyradio::sendPacket(
     }
 
     ack.size_ = transferred - 1;
-
-    std::cout << "ack " << ack.size_ << " " << (int) ack.data_[0] << std::endl;
 
     return ack;
 }

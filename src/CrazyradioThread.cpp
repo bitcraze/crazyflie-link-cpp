@@ -48,6 +48,8 @@ void CrazyradioThread::run()
 
     while (true)
     {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
         // copy connections_
         {
             const std::lock_guard<std::mutex> lock(connections_mutex_);
@@ -133,10 +135,20 @@ void CrazyradioThread::run()
 
             // enqueue result
             if (ack) {
-                const std::lock_guard<std::mutex> lock(con->queue_recv_mutex_);
                 Packet p_ack(ack.data(), ack.size());
-                std::cout << p_ack << std::endl;
-                con->queue_recv_.push(p_ack);
+                if (p_ack.port() == 15 && p_ack.channel() == 3)
+                {
+                    // Empty packet -> update stats only
+                    con->statistics_.rssi_latest = p_ack.data()[1];
+                }
+                else
+                {
+                    {
+                        const std::lock_guard<std::mutex> lock(con->queue_recv_mutex_);
+                        con->queue_recv_.push(p_ack);
+                    }
+                    con->queue_recv_cv_.notify_one();
+                }
             }
         }
     }

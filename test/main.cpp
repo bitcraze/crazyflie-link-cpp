@@ -18,12 +18,17 @@ int main()
     Connection con("radio://0/80/2M/E7E7E7E7E7");
 
     while (true) {
-        Packet p = con.recv(false);
-        if (p && p.port() == 0 && p.channel() == 0) {
-            std::cout << p.data();
-        }
+        Packet p = con.recv(/*blocking*/true);
+        std::cout << p << std::endl;
     }
-    // std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    // while (true) {
+    //     Packet p = con.recv(false);
+    //     if (p && p.port() == 0 && p.channel() == 0) {
+    //         std::cout << p.data();
+    //     }
+    // }
+    // std::this_thread::sleep_for(std::chrono::seconds(10));
 
     return 0;
 }

@@ -48,6 +48,14 @@ include_directories(
   src
 )
 
+# test_console
+add_executable(test_console
+  test/console.cpp
+)
+target_link_libraries(test_console
+  crazyflieNativeLink
+)
+
 # scan
 add_executable(test
   test/main.cpp

@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <condition_variable>
 
 #include "Packet.hpp"
 #include "Crazyradio.h"
@@ -29,7 +30,7 @@ public:
     {
       sent_count = 0;
       receive_count = 0;
-      rssi_total = 0;
+      rssi_latest = 0;
     }
 
     friend std::ostream &operator<<(std::ostream &out, const Connection::Statistics &s)
@@ -37,7 +38,7 @@ public:
       out << "Statistics(";
       out << "sent_count=" << s.sent_count;
       out << ",receive_count=" << s.receive_count;
-      out << ",avg_rssi=" << ((s.receive_count > 0) ? (s.rssi_total / (double) s.receive_count) : std::nan(""));
+      out << ",rssi_latest=" << (int)s.rssi_latest;
       out << ")";
 
       return out;
@@ -45,7 +46,7 @@ public:
 
     size_t sent_count;
     size_t receive_count;
-    size_t rssi_total;
+    uint8_t rssi_latest;
   };
 
 public:
@@ -97,7 +98,9 @@ private:
   std::priority_queue<Packet> queue_send_;
 
   std::mutex queue_recv_mutex_;
-  std::priority_queue<Packet> queue_recv_;
+  std::condition_variable queue_recv_cv_;
+  // std::priority_queue<Packet> queue_recv_;
+  std::queue<Packet> queue_recv_;
 
   std::mutex alive_mutex_;
   bool alive_;
