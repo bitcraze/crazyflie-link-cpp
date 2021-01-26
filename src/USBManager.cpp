@@ -3,7 +3,10 @@
 #include <stdexcept>
 #include <functional>
 #include <iostream>
+#include <cassert>
+#include <sstream>
 
+#include "Connection.h"
 
 // extern "C" int hotplugCrazyradioCallback_C(libusb_context */*ctx*/, libusb_device *dev,
 //                                                   libusb_hotplug_event event, void *user_data)
@@ -149,3 +152,90 @@ USBManager::~USBManager()
 //         break;
 //     }
 // }
+
+void USBManager::addConnection(Connection *con)
+{
+    const std::lock_guard<std::mutex> lk(mutex_);
+
+    int devId = con->devid_;
+    int channel = con->channel_;
+    auto datarate = con->datarate_;
+
+    std::cout << "attempt " << devId << " " << channel << std::endl;
+
+    // assign a radio automatically
+    if (devId == -1) {
+
+        // a) i) check if a radio already has the same channel
+        //   ii) if the datarate is 2M, also use consecutive channels
+        for (size_t i = 0; i < radioThreads_.size(); ++i) {
+            auto& radioThread = radioThreads_[i];
+            for (auto con : radioThread.connections_) {
+                if (  (con->channel_ == channel)
+                   || (con->datarate_ == Crazyradio::Datarate_2MPS && con->channel_+1 == channel)
+                   || (datarate == Crazyradio::Datarate_2MPS && con->channel_ == channel + 1)) {
+                    std::cout << "use radio " << i << " b/c radio serves " << con->channel_ << " we need " << channel << std::endl;
+                    devId = i;
+                    break;
+                }
+            }
+            if (devId >= 0) {
+                break;
+            }
+        }
+
+        // b) if no radio serves this channel, pick the one with the fewest
+        //    connections
+
+        if (devId == -1) {
+            devId = 0;
+            size_t min_connections_count = radioThreads_[0].connections_.size();
+            for (size_t i = 1; i < radioThreads_.size(); ++i) {
+                if (min_connections_count > radioThreads_[i].connections_.size()) {
+                    devId = i;
+                }
+            }
+            std::cout << "use radio " << devId << " to serve " << channel << " (greedy)"  << std::endl;
+        }
+    }
+    assert(devId >= 0);
+
+    // Sanity checks
+    for (size_t i = 0; i < radioThreads_.size(); ++i) {
+        if ((int)i != devId) {
+            auto &radioThread = radioThreads_[i];
+            for (auto con : radioThread.connections_) {
+                if (con->channel_ == channel) {
+                    std::stringstream sstr;
+                    sstr << "Channel " << channel << " is already served by Crazyradio " << i 
+                         << ". Cannot be served by Crazyradio " << devId << " simultaneously.";
+                    throw std::runtime_error(sstr.str());
+                }
+                if (con->datarate_ == Crazyradio::Datarate_2MPS && con->channel_+1 == channel) {
+                    std::stringstream sstr;
+                    sstr << "Channels " << con->channel_ << " and " << con->channel_+1 << " are already served by Crazyradio " << i
+                         << " (2M mode). Cannot be served by Crazyradio " << devId << " simultaneously.";
+                    throw std::runtime_error(sstr.str());
+                }
+                if (datarate == Crazyradio::Datarate_2MPS && con->channel_ == channel + 1) {
+                    std::stringstream sstr;
+                    sstr << "Channel " << con->channel_ << " is already served by Crazyradio " << i
+                         << ". Cannot be served by Crazyradio " << devId << " (2M mode) simultaneously.";
+                    throw std::runtime_error(sstr.str());
+                }
+            }
+        }
+    }
+
+    // add the connection to the radio
+    con->devid_ = devId;
+    std::cout << "new connection scheduled on " << channel << " " << devId << std::endl;
+    radioThreads_[devId].addConnection(con);
+}
+
+void USBManager::removeConnection(Connection *con)
+{
+    const std::lock_guard<std::mutex> lk(mutex_);
+
+    radioThreads_[con->devid_].removeConnection(con);
+}

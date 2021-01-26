@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <mutex>
 
 #include <libusb-1.0/libusb.h>
 
@@ -33,18 +34,12 @@ public :
         return radioThreads_;
     }
 
-        // size_t numCrazyradios() const {
-        //     return crazyradios_.size();
-        // }
+    void addConnection(Connection *con);
 
-        // const std::vector<libusb_device *>& crazyradios()
-        // {
-        //     return crazyradios_;
-        // }
+    void removeConnection(Connection *con);
 
-        private :
-        // constructor
-        USBManager();
+private :
+    USBManager();
 
 private :
     libusb_context * ctx_;
@@ -52,4 +47,6 @@ private :
     std::vector<libusb_device*> crazyfliesUSB_;
 
     std::vector<CrazyradioThread> radioThreads_;
+
+    std::mutex mutex_;
 };

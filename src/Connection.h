@@ -13,10 +13,12 @@
 #include "Crazyradio.h"
 
 class CrazyradioThread;
+class USBManager;
 
 class Connection
 {
   friend class CrazyradioThread;
+  friend class USBManager;
 public:
   class Statistics
   {

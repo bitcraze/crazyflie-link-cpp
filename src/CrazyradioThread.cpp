@@ -58,11 +58,11 @@ void CrazyradioThread::removeConnection(Connection *con)
 {
     bool endThread;
     {
-        const std::lock_guard<std::mutex> lock(connections_mutex_);
+        std::unique_lock<std::mutex> lk(connections_mutex_);
+        connections_updated_ = false;
         connections_.erase(con);
         endThread = connections_.empty();
-        // thread_ended_ = endThread;
-        // std::cout << "rm con " << connections_.size() << std::endl;
+        connections_updated_cv_.wait(lk, [this] { return !connections_updated_; });
     }
 
     if (endThread) {
@@ -90,18 +90,22 @@ void CrazyradioThread::run()
         // copy connections_
         {
             const std::lock_guard<std::mutex> lock(connections_mutex_);
+            connections_copy = connections_;
+            connections_updated_ = true;
+            connections_updated_cv_.notify_one();
+
             if (thread_ending_) {
                 // std::cout << "ending..." << std::endl;
                 break;
             }
-            connections_copy = connections_;
         }
 
         for (auto con : connections_copy) {
-            const std::lock_guard<std::mutex> con_lock(con->alive_mutex_);
-            if (!con->alive_) {
-                continue;
-            }
+        // for (auto con : connections_) {
+            // const std::lock_guard<std::mutex> con_lock(con->alive_mutex_);
+            // if (!con->alive_) {
+            //     continue;
+            // }
             // reconfigure radio if needed
             if (radio.address() != con->address_)
             {

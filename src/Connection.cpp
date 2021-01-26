@@ -35,7 +35,11 @@ Connection::Connection(const std::string &uri, const Connection::Settings &setti
     // TODO
   } else {
     // radio
-    devid_ = std::stoi(match[3].str());
+    if (match[3].str() == "*") {
+      devid_ = -1;
+    } else {
+      devid_ = std::stoi(match[3].str());
+    }
 
     channel_ = std::stoi(match[4].str());
     if (match[5].str() == "250K") {
@@ -53,21 +57,19 @@ Connection::Connection(const std::string &uri, const Connection::Settings &setti
 
     alive_ = true;
 
-    USBManager::get()
-        .crazyradioThreads()
-        .at(devid_)
-        .addConnection(this);
+    USBManager::get().addConnection(this);
+
   }
 
 }
 
 Connection::~Connection()
 {
-  USBManager::get().crazyradioThreads().at(devid_).removeConnection(this);
-  {
-    const std::lock_guard<std::mutex> lock(alive_mutex_);
-    alive_ = false;
-  }
+  USBManager::get().removeConnection(this);
+  // {
+  //   const std::lock_guard<std::mutex> lock(alive_mutex_);
+  //   alive_ = false;
+  // }
 }
 
 std::vector<std::string> Connection::scan(const std::string& address)
@@ -89,7 +91,7 @@ std::vector<std::string> Connection::scan(const std::string& address)
   for (auto datarate : {"250K", "1M", "2M"})
   {
     for (int channel = 0; channel < 125; ++channel) {
-      std::string uri = "radio://0/" + std::to_string(channel) + "/" + datarate + "/" + a;
+      std::string uri = "radio://*/" + std::to_string(channel) + "/" + datarate + "/" + a;
 
       futures.emplace_back(std::async(std::launch::async,
       [uri]() {

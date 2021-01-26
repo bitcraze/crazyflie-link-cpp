@@ -3,14 +3,17 @@
 #include <set>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 
 #include <libusb-1.0/libusb.h>
 
 // forward declaration
 class Connection;
+class USBManager;
 
 class CrazyradioThread
 {
+    friend class USBManager;
 public:
     CrazyradioThread(libusb_device * dev);
 
@@ -33,12 +36,12 @@ public:
         return dev_;
     }
 
-    void addConnection(Connection* con);
-
-    void removeConnection(Connection* con);
-
 private: 
     void run();
+
+    void addConnection(Connection *con);
+
+    void removeConnection(Connection *con);
 
 private:
     libusb_device* dev_;
@@ -48,5 +51,7 @@ private:
     bool thread_ending_;
 
     std::mutex connections_mutex_;
+    std::condition_variable connections_updated_cv_;
+    bool connections_updated_;
     std::set<Connection*> connections_;
 };

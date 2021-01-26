@@ -35,16 +35,16 @@ python3 test_python_binding.py
 
 ## To Do
 
-* add condition variables to lower CPU usage
-  * in radio loop
-* add radio scheduler (* notation)
-* switch scanning to radio scheduler to use multiple radios
+* fix multiradio crash: use shared_ptr and ConnectionImpl to deal with raceconditions during dtor
+* add CrazyflieUSB support
 * add test examples to measure bandwidth/latency/packet droprate
   * in C++
   * in Python
 * add broadcast support
-* add CrazyflieUSB support
 * better separation public/private interface for lib
+* add condition variables to lower CPU usage
+  * in radio loop
+
 * integrate in Crazyflie_cpp and crazyflie_tools
 * integrate in python client
 * test with 'faulty' radio
@@ -53,4 +53,5 @@ python3 test_python_binding.py
 
 ## To Discuss
 
+* Python import issues
 * multi-radio broadcast?
