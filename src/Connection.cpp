@@ -2,7 +2,7 @@
 #include <iostream>
 #include <future>
 
-#include "Connection.h"
+#include "native_link/Connection.h"
 
 #include "USBManager.h"
 #include "Crazyradio.h"

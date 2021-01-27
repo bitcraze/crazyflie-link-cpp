@@ -1,7 +1,7 @@
 #include <iostream>
 #include <thread>
 
-#include "Connection.h"
+#include "native_link/Connection.h"
 
 int main()
 {

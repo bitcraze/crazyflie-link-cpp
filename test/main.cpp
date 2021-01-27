@@ -1,8 +1,7 @@
 #include <iostream>
 #include <thread>
 
-#include "Connection.h"
-#include "Crazyradio.h"
+#include "native_link/Connection.h"
 
 int main()
 {

@@ -2,7 +2,7 @@
 
 #include "CrazyradioThread.h"
 #include "Crazyradio.h"
-#include "Connection.h"
+#include "native_link/Connection.h"
 
 CrazyradioThread::CrazyradioThread(libusb_device *dev)
     : dev_(dev)

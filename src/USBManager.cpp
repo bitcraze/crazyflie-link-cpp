@@ -6,7 +6,7 @@
 #include <cassert>
 #include <sstream>
 
-#include "Connection.h"
+#include "native_link/Connection.h"
 
 // extern "C" int hotplugCrazyradioCallback_C(libusb_context */*ctx*/, libusb_device *dev,
 //                                                   libusb_hotplug_event event, void *user_data)

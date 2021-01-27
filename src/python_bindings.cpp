@@ -5,8 +5,8 @@
 #include <pybind11/stl_bind.h>
 #include <pybind11/numpy.h>
 
-#include "Packet.hpp"
-#include "Connection.h"
+#include "native_link/Packet.hpp"
+#include "native_link/Connection.h"
 // #include "USBManager.h"
 
 // USBManager* g_usbMgr;

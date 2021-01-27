@@ -10,7 +10,7 @@
 #include <condition_variable>
 
 #include "Packet.hpp"
-#include "Crazyradio.h"
+#include "../src/Crazyradio.h"
 
 class CrazyradioThread;
 class USBManager;

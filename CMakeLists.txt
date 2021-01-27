@@ -19,6 +19,10 @@ endif()
 # dependencies
 find_library(USB_LIB usb-1.0)
 
+include_directories(
+  include
+)
+
 # C++ library
 
 add_library(crazyflieNativeLink
@@ -43,10 +47,6 @@ target_link_libraries(crazyflieNativeLink
 set_property(TARGET crazyflieNativeLink PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # C++ test application
-
-include_directories(
-  src
-)
 
 # test_console
 add_executable(test_console
