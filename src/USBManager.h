@@ -34,9 +34,9 @@ public :
         return radioThreads_;
     }
 
-    void addConnection(Connection *con);
+    void addConnection(std::shared_ptr<ConnectionImpl> con);
 
-    void removeConnection(Connection *con);
+    void removeConnection(std::shared_ptr<ConnectionImpl> con);
 
 private :
     USBManager();

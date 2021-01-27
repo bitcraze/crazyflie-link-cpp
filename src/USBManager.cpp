@@ -5,8 +5,10 @@
 #include <iostream>
 #include <cassert>
 #include <sstream>
+#include <map>
 
-#include "native_link/Connection.h"
+// #include "native_link/Connection.h"
+#include "ConnectionImpl.h"
 
 // extern "C" int hotplugCrazyradioCallback_C(libusb_context */*ctx*/, libusb_device *dev,
 //                                                   libusb_hotplug_event event, void *user_data)
@@ -21,6 +23,8 @@
 //     reinterpret_cast<USBManager *>(user_data)->hotplugCrazyflieUSBCallback(dev, event);
 //     return 0;
 // }
+
+class ConnectionImpl;
 
 USBManager::USBManager()
 {
@@ -153,41 +157,49 @@ USBManager::~USBManager()
 //     }
 // }
 
-void USBManager::addConnection(Connection *con)
+void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
 {
     const std::lock_guard<std::mutex> lk(mutex_);
 
-    int devId = con->devid_;
-    int channel = con->channel_;
-    auto datarate = con->datarate_;
+    int devId = connection->devid_;
+    int channel = connection->channel_;
+    auto datarate = connection->datarate_;
 
-    std::cout << "attempt " << devId << " " << channel << std::endl;
+    // std::cout << "addCon " << connection->uri_ << std::endl;
 
     // assign a radio automatically
     if (devId == -1) {
 
+        // GREEDY DOES NOT WORK
+        // ex: 0/2M on radio 0, 2/1M on radio 1
+        // try to schedule: 1/2M -> bam
+
         // a) i) check if a radio already has the same channel
         //   ii) if the datarate is 2M, also use consecutive channels
+
+        std::map<int, std::vector<std::shared_ptr<ConnectionImpl>>> constraints;
+
         for (size_t i = 0; i < radioThreads_.size(); ++i) {
             auto& radioThread = radioThreads_[i];
             for (auto con : radioThread.connections_) {
                 if (  (con->channel_ == channel)
                    || (con->datarate_ == Crazyradio::Datarate_2MPS && con->channel_+1 == channel)
                    || (datarate == Crazyradio::Datarate_2MPS && con->channel_ == channel + 1)) {
-                    std::cout << "use radio " << i << " b/c radio serves " << con->channel_ << " we need " << channel << std::endl;
-                    devId = i;
-                    break;
+                    // std::cout << "use radio " << i << " b/c radio serves " << con->channel_ << " we need " << channel << std::endl;
+                    // devId = i;
+                    constraints[i].push_back(con);
+                    // break;
                 }
             }
-            if (devId >= 0) {
-                break;
-            }
+            // if (devId >= 0) {
+                // break;
+            // }
         }
 
         // b) if no radio serves this channel, pick the one with the fewest
         //    connections
 
-        if (devId == -1) {
+        if (constraints.empty()) {
             devId = 0;
             size_t min_connections_count = radioThreads_[0].connections_.size();
             for (size_t i = 1; i < radioThreads_.size(); ++i) {
@@ -195,10 +207,38 @@ void USBManager::addConnection(Connection *con)
                     devId = i;
                 }
             }
-            std::cout << "use radio " << devId << " to serve " << channel << " (greedy)"  << std::endl;
+            // std::cout << "use radio " << devId << " to serve " << channel << " (greedy)"  << std::endl;
+        } else if (constraints.size() == 1) {
+            // easy resolution -> constraints only from one radio
+            devId = constraints.begin()->first;
+        } else {
+            // need to move some connections to resolve the conflict
+            
+            // assign to most constrained radio
+            size_t max_constraints = 0;
+            for (const auto& c : constraints) {
+                if (c.second.size() > max_constraints) {
+                    devId = c.first;
+                    max_constraints = c.second.size();
+                }
+            }
+
+            // move other connection to this radio, too
+            for (const auto &c : constraints) {
+                if (c.first != devId) {
+                    for (auto con : c.second) {
+                        radioThreads_[con->devid_].removeConnection(con);
+                        con->devid_ = devId;
+                        radioThreads_[devId].addConnection(con);
+                    }
+                }
+            }
         }
     }
     assert(devId >= 0);
+
+    // std::cout << "ch " << channel << std::endl;
+    // std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     // Sanity checks
     for (size_t i = 0; i < radioThreads_.size(); ++i) {
@@ -208,7 +248,7 @@ void USBManager::addConnection(Connection *con)
                 if (con->channel_ == channel) {
                     std::stringstream sstr;
                     sstr << "Channel " << channel << " is already served by Crazyradio " << i 
-                         << ". Cannot be served by Crazyradio " << devId << " simultaneously.";
+                         << ". Cannot be served by Crazyradio " << devId << " simultaneously." << con->uri_ << " " << connection->uri_;
                     throw std::runtime_error(sstr.str());
                 }
                 if (con->datarate_ == Crazyradio::Datarate_2MPS && con->channel_+1 == channel) {
@@ -228,14 +268,14 @@ void USBManager::addConnection(Connection *con)
     }
 
     // add the connection to the radio
-    con->devid_ = devId;
-    std::cout << "new connection scheduled on " << channel << " " << devId << std::endl;
-    radioThreads_[devId].addConnection(con);
+    connection->devid_ = devId;
+    // std::cout << "new connection scheduled on " << channel << " " << devId << std::endl;
+    radioThreads_[devId].addConnection(connection);
 }
 
-void USBManager::removeConnection(Connection *con)
+void USBManager::removeConnection(std::shared_ptr<ConnectionImpl> con)
 {
     const std::lock_guard<std::mutex> lk(mutex_);
-
+    // std::cout << "rmCon " << con->uri_ << std::endl;
     radioThreads_[con->devid_].removeConnection(con);
 }

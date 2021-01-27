@@ -2,7 +2,8 @@
 
 #include "CrazyradioThread.h"
 #include "Crazyradio.h"
-#include "native_link/Connection.h"
+// #include "native_link/Connection.h"
+#include "ConnectionImpl.h"
 
 CrazyradioThread::CrazyradioThread(libusb_device *dev)
     : dev_(dev)
@@ -24,7 +25,7 @@ CrazyradioThread::~CrazyradioThread()
 //     return thread_.joinable();
 // }
 
-void CrazyradioThread::addConnection(Connection *con)
+void CrazyradioThread::addConnection(std::shared_ptr<ConnectionImpl> con)
 {
     // bool startThread;
     {
@@ -54,15 +55,15 @@ void CrazyradioThread::addConnection(Connection *con)
     // }
 }
 
-void CrazyradioThread::removeConnection(Connection *con)
+void CrazyradioThread::removeConnection(std::shared_ptr<ConnectionImpl> con)
 {
     bool endThread;
     {
         std::unique_lock<std::mutex> lk(connections_mutex_);
-        connections_updated_ = false;
+        // connections_updated_ = false;
         connections_.erase(con);
         endThread = connections_.empty();
-        connections_updated_cv_.wait(lk, [this] { return !connections_updated_; });
+        // connections_updated_cv_.wait(lk, [this] { return !connections_updated_; });
     }
 
     if (endThread) {
@@ -81,7 +82,7 @@ void CrazyradioThread::run()
     const uint8_t enableSafelink[] = {0xFF, 0x05, 1};
     const uint8_t ping[] = {0xFF};
 
-    std::set<Connection *> connections_copy;
+    std::set<std::shared_ptr<ConnectionImpl>> connections_copy;
 
     while (true)
     {
@@ -91,8 +92,8 @@ void CrazyradioThread::run()
         {
             const std::lock_guard<std::mutex> lock(connections_mutex_);
             connections_copy = connections_;
-            connections_updated_ = true;
-            connections_updated_cv_.notify_one();
+            // connections_updated_ = true;
+            // connections_updated_cv_.notify_one();
 
             if (thread_ending_) {
                 // std::cout << "ending..." << std::endl;

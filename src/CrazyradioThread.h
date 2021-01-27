@@ -8,8 +8,8 @@
 #include <libusb-1.0/libusb.h>
 
 // forward declaration
-class Connection;
 class USBManager;
+class ConnectionImpl;
 
 class CrazyradioThread
 {
@@ -39,9 +39,9 @@ public:
 private: 
     void run();
 
-    void addConnection(Connection *con);
+    void addConnection(std::shared_ptr<ConnectionImpl> con);
 
-    void removeConnection(Connection *con);
+    void removeConnection(std::shared_ptr<ConnectionImpl> con);
 
 private:
     libusb_device* dev_;
@@ -51,7 +51,7 @@ private:
     bool thread_ending_;
 
     std::mutex connections_mutex_;
-    std::condition_variable connections_updated_cv_;
-    bool connections_updated_;
-    std::set<Connection*> connections_;
+    // std::condition_variable connections_updated_cv_;
+    // bool connections_updated_;
+    std::set<std::shared_ptr<ConnectionImpl>> connections_;
 };

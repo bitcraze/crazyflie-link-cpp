@@ -35,15 +35,14 @@ python3 test_python_binding.py
 
 ## To Do
 
-* fix multiradio crash: use shared_ptr and ConnectionImpl to deal with raceconditions during dtor
 * add CrazyflieUSB support
 * add test examples to measure bandwidth/latency/packet droprate
   * in C++
   * in Python
 * add broadcast support
-* better separation public/private interface for lib
 * add condition variables to lower CPU usage
   * in radio loop
+* add namespace 
 
 * integrate in Crazyflie_cpp and crazyflie_tools
 * integrate in python client

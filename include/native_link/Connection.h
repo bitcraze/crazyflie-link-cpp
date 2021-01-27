@@ -5,20 +5,13 @@
 #include <cmath>
 #include <ostream>
 #include <vector>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
 
 #include "Packet.hpp"
-#include "../src/Crazyradio.h"
 
-class CrazyradioThread;
-class USBManager;
+class ConnectionImpl;
 
 class Connection
 {
-  friend class CrazyradioThread;
-  friend class USBManager;
 public:
   class Statistics
   {
@@ -89,38 +82,12 @@ public:
 
   Packet recv(bool blocking);
 
-  const std::string& uri() const
-  {
-    return uri_;
-  }
+  const std::string& uri() const;
 
-  Connection::Statistics& statistics()
-  {
-    return statistics_;
-  }
+  Connection::Statistics& statistics();
 
   friend std::ostream& operator<<(std::ostream& out, const Connection& p);
 
 private:
-  std::string uri_;
-  int devid_;
-  int channel_;
-  Crazyradio::Datarate datarate_;
-  uint64_t address_;
-  bool useSafelink_;
-  bool safelinkInitialized_;
-  bool safelinkDown_;
-  bool safelinkUp_;
-
-  Connection::Statistics statistics_;
-
-  std::mutex queue_send_mutex_;
-  std::priority_queue<Packet> queue_send_;
-
-  std::mutex queue_recv_mutex_;
-  std::condition_variable queue_recv_cv_;
-  std::priority_queue<Packet> queue_recv_;
-
-  std::mutex alive_mutex_;
-  bool alive_;
+  std::shared_ptr<ConnectionImpl> impl_;
 };
