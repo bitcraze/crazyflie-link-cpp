@@ -15,6 +15,11 @@ public:
     std::string uri_;
     int devid_;
 
+    Connection::Statistics statistics_;
+
+    // USB related
+    std::shared_ptr<CrazyflieUSB> crazyflieUSB_;
+
     // Radio related
     int channel_;
     Crazyradio::Datarate datarate_;
@@ -24,15 +29,10 @@ public:
     bool safelinkDown_;
     bool safelinkUp_;
 
-    // USB related
-    std::shared_ptr<CrazyflieUSB> crazyflieUSB_;
-
-    Connection::Statistics statistics_;
-
     std::mutex queue_send_mutex_;
-    std::priority_queue<Packet> queue_send_;
+    std::priority_queue<Packet, std::vector<Packet>, std::greater<Packet>> queue_send_;
 
     std::mutex queue_recv_mutex_;
     std::condition_variable queue_recv_cv_;
-    std::priority_queue<Packet> queue_recv_;
+    std::priority_queue<Packet, std::vector<Packet>, std::greater<Packet>> queue_recv_;
 };

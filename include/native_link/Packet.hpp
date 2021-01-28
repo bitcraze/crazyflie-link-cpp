@@ -124,6 +124,11 @@ public:
     return std::forward_as_tuple(l.port(), l.seq_) < std::forward_as_tuple(r.port(), r.seq_);
   }
 
+  friend bool operator>(const Packet &l, const Packet &r)
+  {
+    return std::forward_as_tuple(l.port(), l.seq_) > std::forward_as_tuple(r.port(), r.seq_);
+  }
+
 private:
   uint8_t safelink() const
   {
