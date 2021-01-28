@@ -190,7 +190,7 @@ void CrazyradioThread::run()
                 if (p_ack.port() == 15 && p_ack.channel() == 3)
                 {
                     // Empty packet -> update stats only
-                    con->statistics_.rssi_latest = p_ack.data()[1];
+                    con->statistics_.rssi_latest = p_ack.payload()[1];
                 }
                 else
                 {

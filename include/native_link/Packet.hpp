@@ -22,9 +22,10 @@ class Packet
 
 public:
   Packet() 
-    : size_(-1)
+    : size_(0)
     , seq_(0)
   {
+    data_[0] = 0;
   }
 
   Packet(const uint8_t* data, size_t size)
@@ -63,9 +64,19 @@ public:
     setBitBieldValue<uint8_t, 4, 4>(data_[0], port);
   }
 
-  uint8_t size() const
+  size_t payloadSize() const
   {
-    return std::max(0, size_ - 1);
+    return size_ == 0 ? 0 : size_ - 1;
+  }
+
+  void setPayloadSize(size_t size)
+  {
+    setSize(size + 1);
+  }
+
+  size_t size() const
+  {
+    return size_;
   }
 
   void setSize(size_t size)
@@ -73,12 +84,22 @@ public:
     size_ = std::min<size_t>(CRTP_MAXSIZE, size);
   }
 
-  uint8_t* data()
+  uint8_t* payload()
+  {
+    return &data_[1];
+  }
+
+  const uint8_t *payload() const
   {
     return &data_[1];
   }
 
   const uint8_t* raw() const
+  {
+    return &data_[0];
+  }
+
+  uint8_t *raw()
   {
     return &data_[0];
   }
@@ -89,7 +110,7 @@ public:
     out << "channel=" << (int)p.channel();
     out << ",port=" << (int)p.port();
     out << ",data=";
-    for (int i = 1; i < p.size_; ++i) {
+    for (size_t i = 1; i < p.size_; ++i) {
       out << (int)p.data_[i] << " ";
     }
     out << ",seq=" << p.seq_;
@@ -119,7 +140,7 @@ private:
   std::array<uint8_t, CRTP_MAXSIZE> data_;
 
   // actual size of data
-  int size_;
+  size_t size_;
 
   // sequence number for strict weak ordering
   mutable size_t seq_;

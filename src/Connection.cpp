@@ -142,7 +142,7 @@ Packet Connection::recv(bool blocking)
 {
   if (impl_->crazyflieUSB_) {
     Packet result;
-    size_t size = impl_->crazyflieUSB_->recv(result.data(), CRTP_MAXSIZE, blocking ? 0 : 100);
+    size_t size = impl_->crazyflieUSB_->recv(result.raw(), CRTP_MAXSIZE, blocking ? 0 : 100);
     result.setSize(size);
     return result;
   } else {

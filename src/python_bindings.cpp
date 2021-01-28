@@ -42,13 +42,13 @@ PYBIND11_MODULE(nativelink, m) {
       //       return py::array(
       //           dtype, {p.size()}, {sizeof(uint8_t)}, p.data(), base); }, [](Packet &) {})
       .def_buffer([](Packet &p) -> py::buffer_info {
-        return py::buffer_info(p.data(), p.size(), /*readonly*/ false);
+        return py::buffer_info(p.payload(), p.payloadSize(), /*readonly*/ false);
       })
       .def("__len__", [](const Packet &p) {
-        return p.size();
+        return p.payloadSize();
       })
       .def("__getitem__", [](const Packet &p, py::ssize_t i) {
-        if (i >= p.size())
+        if (i >= (long int)p.payloadSize())
           throw py::index_error();
         return p.raw()[i+1];
       })
