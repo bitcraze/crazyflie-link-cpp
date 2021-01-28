@@ -73,7 +73,7 @@ PYBIND11_MODULE(nativelink, m) {
            const std::string &>())
       .def_static("scan", &Connection::scan)
       .def("send", &Connection::send)
-      .def("recv", &Connection::recv, py::arg("blocking"))
+      .def("recv", &Connection::recv, py::arg("timeout"))
       .def_property_readonly("uri", &Connection::uri)
       .def_property_readonly("statistics", &Connection::statistics)
       .def("__repr__", &toString<Connection>);

@@ -138,32 +138,30 @@ void Connection::send(const Packet& p)
   }
 }
 
-Packet Connection::recv(bool blocking)
+Packet Connection::recv(unsigned int timeout_in_ms)
 {
   if (impl_->crazyflieUSB_) {
     Packet result;
-    size_t size = impl_->crazyflieUSB_->recv(result.raw(), CRTP_MAXSIZE, blocking ? 0 : 100);
+    size_t size = impl_->crazyflieUSB_->recv(result.raw(), CRTP_MAXSIZE, timeout_in_ms);
     result.setSize(size);
     return result;
   } else {
-    if (blocking) {
-      std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
+    std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
+    if (timeout_in_ms == 0) {
       impl_->queue_recv_cv_.wait(lk, [this] { return !impl_->queue_recv_.empty(); });
-      auto result = impl_->queue_recv_.top();
-      impl_->queue_recv_.pop();
+    } else {
+      std::chrono::milliseconds duration(timeout_in_ms);
+      impl_->queue_recv_cv_.wait_for(lk, duration, [this] { return !impl_->queue_recv_.empty(); });
+    }
+
+    Packet result;
+    if (impl_->queue_recv_.empty()) {
       return result;
     } else {
-      const std::lock_guard<std::mutex> lock(impl_->queue_recv_mutex_);
-
-      Packet result;
-      if (impl_->queue_recv_.empty()) {
-        return result;
-      } else {
-        result = impl_->queue_recv_.top();
-        impl_->queue_recv_.pop();
-      }
-      return result;
+      result = impl_->queue_recv_.top();
+      impl_->queue_recv_.pop();
     }
+    return result;
   }
 }
 

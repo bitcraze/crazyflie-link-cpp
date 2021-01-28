@@ -80,7 +80,7 @@ public:
 
   void send(const Packet& p);
 
-  Packet recv(bool blocking);
+  Packet recv(unsigned int timeout_in_ms);
 
   const std::string& uri() const;
 

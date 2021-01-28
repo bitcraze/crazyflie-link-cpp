@@ -6,6 +6,7 @@ if __name__ == "__main__":
   con = nativelink.Connection("radio://0/80/2M/E7E7E7E7E7")
 
   while True:
-    p = con.recv(blocking=True)
-    msg = ''.join(chr(v) for v in p.data)
-    print(msg, end='')
+    p = con.recv(timeout=100)
+    if p.valid:
+      msg = ''.join(chr(v) for v in p)
+      print(msg, end='')
