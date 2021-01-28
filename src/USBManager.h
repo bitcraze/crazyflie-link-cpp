@@ -30,13 +30,17 @@ public :
         return crazyfliesUSB_.size();
     }
 
-    std::vector<CrazyradioThread>& crazyradioThreads() {
-        return radioThreads_;
+    // std::vector<CrazyradioThread>& crazyradioThreads() {
+    //     return radioThreads_;
+    // }
+
+    const std::vector<libusb_device *>& crazyfliesOverUSB() const {
+        return crazyfliesUSB_;
     }
 
-    void addConnection(std::shared_ptr<ConnectionImpl> con);
+        void addRadioConnection(std::shared_ptr<ConnectionImpl> con);
 
-    void removeConnection(std::shared_ptr<ConnectionImpl> con);
+    void removeRadioConnection(std::shared_ptr<ConnectionImpl> con);
 
 private :
     USBManager();

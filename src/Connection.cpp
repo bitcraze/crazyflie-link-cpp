@@ -34,8 +34,9 @@ Connection::Connection(const std::string &uri, const Connection::Settings &setti
 
   if (match[2].matched) {
     // usb://
-    // int devid = std::stoi(match[2].str());
-    // TODO
+    impl_->devid_ = std::stoi(match[2].str());
+    auto dev = USBManager::get().crazyfliesOverUSB().at(impl_->devid_);
+    impl_->crazyflieUSB_ = std::make_shared<CrazyflieUSB>(dev);
   } else {
     // radio
     if (match[3].str() == "*") {
@@ -58,7 +59,7 @@ Connection::Connection(const std::string &uri, const Connection::Settings &setti
     impl_->safelinkUp_ = false;
     impl_->safelinkDown_ = false;
 
-    USBManager::get().addConnection(impl_);
+    USBManager::get().addRadioConnection(impl_);
   }
 
 }
@@ -66,7 +67,9 @@ Connection::Connection(const std::string &uri, const Connection::Settings &setti
 Connection::~Connection()
 {
   // std::cout << "~Connection " << impl_->uri_ << std::endl;
-  USBManager::get().removeConnection(impl_);
+  if (!impl_->crazyflieUSB_) {
+    USBManager::get().removeRadioConnection(impl_);
+  }
 }
 
 std::vector<std::string> Connection::scan(const std::string& address)
@@ -124,32 +127,43 @@ std::vector<std::string> Connection::scan(const std::string& address)
 
 void Connection::send(const Packet& p)
 {
-  const std::lock_guard<std::mutex> lock(impl_->queue_send_mutex_);
-  p.seq_ = impl_->statistics_.enqueued_count;
-  impl_->queue_send_.push(p);
-  ++impl_->statistics_.enqueued_count;
+  if (!impl_->crazyflieUSB_) {
+    impl_->crazyflieUSB_->send(p.raw(), p.size()+1);
+  }
+  else {
+    const std::lock_guard<std::mutex> lock(impl_->queue_send_mutex_);
+    p.seq_ = impl_->statistics_.enqueued_count;
+    impl_->queue_send_.push(p);
+    ++impl_->statistics_.enqueued_count;
+  }
 }
 
 Packet Connection::recv(bool blocking)
 {
-  if (blocking) {
-    std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
-    impl_->queue_recv_cv_.wait(lk, [this] { return !impl_->queue_recv_.empty(); });
-    auto result = impl_->queue_recv_.top();
-    impl_->queue_recv_.pop();
+  if (!impl_->crazyflieUSB_) {
+    Packet result;
+    size_t size = impl_->crazyflieUSB_->recv(result.data(), CRTP_MAXSIZE, blocking ? 0 : 100);
+    result.setSize(size);
     return result;
   } else {
-    const std::lock_guard<std::mutex> lock(impl_->queue_recv_mutex_);
-
-    Packet result;
-    if (impl_->queue_recv_.empty())
-    {
+    if (blocking) {
+      std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
+      impl_->queue_recv_cv_.wait(lk, [this] { return !impl_->queue_recv_.empty(); });
+      auto result = impl_->queue_recv_.top();
+      impl_->queue_recv_.pop();
       return result;
     } else {
-      result = impl_->queue_recv_.top();
-      impl_->queue_recv_.pop();
+      const std::lock_guard<std::mutex> lock(impl_->queue_recv_mutex_);
+
+      Packet result;
+      if (impl_->queue_recv_.empty()) {
+        return result;
+      } else {
+        result = impl_->queue_recv_.top();
+        impl_->queue_recv_.pop();
+      }
+      return result;
     }
-    return result;
   }
 }
 

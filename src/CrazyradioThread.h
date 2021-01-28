@@ -51,7 +51,7 @@ private:
     bool thread_ending_;
 
     std::mutex connections_mutex_;
-    // std::condition_variable connections_updated_cv_;
-    // bool connections_updated_;
+    std::condition_variable connections_updated_cv_;
+    bool connections_updated_;
     std::set<std::shared_ptr<ConnectionImpl>> connections_;
 };

@@ -13,11 +13,11 @@ USBDevice::USBDevice(
         throw std::runtime_error(libusb_error_name(err));
     }
 
-    // err = libusb_set_configuration(dev_handle_, 1);
-    // if (err != LIBUSB_SUCCESS)
-    // {
-    //     throw std::runtime_error(libusb_error_name(err));
-    // }
+    err = libusb_set_configuration(dev_handle_, 1);
+    if (err != LIBUSB_SUCCESS)
+    {
+        throw std::runtime_error(libusb_error_name(err));
+    }
 
     err = libusb_claim_interface(dev_handle_, 0);
     if (err != LIBUSB_SUCCESS)

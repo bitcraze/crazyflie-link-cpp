@@ -157,7 +157,7 @@ USBManager::~USBManager()
 //     }
 // }
 
-void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
+void USBManager::addRadioConnection(std::shared_ptr<ConnectionImpl> connection)
 {
     const std::lock_guard<std::mutex> lk(mutex_);
 
@@ -273,7 +273,7 @@ void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
     radioThreads_[devId].addConnection(connection);
 }
 
-void USBManager::removeConnection(std::shared_ptr<ConnectionImpl> con)
+void USBManager::removeRadioConnection(std::shared_ptr<ConnectionImpl> con)
 {
     const std::lock_guard<std::mutex> lk(mutex_);
     // std::cout << "rmCon " << con->uri_ << std::endl;

@@ -60,10 +60,10 @@ void CrazyradioThread::removeConnection(std::shared_ptr<ConnectionImpl> con)
     bool endThread;
     {
         std::unique_lock<std::mutex> lk(connections_mutex_);
-        // connections_updated_ = false;
+        connections_updated_ = false;
         connections_.erase(con);
         endThread = connections_.empty();
-        // connections_updated_cv_.wait(lk, [this] { return !connections_updated_; });
+        connections_updated_cv_.wait(lk, [this] { return !connections_updated_; });
     }
 
     if (endThread) {
@@ -89,16 +89,19 @@ void CrazyradioThread::run()
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         // copy connections_
+        bool thread_ending;
         {
             const std::lock_guard<std::mutex> lock(connections_mutex_);
             connections_copy = connections_;
-            // connections_updated_ = true;
-            // connections_updated_cv_.notify_one();
+            connections_updated_ = true;
+            thread_ending = thread_ending_;
+        }
 
-            if (thread_ending_) {
-                // std::cout << "ending..." << std::endl;
-                break;
-            }
+        connections_updated_cv_.notify_one();
+        if (thread_ending)
+        {
+            // std::cout << "ending..." << std::endl;
+            break;
         }
 
         for (auto con : connections_copy) {

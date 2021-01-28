@@ -6,6 +6,7 @@
 #include <condition_variable>
 
 #include "Crazyradio.h"
+#include "CrazyflieUSB.h"
 #include "native_link/Connection.h"
 
 class ConnectionImpl
@@ -13,6 +14,8 @@ class ConnectionImpl
 public:
     std::string uri_;
     int devid_;
+
+    // Radio related
     int channel_;
     Crazyradio::Datarate datarate_;
     uint64_t address_;
@@ -20,6 +23,9 @@ public:
     bool safelinkInitialized_;
     bool safelinkDown_;
     bool safelinkUp_;
+
+    // USB related
+    std::shared_ptr<CrazyflieUSB> crazyflieUSB_;
 
     Connection::Statistics statistics_;
 
