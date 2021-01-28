@@ -35,8 +35,6 @@ python3 test_python_binding.py
 
 ## To Do
 
-* in rmConnection make sure we add back condition variable to ensure that 
-* add CrazyflieUSB support
 * add test examples to measure bandwidth/latency/packet droprate
   * in C++
   * in Python

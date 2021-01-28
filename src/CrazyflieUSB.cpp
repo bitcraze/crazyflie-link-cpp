@@ -2,7 +2,6 @@
 
 #include <sstream>
 #include <stdexcept>
-#include <iostream>
 
 #include <libusb-1.0/libusb.h>
 
@@ -56,12 +55,10 @@ size_t CrazyflieUSB::recv(uint8_t *buffer, size_t max_length, unsigned int timeo
     if (status != LIBUSB_SUCCESS && status != LIBUSB_ERROR_TIMEOUT) {
         throw std::runtime_error(libusb_error_name(status));
     }
-    std::cout << status << " " << transferred << std::endl;
     return transferred;
 }
 
 void CrazyflieUSB::setCrtpToUsb(bool crtpToUsb)
 {
-    std::cout << "setCrtpToUsb" << std::endl;
     sendVendorSetup(0x01, 0x01, crtpToUsb, NULL, 0);
 }

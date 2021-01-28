@@ -127,7 +127,7 @@ std::vector<std::string> Connection::scan(const std::string& address)
 
 void Connection::send(const Packet& p)
 {
-  if (!impl_->crazyflieUSB_) {
+  if (impl_->crazyflieUSB_) {
     impl_->crazyflieUSB_->send(p.raw(), p.size()+1);
   }
   else {
@@ -140,7 +140,7 @@ void Connection::send(const Packet& p)
 
 Packet Connection::recv(bool blocking)
 {
-  if (!impl_->crazyflieUSB_) {
+  if (impl_->crazyflieUSB_) {
     Packet result;
     size_t size = impl_->crazyflieUSB_->recv(result.data(), CRTP_MAXSIZE, blocking ? 0 : 100);
     result.setSize(size);
