@@ -79,7 +79,7 @@ void CrazyradioThread::run()
 {
     Crazyradio radio(dev_);
 
-    const uint8_t enableSafelink[] = {0xFF, 0x05, 1};
+        const uint8_t enableSafelink[] = {0xFF, 0x05, 1};
     const uint8_t ping[] = {0xFF};
 
     std::set<std::shared_ptr<ConnectionImpl>> connections_copy;
@@ -152,16 +152,23 @@ void CrazyradioThread::run()
                     p.setSafelink(con->safelinkUp_ << 1 | con->safelinkDown_);
                     ack = radio.sendPacket(p.raw(), p.size());
                     ++con->statistics_.sent_count;
-                    if (ack && ack.size() > 0 && (ack.data()[0] & 0x04) == (con->safelinkDown_ << 2)) {
-                        con->safelinkDown_ = !con->safelinkDown_;
-                    }
+
                     if (ack)
                     {
                         con->safelinkUp_ = !con->safelinkUp_;
-                        if (!con->queue_send_.empty()) {
+                        if (!con->queue_send_.empty())
+                        {
                             con->queue_send_.pop();
                         }
                     }
+
+                    if (ack && ack.size() > 0 && (ack.data()[0] & 0x04) == (con->safelinkDown_ << 2)) {
+                        con->safelinkDown_ = !con->safelinkDown_;
+                    } else {
+                        // reset ack to be invalid since safelink does not match
+                        ack = Crazyradio::Ack();
+                    }
+
                 }
             } else {
                 // no safelink

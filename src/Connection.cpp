@@ -128,7 +128,7 @@ std::vector<std::string> Connection::scan(const std::string& address)
 void Connection::send(const Packet& p)
 {
   if (impl_->crazyflieUSB_) {
-    impl_->crazyflieUSB_->send(p.raw(), p.size()+1);
+    impl_->crazyflieUSB_->send(p.raw(), p.size());
   }
   else {
     const std::lock_guard<std::mutex> lock(impl_->queue_send_mutex_);

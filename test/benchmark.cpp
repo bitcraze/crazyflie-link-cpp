@@ -39,7 +39,7 @@ public:
         // Latency experiment
         double latency_sum = 0.0;
         latency_min = std::numeric_limits<double>::max();
-        const size_t count = 100;
+        const size_t count = 1000;
         for (uint32_t i = 0; i < count; ++i)
         {
             std::memcpy(p.payload(), &i, sizeof(i));
@@ -70,6 +70,7 @@ public:
             std::memcpy(p.payload(), &i, sizeof(i));
             con.send(p);
         }
+        Packet p_old;
         for (uint32_t i = 0; i < count; ++i)
         {
             Packet p_recv = con.recv(0);
@@ -79,8 +80,23 @@ public:
             {
                 std::stringstream sstr;
                 sstr << "Bandwith: Sent " << i << " but received " << recv_i << "! (" << p_recv << ")";
+
+                // DBG
+                sstr << std::endl;
+                sstr << " previous: " << p_old << std::endl;
+                sstr << " current: " << p_recv << std::endl;
+                sstr << " new/future ";
+                for (size_t k = 0; k < 10; ++k) {
+                    Packet p_recv2 = con.recv(0);
+                    sstr << p_recv2 << std::endl;
+                }
+
+                // DBG
+
+
                 throw std::runtime_error(sstr.str());
             }
+            p_old = p_recv;
         }
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> diff = end - start;

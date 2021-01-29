@@ -109,6 +109,8 @@ public:
     out << "Packet(";
     out << "channel=" << (int)p.channel();
     out << ",port=" << (int)p.port();
+    out << ",safelinkUp=" << p.safelinkUp();
+    out << ",safelinkDown=" << p.safelinkDown();
     out << ",data=";
     for (size_t i = 1; i < p.size_; ++i) {
       out << (int)p.data_[i] << " ";
@@ -130,6 +132,16 @@ public:
   }
 
 private:
+  bool safelinkUp() const
+  {
+    return getBitBieldValue<uint8_t, 3, 1>(data_[0]);
+  }
+
+  bool safelinkDown() const
+  {
+    return getBitBieldValue<uint8_t, 2, 1>(data_[0]);
+  }
+
   uint8_t safelink() const
   {
     return getBitBieldValue<uint8_t, 2, 2>(data_[0]);
