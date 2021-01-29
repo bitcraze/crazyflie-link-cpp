@@ -150,7 +150,7 @@ void CrazyradioThread::run()
                     }
 
                     p.setSafelink(con->safelinkUp_ << 1 | con->safelinkDown_);
-                    ack = radio.sendPacket(p.raw(), p.size() + 1);
+                    ack = radio.sendPacket(p.raw(), p.size());
                     ++con->statistics_.sent_count;
                     if (ack && ack.size() > 0 && (ack.data()[0] & 0x04) == (con->safelinkDown_ << 2)) {
                         con->safelinkDown_ = !con->safelinkDown_;
@@ -169,7 +169,7 @@ void CrazyradioThread::run()
                 if (!con->queue_send_.empty())
                 {
                     const auto p = con->queue_send_.top();
-                    ack = radio.sendPacket(p.raw(), p.size() + 1);
+                    ack = radio.sendPacket(p.raw(), p.size());
                     ++con->statistics_.sent_count;
                     if (ack)
                     {
