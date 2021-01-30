@@ -1,14 +1,15 @@
-from build import nativelink
+#!/usr/bin/env python3
+import nativelink
 
 if __name__ == "__main__":
 
   # scan for all available Crazyflies
-  cfs = nativelink.Connection.scan("*")
+  cfs = nativelink.Connection.scan("")
   print(cfs)
 
   # connect to a CF
   # con = nativelink.Connection("usb://0")
-  con = nativelink.Connection("radio://0/80/2M/E7E7E7E7E7")
+  con = nativelink.Connection("radio://0/60/2M/E7E7E7E7E7")
 
   while True:
     p = con.recv(blocking=True)

@@ -1,9 +1,10 @@
-from build import nativelink
+#!/usr/bin/env python3
+import nativelink
 
 if __name__ == "__main__":
 
   # connect to a CF
-  con = nativelink.Connection("radio://0/80/2M/E7E7E7E7E7")
+  con = nativelink.Connection("radio://0/60/2M/E7E7E7E7E7")
 
   while True:
     p = con.recv(timeout=100)
