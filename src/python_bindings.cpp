@@ -50,15 +50,14 @@ PYBIND11_MODULE(nativelink, m) {
       .def("__getitem__", [](const Packet &p, py::ssize_t i) {
         if (i >= (long int)p.payloadSize())
           throw py::index_error();
-        return p.raw()[i+1];
+        return p.payload()[i];
       })
-      // .def("__setitem__", [](Matrix &m, std::pair<py::ssize_t, py::ssize_t> i, float v) {
-      //   if (i.first >= m.rows() || i.second >= m.cols())
-      //     throw py::index_error();
-      //   m(i.first, i.second) = v;
-      // })
-
-      .def_property("size", &Packet::size, &Packet::setSize)
+      .def("__setitem__", [](Packet &p, py::ssize_t i, int v) {
+        if (i >= (long int)p.payloadSize())
+          throw py::index_error();
+        return p.payload()[i] = v;
+      })
+      .def_property("size", &Packet::payloadSize, &Packet::setPayloadSize)
       .def_property_readonly("valid", &Packet::valid)
       .def("__repr__", &toString<Packet>);
 
