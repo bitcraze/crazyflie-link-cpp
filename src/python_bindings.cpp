@@ -55,8 +55,21 @@ PYBIND11_MODULE(nativelink, m) {
       .def("__setitem__", [](Packet &p, py::ssize_t i, int v) {
         if (i >= (long int)p.payloadSize())
           throw py::index_error();
+        if (v < 0 || v > 255)
+          throw py::value_error();
         return p.payload()[i] = v;
       })
+      .def_property("payload",
+        [](const Packet &p) -> py::bytes {
+          return py::bytes(reinterpret_cast<const char*>(p.payload()), p.payloadSize());
+        },
+        [](Packet &p, py::bytes value) {
+          char *buffer;
+          ssize_t length;
+          PYBIND11_BYTES_AS_STRING_AND_SIZE(value.ptr(), &buffer, &length);
+          p.setPayloadSize(length);
+          std::memcpy(p.payload(), buffer, length);
+        })
       .def_property("size", &Packet::payloadSize, &Packet::setPayloadSize)
       .def_property_readonly("valid", &Packet::valid)
       .def("__repr__", &toString<Packet>);
