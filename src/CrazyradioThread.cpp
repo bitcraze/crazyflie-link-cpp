@@ -142,11 +142,18 @@ void CrazyradioThread::run()
                 } else {
                     // send actual packet via safelink
 
-                    const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
+
                     Packet p(ping, sizeof(ping));
-                    if (!con->queue_send_.empty())
-                    {
-                        p = con->queue_send_.top();
+
+                    if (con->retry_) {
+                        p = con->retry_;
+                    } else {
+                        const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
+                        if (!con->queue_send_.empty())
+                        {
+                            p = con->queue_send_.top();
+                            con->queue_send_.pop();
+                        }
                     }
 
                     p.setSafelink(con->safelinkUp_ << 1 | con->safelinkDown_);
@@ -156,10 +163,11 @@ void CrazyradioThread::run()
                     if (ack)
                     {
                         con->safelinkUp_ = !con->safelinkUp_;
-                        if (!con->queue_send_.empty())
-                        {
-                            con->queue_send_.pop();
+                        if (con->retry_) {
+                            con->retry_ = Packet();
                         }
+                    } else {
+                        con->retry_ = p;
                     }
 
                     if (ack && ack.size() > 0 && (ack.data()[0] & 0x04) == (con->safelinkDown_ << 2)) {

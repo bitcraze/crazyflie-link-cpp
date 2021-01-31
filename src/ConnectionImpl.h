@@ -31,6 +31,7 @@ public:
 
     std::mutex queue_send_mutex_;
     std::priority_queue<Packet, std::vector<Packet>, std::greater<Packet>> queue_send_;
+    Packet retry_;
 
     std::mutex queue_recv_mutex_;
     std::condition_variable queue_recv_cv_;

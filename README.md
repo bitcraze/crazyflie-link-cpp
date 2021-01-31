@@ -60,5 +60,4 @@ python3 test/test_python_binding.py
 
 ## To Discuss
 
-* Python import issues
 * multi-radio broadcast?
