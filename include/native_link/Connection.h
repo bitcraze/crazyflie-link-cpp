@@ -84,7 +84,7 @@ public:
 
   const std::string& uri() const;
 
-  Connection::Statistics& statistics();
+  Connection::Statistics statistics();
 
   friend std::ostream& operator<<(std::ostream& out, const Connection& p);
 

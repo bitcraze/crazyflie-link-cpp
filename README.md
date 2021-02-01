@@ -51,10 +51,10 @@ python3 test/test_python_binding.py
 * add condition variables to lower CPU usage
   * in radio loop
 * add namespace 
+* improved stats
+  * locks?
 
 * integrate in Crazyflie_cpp and crazyflie_tools
-* integrate in python client
-* test with 'faulty' radio
 * code linter
 * Add CI for repo
 

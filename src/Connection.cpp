@@ -177,7 +177,7 @@ const std::string& Connection::uri() const
   return impl_->uri_;
 }
 
-Connection::Statistics& Connection::statistics()
+Connection::Statistics Connection::statistics()
 {
   return impl_->statistics_;
 }
