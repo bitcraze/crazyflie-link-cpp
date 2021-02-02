@@ -10,7 +10,7 @@
 
 #include <libusb-1.0/libusb.h>
 
-Connection::Connection(const std::string &uri, const Connection::Settings &settings)
+Connection::Connection(const std::string &uri)
     : impl_(std::make_shared<ConnectionImpl>())
 {
   // Examples:
@@ -19,7 +19,7 @@ Connection::Connection(const std::string &uri, const Connection::Settings &setti
   // "radio://*/80/2M/E7E7E7E7E7" -> auto-pick radio
   // "radio://*/80/2M/*" -> broadcast/P2P sniffing on channel 80
 
-  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]{10}|\\*))");
+  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]{10}|\\*)(\\[noSafelink\\])?(\\[noAutoPing\\])?(\\[noAckFilter\\])?)");
   std::smatch match;
   if (!std::regex_match(uri, match, uri_regex)) {
     throw std::runtime_error("Invalid uri!");
@@ -62,7 +62,9 @@ Connection::Connection(const std::string &uri, const Connection::Settings &setti
       impl_->datarate_ = Crazyradio::Datarate_2MPS;
     }
     impl_->address_ = std::stoul(match[6].str(), nullptr, 16);
-    impl_->useSafelink_ = settings.use_safelink;
+    impl_->useSafelink_ = match[7].length() == 0;
+    impl_->useAutoPing_ = match[8].length() == 0;
+    impl_->useAckFilter_ = match[9].length() == 0;
     impl_->safelinkInitialized_ = false;
     impl_->safelinkUp_ = false;
     impl_->safelinkDown_ = false;

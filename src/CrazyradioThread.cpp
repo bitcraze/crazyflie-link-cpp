@@ -175,6 +175,9 @@ void CrazyradioThread::run()
                         {
                             p = con->queue_send_.top();
                             con->queue_send_.pop();
+                        } else if (!con->useAutoPing_)
+                        {
+                            continue;
                         }
                     }
 
@@ -213,7 +216,7 @@ void CrazyradioThread::run()
                         con->queue_send_.pop();
                     }
                 }
-                else
+                else if (con->useAutoPing_)
                 {
                     ack = radio.sendPacket(ping, sizeof(ping));
                     ++con->statistics_.sent_count;
@@ -224,7 +227,8 @@ void CrazyradioThread::run()
             if (ack) {
                 ++con->statistics_.ack_count;
                 Packet p_ack(ack.data(), ack.size());
-                if (p_ack.port() == 15 && p_ack.channel() == 3)
+                if (con->useAckFilter_ &&
+                    p_ack.port() == 15 && p_ack.channel() == 3)
                 {
                     // Empty packet -> update stats only
                     con->statistics_.rssi_latest = p_ack.payload()[1];

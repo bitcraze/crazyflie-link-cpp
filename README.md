@@ -54,10 +54,15 @@ python3 test/test_python_binding.py
 * improved stats
   * locks?
 
+* rename to cfnativelink
 * integrate in Crazyflie_cpp and crazyflie_tools
 * code linter
 * Add CI for repo
 
 ## To Discuss
 
+* bootloader commands:
+  * Current solution [feels hacky since it requires specialized URI] -OR- 
+  * Add a wait_until_sent_queue empty call instead? [cleanest, but requires interface change] -OR-
+  * NRF firmware change to send more than just Ack (e.g., include what was acked, to avoid result being filtered)
 * multi-radio broadcast?

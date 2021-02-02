@@ -50,18 +50,6 @@ public:
     uint8_t rssi_latest;
   };
 
-  class Settings
-  {
-    public:
-      Settings()
-        : use_safelink(true)
-      {
-
-      }
-
-      bool use_safelink;
-  };
-
 public:
 
   // non construction-copyable
@@ -71,7 +59,7 @@ public:
   Connection& operator=(const Connection&) = delete;
 
   // construct, given a URI, e.g. "radio://*/80/2M/*"
-  Connection(const std::string& uri, const Connection::Settings& settings = Connection::Settings());
+  Connection(const std::string& uri);
 
   // deconstruct/cleanup
   ~Connection();

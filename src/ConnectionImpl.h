@@ -25,6 +25,8 @@ public:
     Crazyradio::Datarate datarate_;
     uint64_t address_;
     bool useSafelink_;
+    bool useAutoPing_;
+    bool useAckFilter_;
     bool safelinkInitialized_;
     bool safelinkDown_;
     bool safelinkUp_;
