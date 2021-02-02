@@ -48,13 +48,11 @@ python3 test/test_python_binding.py
   * in Python
 * add broadcast support
   * support send2PacketsNoAck 
-* add condition variables to lower CPU usage
-  * in radio loop
 * add namespace 
 * improved stats
   * locks?
 
-* rename to cfnativelink
+* rename to <discuss>
 * integrate in Crazyflie_cpp and crazyflie_tools
 * code linter
 * Add CI for repo
@@ -65,4 +63,7 @@ python3 test/test_python_binding.py
   * Current solution [feels hacky since it requires specialized URI] -OR- 
   * Add a wait_until_sent_queue empty call instead? [cleanest, but requires interface change] -OR-
   * NRF firmware change to send more than just Ack (e.g., include what was acked, to avoid result being filtered)
+* test_bandwidth_usb crash
+* naming: cfcpplink?
+* CI
 * multi-radio broadcast?
