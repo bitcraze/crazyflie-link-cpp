@@ -39,7 +39,7 @@ USBDevice::USBDevice(
 USBDevice::~USBDevice()
 {
     if (dev_handle_) {
-        // ignore the error (we don't want to throw in dtor)
+        // ignore the error (we can't throw in dtor)
         libusb_release_interface(dev_handle_, 0);
 
         // function returns void => no error checking

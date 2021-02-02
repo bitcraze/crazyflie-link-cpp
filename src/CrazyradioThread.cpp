@@ -31,6 +31,9 @@ void CrazyradioThread::addConnection(std::shared_ptr<ConnectionImpl> con)
     {
         const std::lock_guard<std::mutex> lock(connections_mutex_);
         connections_.insert(con);
+        if (!runtime_error_.empty()) {
+            con->runtime_error_ = runtime_error_;
+        }
         // startThread = thread_ended_;
         // std::cout << "add con " << connections_.size() << std::endl;
     }
@@ -39,7 +42,7 @@ void CrazyradioThread::addConnection(std::shared_ptr<ConnectionImpl> con)
         const std::lock_guard<std::mutex> lock(thread_mutex_);
         if (!thread_.joinable()) {
             // std::cout << "add con " << startThread << std::endl;
-            thread_ = std::thread(&CrazyradioThread::run, this);
+            thread_ = std::thread(&CrazyradioThread::runWithErrorHandler, this);
         }
     }
 
@@ -75,11 +78,30 @@ void CrazyradioThread::removeConnection(std::shared_ptr<ConnectionImpl> con)
     }
 }
 
+void CrazyradioThread::runWithErrorHandler()
+{
+    try {
+        run();
+    }
+    catch (const std::runtime_error &error) {
+        const std::lock_guard<std::mutex> lock(connections_mutex_);
+        for (auto con : connections_) {
+            std::lock(con->queue_send_mutex_, con->queue_recv_mutex_);
+            std::lock_guard<std::mutex> lk1(con->queue_send_mutex_, std::adopt_lock);
+            std::lock_guard<std::mutex> lk2(con->queue_recv_mutex_, std::adopt_lock);
+            con->runtime_error_ = error.what();
+        }
+        runtime_error_ = error.what();
+    }
+    catch (...) {
+    }
+}
+
 void CrazyradioThread::run()
 {
     Crazyradio radio(dev_);
 
-        const uint8_t enableSafelink[] = {0xFF, 0x05, 1};
+    const uint8_t enableSafelink[] = {0xFF, 0x05, 1};
     const uint8_t ping[] = {0xFF};
 
     std::set<std::shared_ptr<ConnectionImpl>> connections_copy;

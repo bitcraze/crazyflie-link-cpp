@@ -13,7 +13,11 @@ CrazyflieUSB::CrazyflieUSB(libusb_device *dev)
 
 CrazyflieUSB::~CrazyflieUSB()
 {
-    setCrtpToUsb(false);
+    try {
+        setCrtpToUsb(false);
+    } catch(...) {
+        // do not throw in dtor
+    }
 }
 
 void CrazyflieUSB::send(

@@ -6,7 +6,7 @@
 int main()
 {
     // scanning
-    const auto uris = Connection::scan("");
+    const auto uris = Connection::scan();
 
     for (const auto uri : uris) {
         std::cout << uri << std::endl;

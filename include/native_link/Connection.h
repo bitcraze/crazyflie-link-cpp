@@ -76,7 +76,7 @@ public:
   // deconstruct/cleanup
   ~Connection();
 
-  static std::vector<std::string> scan(const std::string& address);
+  static std::vector<std::string> scan(uint64_t address = 0xE7E7E7E7E7);
 
   void send(const Packet& p);
 

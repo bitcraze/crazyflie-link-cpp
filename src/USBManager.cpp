@@ -170,6 +170,10 @@ void USBManager::addRadioConnection(std::shared_ptr<ConnectionImpl> connection)
     // assign a radio automatically
     if (devId == -1) {
 
+        if (radioThreads_.empty()) {
+            throw std::runtime_error("No Crazyradio dongle found!");
+        }
+
         // GREEDY DOES NOT WORK
         // ex: 0/2M on radio 0, 2/1M on radio 1
         // try to schedule: 1/2M -> bam
@@ -237,8 +241,12 @@ void USBManager::addRadioConnection(std::shared_ptr<ConnectionImpl> connection)
     }
     assert(devId >= 0);
 
-    // std::cout << "ch " << channel << std::endl;
-    // std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    if (devId < 0 || devId >= (int)radioThreads_.size()) {
+        std::stringstream sstr;
+        sstr << "No Crazyradio with id=" << devId << " found.";
+        sstr << "There are " << radioThreads_.size() << " Crazyradios connected.";
+        throw std::runtime_error(sstr.str());
+    }
 
     // Sanity checks
     for (size_t i = 0; i < radioThreads_.size(); ++i) {

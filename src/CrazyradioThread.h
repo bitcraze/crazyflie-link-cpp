@@ -25,7 +25,9 @@ public:
         dev_ = std::move(other.dev_);
         thread_ = std::move(other.thread_);
         thread_ending_ = std::move(other.thread_ending_);
+        connections_updated_ = std::move(other.connections_updated_);
         connections_ = std::move(other.connections_);
+        runtime_error_ = std::move(other.runtime_error_);
     }
 
     ~CrazyradioThread();
@@ -36,7 +38,8 @@ public:
         return dev_;
     }
 
-private: 
+private:
+    void runWithErrorHandler();
     void run();
 
     void addConnection(std::shared_ptr<ConnectionImpl> con);
@@ -54,4 +57,5 @@ private:
     std::condition_variable connections_updated_cv_;
     bool connections_updated_;
     std::set<std::shared_ptr<ConnectionImpl>> connections_;
+    std::string runtime_error_;
 };

@@ -36,4 +36,6 @@ public:
     std::mutex queue_recv_mutex_;
     std::condition_variable queue_recv_cv_;
     std::priority_queue<Packet, std::vector<Packet>, std::greater<Packet>> queue_recv_;
+
+    std::string runtime_error_;
 };

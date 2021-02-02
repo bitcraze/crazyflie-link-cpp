@@ -35,6 +35,14 @@ Connection::Connection(const std::string &uri, const Connection::Settings &setti
   if (match[2].matched) {
     // usb://
     impl_->devid_ = std::stoi(match[2].str());
+
+    if (impl_->devid_ < 0 || impl_->devid_ >= (int)USBManager::get().numCrazyfliesOverUSB()) {
+      std::stringstream sstr;
+      sstr << "No Crazyflie with id=" << impl_->devid_ << " found. ";
+      sstr << "There are " << USBManager::get().numCrazyfliesOverUSB() << " Crazyflies connected.";
+      throw std::runtime_error(sstr.str());
+    }
+
     auto dev = USBManager::get().crazyfliesOverUSB().at(impl_->devid_);
     impl_->crazyflieUSB_ = std::make_shared<CrazyflieUSB>(dev);
   } else {
@@ -72,7 +80,7 @@ Connection::~Connection()
   }
 }
 
-std::vector<std::string> Connection::scan(const std::string& address)
+std::vector<std::string> Connection::scan(uint64_t address)
 {
   std::vector<std::string> result;
 
@@ -82,43 +90,47 @@ std::vector<std::string> Connection::scan(const std::string& address)
   }
 
   // Crazyflies over radio
-  std::string a = address;
-  if (address.empty()) {
-    a = "E7E7E7E7E7";
-  }
+  if (USBManager::get().numCrazyradios()) {
+    std::stringstream sstr;
+    sstr << std::hex << std::uppercase << address;
+    std::string a = sstr.str();
 
-  std::vector<std::future<std::string>> futures;
-  for (auto datarate : {"250K", "1M", "2M"})
-  {
-    for (int channel = 0; channel < 125; ++channel) {
-      std::string uri = "radio://*/" + std::to_string(channel) + "/" + datarate + "/" + a;
-
-      futures.emplace_back(std::async(std::launch::async,
-      [uri]() {
-        Connection con(uri);
-        bool success;
-        while (true)
-        {
-          if (con.statistics().sent_count >= 1)
-          {
-            success = con.statistics().ack_count >= 1;
-            break;
-          }
-          std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        };
-        if (success) {
-          return uri;
-        }
-        return std::string();
-      }));
-    }
-  }
-
-  for (auto& future : futures) {
-    auto uri = future.get();
-    if (!uri.empty())
+    std::vector<std::future<std::string>> futures;
+    for (auto datarate : {"250K", "1M", "2M"})
     {
-      result.push_back(uri);
+      for (int channel = 0; channel < 125; ++channel) {
+        std::string uri = "radio://*/" + std::to_string(channel) + "/" + datarate + "/" + a;
+
+        futures.emplace_back(std::async(std::launch::async,
+        [uri]() {
+          try {
+            Connection con(uri);
+            bool success;
+            while (true)
+            {
+              if (con.statistics().sent_count >= 1)
+              {
+                success = con.statistics().ack_count >= 1;
+                break;
+              }
+              std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            };
+            if (success) {
+              return uri;
+            }
+          } catch(...) {
+          }
+          return std::string();
+        }));
+      }
+    }
+
+    for (auto& future : futures) {
+      auto uri = future.get();
+      if (!uri.empty())
+      {
+        result.push_back(uri);
+      }
     }
   }
 
@@ -129,9 +141,14 @@ void Connection::send(const Packet& p)
 {
   if (impl_->crazyflieUSB_) {
     impl_->crazyflieUSB_->send(p.raw(), p.size());
+    ++impl_->statistics_.sent_count;
   }
   else {
     const std::lock_guard<std::mutex> lock(impl_->queue_send_mutex_);
+    if (!impl_->runtime_error_.empty()) {
+      throw std::runtime_error(impl_->runtime_error_);
+    }
+
     p.seq_ = impl_->statistics_.enqueued_count;
     impl_->queue_send_.push(p);
     ++impl_->statistics_.enqueued_count;
@@ -144,9 +161,13 @@ Packet Connection::recv(unsigned int timeout_in_ms)
     Packet result;
     size_t size = impl_->crazyflieUSB_->recv(result.raw(), CRTP_MAXSIZE, timeout_in_ms);
     result.setSize(size);
+    ++impl_->statistics_.ack_count;
     return result;
   } else {
     std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
+    if (!impl_->runtime_error_.empty()) {
+      throw std::runtime_error(impl_->runtime_error_);
+    }
     if (timeout_in_ms == 0) {
       impl_->queue_recv_cv_.wait(lk, [this] { return !impl_->queue_recv_.empty(); });
     } else {
@@ -179,5 +200,8 @@ const std::string& Connection::uri() const
 
 Connection::Statistics Connection::statistics()
 {
+  if (!impl_->runtime_error_.empty()) {
+    throw std::runtime_error(impl_->runtime_error_);
+  }
   return impl_->statistics_;
 }

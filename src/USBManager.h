@@ -30,6 +30,10 @@ public :
         return crazyfliesUSB_.size();
     }
 
+    size_t numCrazyradios() const {
+        return radioThreads_.size();
+    }
+
     // std::vector<CrazyradioThread>& crazyradioThreads() {
     //     return radioThreads_;
     // }
@@ -38,7 +42,7 @@ public :
         return crazyfliesUSB_;
     }
 
-        void addRadioConnection(std::shared_ptr<ConnectionImpl> con);
+    void addRadioConnection(std::shared_ptr<ConnectionImpl> con);
 
     void removeRadioConnection(std::shared_ptr<ConnectionImpl> con);
 
