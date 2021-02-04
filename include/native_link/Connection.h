@@ -70,6 +70,8 @@ public:
 
   Packet recv(unsigned int timeout_in_ms);
 
+  void close();
+
   const std::string& uri() const;
 
   Connection::Statistics statistics();

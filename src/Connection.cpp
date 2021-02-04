@@ -76,8 +76,12 @@ Connection::Connection(const std::string &uri)
 
 Connection::~Connection()
 {
-  // std::cout << "~Connection " << impl_->uri_ << std::endl;
-  if (!impl_->crazyflieUSB_) {
+  close();
+}
+
+void Connection::close()
+{
+  if (!impl_->crazyflieUSB_ && impl_->devid_ >= 0) {
     USBManager::get().removeRadioConnection(impl_);
   }
 }

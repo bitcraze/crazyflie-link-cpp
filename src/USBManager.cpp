@@ -248,7 +248,20 @@ void USBManager::addRadioConnection(std::shared_ptr<ConnectionImpl> connection)
         throw std::runtime_error(sstr.str());
     }
 
-    // Sanity checks
+    // Sanity check (connections)
+    for (auto& radioThread : radioThreads_) {
+        for (auto con : radioThread.connections_) {
+            if (   con->channel_ == connection->channel_
+                && con->address_ == connection->address_ 
+                && con->datarate_ == connection->datarate_) {
+                std::stringstream sstr;
+                sstr << "Connection " << connection->uri_ << " is using the same settings as an existing connection!";
+                throw std::runtime_error(sstr.str());
+            }
+        }
+    }
+
+    // Sanity checks (radio assignment)
     for (size_t i = 0; i < radioThreads_.size(); ++i) {
         if ((int)i != devId) {
             auto &radioThread = radioThreads_[i];
@@ -286,4 +299,5 @@ void USBManager::removeRadioConnection(std::shared_ptr<ConnectionImpl> con)
     const std::lock_guard<std::mutex> lk(mutex_);
     // std::cout << "rmCon " << con->uri_ << std::endl;
     radioThreads_[con->devid_].removeConnection(con);
+    con->devid_ = -1;
 }
