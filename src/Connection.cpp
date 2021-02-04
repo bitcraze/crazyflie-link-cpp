@@ -22,7 +22,9 @@ Connection::Connection(const std::string &uri)
   const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]{10}|\\*)(\\[noSafelink\\])?(\\[noAutoPing\\])?(\\[noAckFilter\\])?)");
   std::smatch match;
   if (!std::regex_match(uri, match, uri_regex)) {
-    throw std::runtime_error("Invalid uri!");
+    std::stringstream sstr;
+    sstr << "Invalid uri (" << uri << ")!";
+    throw std::runtime_error(sstr.str());
   }
 
   impl_->uri_ = uri;
