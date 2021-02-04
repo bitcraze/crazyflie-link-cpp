@@ -65,6 +65,7 @@ public:
   ~Connection();
 
   static std::vector<std::string> scan(uint64_t address = 0xE7E7E7E7E7);
+  static std::vector<std::string> scan_selected(const std::vector<std::string>& uris);
 
   void send(const Packet& p);
 

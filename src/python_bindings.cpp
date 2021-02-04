@@ -85,6 +85,7 @@ PYBIND11_MODULE(nativelink, m) {
       .def(py::init<
            const std::string &>())
       .def_static("scan", &Connection::scan, py::arg("address") = 0xE7E7E7E7E7, py ::call_guard<py::gil_scoped_release>())
+      .def_static("scan_selected", &Connection::scan_selected, py ::call_guard<py::gil_scoped_release>())
       .def("send", &Connection::send, py::call_guard<py::gil_scoped_release>())
       .def("recv", &Connection::recv, py::arg("timeout"), py::call_guard<py::gil_scoped_release>())
       .def("close", &Connection::close, py::call_guard<py::gil_scoped_release>())

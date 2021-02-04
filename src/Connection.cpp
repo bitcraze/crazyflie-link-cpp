@@ -143,6 +143,47 @@ std::vector<std::string> Connection::scan(uint64_t address)
   return result;
 }
 
+std::vector<std::string> Connection::scan_selected(const std::vector<std::string> &uris)
+{
+  std::vector<std::string> result;
+  std::vector<std::future<std::string>> futures;
+  for (const auto& uri : uris) {
+    futures.emplace_back(std::async(std::launch::async,
+      [uri]() {
+        try
+        {
+          Connection con(uri + "[noSafelink][noAutoPing][noAckFilter]");
+          const uint8_t check[] = {0xFF, 0xFF, 0xFF};
+          Packet p(check, sizeof(check));
+          con.send(p);
+          do {
+            Packet p_recv = con.recv(10);
+            if (p_recv)
+            {
+              return uri;
+            }
+          } while (con.statistics().sent_count == 0);
+        }
+        catch (...)
+        {
+          std::cout << "Oh No" << std::endl;
+        }
+        return std::string();
+      }));
+  }
+
+  for (auto &future : futures)
+  {
+    auto uri = future.get();
+    if (!uri.empty())
+    {
+      result.push_back(uri);
+    }
+  }
+
+  return result;
+}
+
 void Connection::send(const Packet& p)
 {
   if (impl_->crazyflieUSB_) {
