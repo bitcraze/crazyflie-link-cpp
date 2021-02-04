@@ -25,13 +25,18 @@ public:
     : size_(0)
     , seq_(0)
   {
-    data_[0] = 0;
+    data_[0] = 0xFF;
   }
 
   Packet(const uint8_t* data, size_t size)
   {
     std::memcpy(data_.data(), data, size);
     size_ = size;
+    seq_ = 0;
+    if (size_ == 0) {
+      data_[0] = 0xFF;
+      size_ = 1;
+    }
   }
 
   bool valid() const

@@ -43,9 +43,9 @@ python3 test/test_python_binding.py
 
 ## To Do
 
-* add test examples to measure bandwidth/latency/packet droprate
-  * in C++
-  * in Python
+* run syslink test
+* improve behavior after re-plugging in client => track by serial number
+* investigate test_bandwidth_usb crash
 * add broadcast support
   * support send2PacketsNoAck 
 * add namespace 
@@ -59,11 +59,7 @@ python3 test/test_python_binding.py
 
 ## To Discuss
 
-* bootloader commands:
-  * Current solution [feels hacky since it requires specialized URI] -OR- 
-  * Add a wait_until_sent_queue empty call instead? [cleanest, but requires interface change] -OR-
-  * NRF firmware change to send more than just Ack (e.g., include what was acked, to avoid result being filtered)
-* test_bandwidth_usb crash
+* API: queue vs. user-facing flow handling
 * naming: cfcpplink?
 * CI
 * multi-radio broadcast?
