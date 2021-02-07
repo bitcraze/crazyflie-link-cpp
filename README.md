@@ -43,7 +43,6 @@ python3 test/test_python_binding.py
 
 ## To Do
 
-* run syslink test
 * improve behavior after re-plugging in client => track by serial number
 * investigate test_bandwidth_usb crash
 * add broadcast support
@@ -59,7 +58,7 @@ python3 test/test_python_binding.py
 
 ## To Discuss
 
-* API: queue vs. user-facing flow handling
+* license?
 * naming: cfcpplink?
 * CI
 * multi-radio broadcast?

@@ -5,10 +5,11 @@
 #include <array>
 #include <algorithm>
 #include <tuple>
+#include <sstream>
 
 #include "utils.hpp"
 
-#define CRTP_MAXSIZE 31
+#define CRTP_MAXSIZE 32
 
 class Connection;
 class CrazyradioThread;
@@ -86,7 +87,12 @@ public:
 
   void setSize(size_t size)
   {
-    size_ = std::min<size_t>(CRTP_MAXSIZE, size);
+    if (size > CRTP_MAXSIZE) {
+      std::stringstream sstr;
+      sstr << "Size " << size << " too large! Maximum: " << CRTP_MAXSIZE << ".";
+      throw std::runtime_error(sstr.str());
+    }
+    size_ = size;
   }
 
   uint8_t* payload()
