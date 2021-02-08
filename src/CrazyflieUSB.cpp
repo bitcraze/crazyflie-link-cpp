@@ -20,7 +20,7 @@ CrazyflieUSB::~CrazyflieUSB()
     }
 }
 
-void CrazyflieUSB::send(
+bool CrazyflieUSB::send(
     const uint8_t* data,
     uint32_t length)
 {
@@ -33,7 +33,10 @@ void CrazyflieUSB::send(
         (uint8_t*)data,
         length,
         &transferred,
-        /*timeout*/ 1000);
+        /*timeout*/ 100);
+    if (status == LIBUSB_ERROR_TIMEOUT) {
+        return false;
+    }
     if (status != LIBUSB_SUCCESS) {
         throw std::runtime_error(libusb_error_name(status));
     }
@@ -42,6 +45,7 @@ void CrazyflieUSB::send(
         sstr << "Did transfer " << transferred << " but " << length << " was requested!";
         throw std::runtime_error(sstr.str());
     }
+    return true;
 }
 
 size_t CrazyflieUSB::recv(uint8_t *buffer, size_t max_length, unsigned int timeout)

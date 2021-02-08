@@ -53,7 +53,7 @@ USBManager::USBManager()
                 deviceDescriptor.idProduct == 0x5740)
             {
                 libusb_ref_device(device);
-                crazyfliesUSB_.push_back(device);
+                crazyfliesUSB_.push_back(CrazyflieUSBThread(device));
             }
             // Crazyradio
             else if (deviceDescriptor.idVendor == 0x1915 &&
@@ -109,19 +109,19 @@ USBManager::~USBManager()
     // std::cout << "dtor USBManager" << std::endl;
     // TODO: deregister hotplug callbacks
 
-    crazyfliesUSB_.clear();
-    radioThreads_.clear();
-
     // std::cout << "  deregister libusb devices" << std::endl;
 
     // deregister devices
     for (auto& t : radioThreads_) {
         libusb_unref_device(t.device());
     }
-    for (auto dev : crazyfliesUSB_)
+    for (auto& t : crazyfliesUSB_)
     {
-        libusb_unref_device(dev);
+        libusb_unref_device(t.device());
     }
+
+    crazyfliesUSB_.clear();
+    radioThreads_.clear();
 
     // function returns void => no error checking
     libusb_exit(ctx_);
@@ -157,9 +157,14 @@ USBManager::~USBManager()
 //     }
 // }
 
-void USBManager::addRadioConnection(std::shared_ptr<ConnectionImpl> connection)
+void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
 {
     const std::lock_guard<std::mutex> lk(mutex_);
+
+    if (!connection->isRadio_) {
+        crazyfliesUSB_[connection->devid_].addConnection(connection);
+        return;
+    }
 
     int devId = connection->devid_;
     int channel = connection->channel_;
@@ -294,10 +299,14 @@ void USBManager::addRadioConnection(std::shared_ptr<ConnectionImpl> connection)
     radioThreads_[devId].addConnection(connection);
 }
 
-void USBManager::removeRadioConnection(std::shared_ptr<ConnectionImpl> con)
+void USBManager::removeConnection(std::shared_ptr<ConnectionImpl> con)
 {
     const std::lock_guard<std::mutex> lk(mutex_);
     // std::cout << "rmCon " << con->uri_ << std::endl;
-    radioThreads_[con->devid_].removeConnection(con);
+    if (con->isRadio_) {
+        radioThreads_[con->devid_].removeConnection(con);
+    } else {
+        crazyfliesUSB_[con->devid_].removeConnection(con);
+    }
     con->devid_ = -1;
 }

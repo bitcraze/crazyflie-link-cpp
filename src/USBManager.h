@@ -6,6 +6,7 @@
 #include <libusb-1.0/libusb.h>
 
 #include "CrazyradioThread.h"
+#include "CrazyflieUSBThread.h"
 
 class USBManager {
 public :
@@ -38,22 +39,21 @@ public :
     //     return radioThreads_;
     // }
 
-    const std::vector<libusb_device *>& crazyfliesOverUSB() const {
-        return crazyfliesUSB_;
-    }
+    // const std::vector<libusb_device *>& crazyfliesOverUSB() const {
+    //     return crazyfliesUSB_;
+    // }
 
-    void addRadioConnection(std::shared_ptr<ConnectionImpl> con);
+    void addConnection(std::shared_ptr<ConnectionImpl> con);
 
-    void removeRadioConnection(std::shared_ptr<ConnectionImpl> con);
+    void removeConnection(std::shared_ptr<ConnectionImpl> con);
 
 private :
     USBManager();
 
 private :
     libusb_context * ctx_;
-    // std::vector<libusb_device*> crazyradios_;
-    std::vector<libusb_device*> crazyfliesUSB_;
 
+    std::vector<CrazyflieUSBThread> crazyfliesUSB_;
     std::vector<CrazyradioThread> radioThreads_;
 
     std::mutex mutex_;

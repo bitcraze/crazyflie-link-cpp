@@ -17,8 +17,7 @@ public:
 
     Connection::Statistics statistics_;
 
-    // USB related
-    std::shared_ptr<CrazyflieUSB> crazyflieUSB_;
+    bool isRadio_;
 
     // Radio related
     int channel_;

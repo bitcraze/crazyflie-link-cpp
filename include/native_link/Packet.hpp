@@ -13,6 +13,7 @@
 
 class Connection;
 class CrazyradioThread;
+class CrazyflieUSBThread;
 
 class Packet
 {
@@ -20,6 +21,7 @@ class Packet
   // constexpr size_t CRTP_MAXSIZE() { return 31; }
   friend class Connection;
   friend class CrazyradioThread;
+  friend class CrazyflieUSBThread;
 
 public:
   Packet() 

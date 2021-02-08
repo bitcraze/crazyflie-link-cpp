@@ -14,7 +14,7 @@ public:
 
   ~CrazyflieUSB();
 
-  void send(
+  bool send(
     const uint8_t* data,
     uint32_t length);
 

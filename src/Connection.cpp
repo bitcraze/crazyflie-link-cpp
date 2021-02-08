@@ -44,9 +44,7 @@ Connection::Connection(const std::string &uri)
       sstr << "There are " << USBManager::get().numCrazyfliesOverUSB() << " Crazyflies connected.";
       throw std::runtime_error(sstr.str());
     }
-
-    auto dev = USBManager::get().crazyfliesOverUSB().at(impl_->devid_);
-    impl_->crazyflieUSB_ = std::make_shared<CrazyflieUSB>(dev);
+    impl_->isRadio_ = false;
   } else {
     // radio
     if (match[3].str() == "*") {
@@ -71,8 +69,9 @@ Connection::Connection(const std::string &uri)
     impl_->safelinkUp_ = false;
     impl_->safelinkDown_ = false;
 
-    USBManager::get().addRadioConnection(impl_);
+    impl_->isRadio_ = true;
   }
+  USBManager::get().addConnection(impl_);
 
 }
 
@@ -83,8 +82,8 @@ Connection::~Connection()
 
 void Connection::close()
 {
-  if (!impl_->crazyflieUSB_ && impl_->devid_ >= 0) {
-    USBManager::get().removeRadioConnection(impl_);
+  if (impl_->devid_ >= 0) {
+    USBManager::get().removeConnection(impl_);
   }
 }
 
@@ -188,51 +187,37 @@ std::vector<std::string> Connection::scan_selected(const std::vector<std::string
 
 void Connection::send(const Packet& p)
 {
-  if (impl_->crazyflieUSB_) {
-    impl_->crazyflieUSB_->send(p.raw(), p.size());
-    ++impl_->statistics_.sent_count;
+  const std::lock_guard<std::mutex> lock(impl_->queue_send_mutex_);
+  if (!impl_->runtime_error_.empty()) {
+    throw std::runtime_error(impl_->runtime_error_);
   }
-  else {
-    const std::lock_guard<std::mutex> lock(impl_->queue_send_mutex_);
-    if (!impl_->runtime_error_.empty()) {
-      throw std::runtime_error(impl_->runtime_error_);
-    }
 
-    p.seq_ = impl_->statistics_.enqueued_count;
-    impl_->queue_send_.push(p);
-    ++impl_->statistics_.enqueued_count;
-  }
+  p.seq_ = impl_->statistics_.enqueued_count;
+  impl_->queue_send_.push(p);
+  ++impl_->statistics_.enqueued_count;
 }
 
 Packet Connection::recv(unsigned int timeout_in_ms)
 {
-  if (impl_->crazyflieUSB_) {
-    Packet result;
-    size_t size = impl_->crazyflieUSB_->recv(result.raw(), CRTP_MAXSIZE, timeout_in_ms);
-    result.setSize(size);
-    ++impl_->statistics_.ack_count;
+  std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
+  if (!impl_->runtime_error_.empty()) {
+    throw std::runtime_error(impl_->runtime_error_);
+  }
+  if (timeout_in_ms == 0) {
+    impl_->queue_recv_cv_.wait(lk, [this] { return !impl_->queue_recv_.empty(); });
+  } else {
+    std::chrono::milliseconds duration(timeout_in_ms);
+    impl_->queue_recv_cv_.wait_for(lk, duration, [this] { return !impl_->queue_recv_.empty(); });
+  }
+
+  Packet result;
+  if (impl_->queue_recv_.empty()) {
     return result;
   } else {
-    std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
-    if (!impl_->runtime_error_.empty()) {
-      throw std::runtime_error(impl_->runtime_error_);
-    }
-    if (timeout_in_ms == 0) {
-      impl_->queue_recv_cv_.wait(lk, [this] { return !impl_->queue_recv_.empty(); });
-    } else {
-      std::chrono::milliseconds duration(timeout_in_ms);
-      impl_->queue_recv_cv_.wait_for(lk, duration, [this] { return !impl_->queue_recv_.empty(); });
-    }
-
-    Packet result;
-    if (impl_->queue_recv_.empty()) {
-      return result;
-    } else {
-      result = impl_->queue_recv_.top();
-      impl_->queue_recv_.pop();
-    }
-    return result;
+    result = impl_->queue_recv_.top();
+    impl_->queue_recv_.pop();
   }
+  return result;
 }
 
 std::ostream& operator<<(std::ostream& out, const Connection& p)
