@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.5)
-project(crazyflie-native-link)
+project(crazyflie-cpp-link)
 
 
 # Enable C++14 and warnings
@@ -25,7 +25,7 @@ include_directories(
 
 # C++ library
 
-add_library(crazyflieNativeLink
+add_library(crazyflieCppLink
   src/USBManager.cpp
   src/Connection.cpp
   src/USBDevice.cpp
@@ -35,18 +35,18 @@ add_library(crazyflieNativeLink
   src/CrazyflieUSBThread.cpp
 )
 
-# target_include_directories(libCrazyflieNativeLink
+# target_include_directories(libCrazyflieCppLink
 #   PUBLIC
 #     $<INSTALL_INTERFACE:include/crazyflie_cpp>
 #     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/crazyflie_cpp>
 # )
 
-target_link_libraries(crazyflieNativeLink
+target_link_libraries(crazyflieCppLink
   PRIVATE
     ${USB_LIB}
     pthread
 )
-set_property(TARGET crazyflieNativeLink PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET crazyflieCppLink PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # C++ test application
 
@@ -55,7 +55,7 @@ add_executable(test_console
   test/console.cpp
 )
 target_link_libraries(test_console
-  crazyflieNativeLink
+  crazyflieCppLink
 )
 
 # test_scan
@@ -63,7 +63,7 @@ add_executable(test_scan
   test/scan.cpp
 )
 target_link_libraries(test_scan
-  crazyflieNativeLink
+  crazyflieCppLink
 )
 
 # test_benchmark
@@ -71,7 +71,7 @@ add_executable(test_benchmark
   test/benchmark.cpp
 )
 target_link_libraries(test_benchmark
-  crazyflieNativeLink
+  crazyflieCppLink
 )
 
 # scan
@@ -79,18 +79,18 @@ add_executable(test
   test/main.cpp
 )
 target_link_libraries(test
-  crazyflieNativeLink
+  crazyflieCppLink
 )
 
 
 # Python bindings
 add_subdirectory(pybind11)
 
-pybind11_add_module(nativelink
+pybind11_add_module(cfcpplink
   src/python_bindings.cpp
 )
 
-target_link_libraries(nativelink
+target_link_libraries(cfcpplink
   PRIVATE
-    crazyflieNativeLink
+    crazyflieCppLink
 )

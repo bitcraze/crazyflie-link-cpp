@@ -2,7 +2,7 @@
 #include <iostream>
 #include <future>
 
-#include "native_link/Connection.h"
+#include "crazyflieCppLink/Connection.h"
 #include "ConnectionImpl.h"
 
 #include "USBManager.h"

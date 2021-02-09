@@ -5,7 +5,7 @@
 #include <chrono>
 #include <sstream>
 
-#include "native_link/Connection.h"
+#include "crazyflieCppLink/Connection.h"
 
 #include <queue>
 

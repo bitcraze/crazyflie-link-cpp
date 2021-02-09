@@ -43,18 +43,16 @@ python3 test/test_python_binding.py
 
 ## To Do
 
-* improve behavior after re-plugging in client => track by serial number
 * add namespace 
 * improved stats
   * locks?
 
-* add license: MIT
-* rename to cfcpplink
 * code linter
 * Add CI for repo
 
 * add broadcast support
   * support send2PacketsNoAck 
 * integrate in Crazyflie_cpp and crazyflie_tools
+* Hot Plug support (Linux/Mac only)
 
 ## To Discuss

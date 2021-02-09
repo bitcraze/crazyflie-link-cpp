@@ -7,7 +7,7 @@
 
 #include "Crazyradio.h"
 #include "CrazyflieUSB.h"
-#include "native_link/Connection.h"
+#include "crazyflieCppLink/Connection.h"
 
 class ConnectionImpl
 {

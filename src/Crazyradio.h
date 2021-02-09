@@ -5,7 +5,7 @@
 #include <array>
 
 #include "USBDevice.h"
-#include "native_link/utils.hpp"
+#include "crazyflieCppLink/utils.hpp"
 
 #define ACK_MAXSIZE 33
 
