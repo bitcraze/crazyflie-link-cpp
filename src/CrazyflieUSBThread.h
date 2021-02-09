@@ -16,21 +16,15 @@ class CrazyflieUSBThread
     friend class USBManager;
 public:
     CrazyflieUSBThread(libusb_device * dev);
-
-    CrazyflieUSBThread(CrazyflieUSBThread &&other)
-    {
-        const std::lock_guard<std::mutex> lk(other.thread_mutex_);
-        dev_ = std::move(other.dev_);
-        thread_ = std::move(other.thread_);
-        thread_ending_ = std::move(other.thread_ending_);
-        connection_ = std::move(other.connection_);
-        // runtime_error_ = std::move(other.runtime_error_);
-    }
-
+    CrazyflieUSBThread(CrazyflieUSBThread &&other);
     ~CrazyflieUSBThread();
 
     libusb_device* device() {
         return dev_;
+    }
+
+    bool hasError() const {
+        return !runtime_error_.empty();
     }
 
 private:
@@ -49,5 +43,5 @@ private:
     bool thread_ending_;
 
     std::shared_ptr<ConnectionImpl> connection_;
-    // std::string runtime_error_;
+    std::string runtime_error_;
 };

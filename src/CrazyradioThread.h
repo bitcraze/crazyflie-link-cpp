@@ -16,26 +16,17 @@ class CrazyradioThread
     friend class USBManager;
 public:
     CrazyradioThread(libusb_device * dev);
-
-    CrazyradioThread(CrazyradioThread &&other)
-    {
-        std::unique_lock<std::mutex> rhs_lk1(other.thread_mutex_, std::defer_lock);
-        std::unique_lock<std::mutex> rhs_lk2(other.connections_mutex_, std::defer_lock);
-        std::lock(rhs_lk1, rhs_lk2);
-        dev_ = std::move(other.dev_);
-        thread_ = std::move(other.thread_);
-        thread_ending_ = std::move(other.thread_ending_);
-        connections_updated_ = std::move(other.connections_updated_);
-        connections_ = std::move(other.connections_);
-        runtime_error_ = std::move(other.runtime_error_);
-    }
-
+    CrazyradioThread(CrazyradioThread &&other);
     ~CrazyradioThread();
 
     // bool isActive() const;
 
     libusb_device* device() {
         return dev_;
+    }
+
+    bool hasError() const {
+        return !runtime_error_.empty();
     }
 
 private:

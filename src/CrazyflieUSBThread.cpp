@@ -8,7 +8,18 @@ CrazyflieUSBThread::CrazyflieUSBThread(libusb_device *dev)
     : dev_(dev)
     , thread_ending_(false)
 {
+    libusb_ref_device(dev_);
+}
 
+CrazyflieUSBThread::CrazyflieUSBThread(CrazyflieUSBThread &&other)
+{
+    const std::lock_guard<std::mutex> lk(other.thread_mutex_);
+    dev_ = std::move(other.dev_);
+    libusb_ref_device(dev_);
+    thread_ = std::move(other.thread_);
+    thread_ending_ = std::move(other.thread_ending_);
+    connection_ = std::move(other.connection_);
+    runtime_error_ = std::move(other.runtime_error_);
 }
 
 CrazyflieUSBThread::~CrazyflieUSBThread()
@@ -17,6 +28,7 @@ CrazyflieUSBThread::~CrazyflieUSBThread()
     if (thread_.joinable()) {
         thread_.join();
     }
+    libusb_unref_device(dev_);
 }
 
 void CrazyflieUSBThread::addConnection(std::shared_ptr<ConnectionImpl> con)
@@ -51,6 +63,7 @@ void CrazyflieUSBThread::runWithErrorHandler()
     }
     catch (const std::runtime_error &error) {
         connection_->runtime_error_ = error.what();
+        runtime_error_ = error.what();
     }
     catch (...) {
     }

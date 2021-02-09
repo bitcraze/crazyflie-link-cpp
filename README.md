@@ -44,21 +44,17 @@ python3 test/test_python_binding.py
 ## To Do
 
 * improve behavior after re-plugging in client => track by serial number
-* investigate test_bandwidth_usb crash
-* add broadcast support
-  * support send2PacketsNoAck 
 * add namespace 
 * improved stats
   * locks?
 
-* rename to <discuss>
-* integrate in Crazyflie_cpp and crazyflie_tools
+* add license: MIT
+* rename to cfcpplink
 * code linter
 * Add CI for repo
 
-## To Discuss
+* add broadcast support
+  * support send2PacketsNoAck 
+* integrate in Crazyflie_cpp and crazyflie_tools
 
-* license?
-* naming: cfcpplink?
-* CI
-* multi-radio broadcast?
+## To Discuss

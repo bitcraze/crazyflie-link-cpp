@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <vector>
 #include <mutex>
 
@@ -32,7 +33,7 @@ public :
     }
 
     size_t numCrazyradios() const {
-        return radioThreads_.size();
+        return crazyradios_.size();
     }
 
     // std::vector<CrazyradioThread>& crazyradioThreads() {
@@ -46,15 +47,28 @@ public :
     void addConnection(std::shared_ptr<ConnectionImpl> con);
 
     void removeConnection(std::shared_ptr<ConnectionImpl> con);
+    
+    void updateDevices();
 
 private :
     USBManager();
 
+    std::string tryToQuerySerialNumber(libusb_device *dev, const libusb_device_descriptor *deviceDescriptor);
+
 private :
     libusb_context * ctx_;
 
-    std::vector<CrazyflieUSBThread> crazyfliesUSB_;
-    std::vector<CrazyradioThread> radioThreads_;
+    // serial number -> devId
+    std::map<std::string, size_t> crazyfliesUSB_devIdbySN_;
+    // devId -> thread
+    std::map<size_t, CrazyflieUSBThread> crazyfliesUSB_;
+    size_t crazyfliesUSB_lastDevId_;
+    
+    // serial number -> devId
+    std::map<std::string, size_t> crazyradios_devIdbySN_;
+    // devId -> thread
+    std::map<size_t, CrazyradioThread> crazyradios_;
+    size_t crazyradios_lastDevId_;
 
     std::mutex mutex_;
 };

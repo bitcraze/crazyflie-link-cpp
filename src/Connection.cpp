@@ -89,6 +89,8 @@ void Connection::close()
 
 std::vector<std::string> Connection::scan(uint64_t address)
 {
+  USBManager::get().updateDevices();
+
   std::vector<std::string> result;
 
   // Crazyflies over USB

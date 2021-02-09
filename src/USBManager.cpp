@@ -27,6 +27,8 @@
 class ConnectionImpl;
 
 USBManager::USBManager()
+    : crazyfliesUSB_lastDevId_(0)
+    , crazyradios_lastDevId_(0)
 {
     int result = libusb_init(&ctx_);
     if (result != LIBUSB_SUCCESS)
@@ -34,39 +36,7 @@ USBManager::USBManager()
         throw std::runtime_error(libusb_error_name(result));
     }
 
-    // 1. Find all Crazyflies and Crazyradios connected over USB
-
-    // b. discover devices
-    libusb_device **list;
-    ssize_t cnt = libusb_get_device_list(ctx_, &list);
-
-    // c. for each device, check if it is a Crazyflie or Crazyradio
-    for (ssize_t i = 0; i < cnt; i++)
-    {
-        libusb_device *device = list[i];
-        libusb_device_descriptor deviceDescriptor;
-        int err = libusb_get_device_descriptor(device, &deviceDescriptor);
-        if (err == LIBUSB_SUCCESS)
-        {
-            // Crazyflie over USB
-            if (deviceDescriptor.idVendor == 0x0483 &&
-                deviceDescriptor.idProduct == 0x5740)
-            {
-                libusb_ref_device(device);
-                crazyfliesUSB_.push_back(CrazyflieUSBThread(device));
-            }
-            // Crazyradio
-            else if (deviceDescriptor.idVendor == 0x1915 &&
-                     deviceDescriptor.idProduct == 0x7777)
-            {
-                libusb_ref_device(device);
-                radioThreads_.emplace_back(CrazyradioThread(device));
-            }
-        }
-    }
-    // function returns void => no error checking
-    libusb_free_device_list(list, 1);
-
+    updateDevices();
 
     // if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) == 0) {
     //     // TODO: Implement alternative scan that just enumerates devices!
@@ -106,23 +76,6 @@ USBManager::USBManager()
 
 USBManager::~USBManager()
 {
-    // std::cout << "dtor USBManager" << std::endl;
-    // TODO: deregister hotplug callbacks
-
-    // std::cout << "  deregister libusb devices" << std::endl;
-
-    // deregister devices
-    for (auto& t : radioThreads_) {
-        libusb_unref_device(t.device());
-    }
-    for (auto& t : crazyfliesUSB_)
-    {
-        libusb_unref_device(t.device());
-    }
-
-    crazyfliesUSB_.clear();
-    radioThreads_.clear();
-
     // function returns void => no error checking
     libusb_exit(ctx_);
 }
@@ -157,12 +110,135 @@ USBManager::~USBManager()
 //     }
 // }
 
+std::string USBManager::tryToQuerySerialNumber(libusb_device *dev, const libusb_device_descriptor* deviceDescriptor)
+{
+    libusb_device_handle *dev_handle;
+    int err = libusb_open(dev, &dev_handle);
+    if (err != LIBUSB_SUCCESS)
+    {
+        return std::string();
+    }
+
+    err = libusb_claim_interface(dev_handle, 0);
+    if (err != LIBUSB_SUCCESS)
+    {
+        libusb_close(dev_handle);
+        return std::string();
+    }
+
+    unsigned char str[256];
+    int length;
+    length = libusb_get_string_descriptor_ascii(
+        dev_handle, deviceDescriptor->iSerialNumber, str, sizeof(str));
+    std::string serialNumber;
+    if (length > 0) {
+        serialNumber = std::string(reinterpret_cast<char *>(str), length);
+    }
+    libusb_release_interface(dev_handle, 0);
+    libusb_close(dev_handle);
+    return serialNumber;
+}
+
+void USBManager::updateDevices()
+{
+    // 1. Find all Crazyflies and Crazyradios connected over USB
+
+    // b. discover devices
+    libusb_device **list;
+    ssize_t cnt = libusb_get_device_list(ctx_, &list);
+
+    // c. for each device, check if it is a Crazyflie or Crazyradio
+    for (ssize_t i = 0; i < cnt; i++)
+    {
+        libusb_device *device = list[i];
+        libusb_device_descriptor deviceDescriptor;
+        int err = libusb_get_device_descriptor(device, &deviceDescriptor);
+        if (err == LIBUSB_SUCCESS)
+        {
+            // Crazyflie over USB
+            if (deviceDescriptor.idVendor == 0x0483 &&
+                deviceDescriptor.idProduct == 0x5740)
+            {
+                auto sn = tryToQuerySerialNumber(device, &deviceDescriptor);
+                if (!sn.empty()) {
+                    auto iter = crazyfliesUSB_devIdbySN_.find(sn);
+                    if (iter == crazyfliesUSB_devIdbySN_.end()) {
+                        // newly detected -> assign a new devId
+                        crazyfliesUSB_devIdbySN_[sn] = crazyfliesUSB_lastDevId_;
+                        crazyfliesUSB_.emplace(std::make_pair(crazyfliesUSB_lastDevId_, CrazyflieUSBThread(device)));
+                        ++crazyfliesUSB_lastDevId_;
+                    } else {
+                        auto iter2 = crazyfliesUSB_.find(iter->second);
+                        if (iter2 == crazyfliesUSB_.end()) {
+                            // a device that we have seen previously re-emerged
+                            crazyfliesUSB_.emplace(std::make_pair(iter->second, CrazyflieUSBThread(device)));
+                        }
+                    }
+                }
+            }
+            // Crazyradio
+            else if (deviceDescriptor.idVendor == 0x1915 &&
+                     deviceDescriptor.idProduct == 0x7777)
+            {
+                auto sn = tryToQuerySerialNumber(device, &deviceDescriptor);
+                if (!sn.empty()) {
+                    auto iter = crazyradios_devIdbySN_.find(sn);
+                    if (iter == crazyradios_devIdbySN_.end()) {
+                        // newly detected -> assign a new devId
+                        crazyradios_devIdbySN_[sn] = crazyradios_lastDevId_;
+                        crazyradios_.emplace(std::make_pair(crazyradios_lastDevId_, CrazyradioThread(device)));
+                        // std::cout << "added new " << sn << " " << crazyradios_lastDevId_ << std::endl;
+                        ++crazyradios_lastDevId_;
+                    } else {
+                        auto iter2 = crazyradios_.find(iter->second);
+                        if (iter2 == crazyradios_.end()) {
+                            // a device that we have seen previously re-emerged
+                            crazyradios_.emplace(std::make_pair(iter->second, CrazyradioThread(device)));
+                            // std::cout << "added old " << sn << " " << iter->second << std::endl;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // function returns void => no error checking
+    libusb_free_device_list(list, 1);
+
+    // 2. remove all devices that caused an error.
+    //    Do not delete devices that we couldn't enumerate, because they might be still in use.
+    //    Keep the mapping of sn -> devid for future connections
+
+    std::set<size_t> to_erase;
+    for (const auto &iter : crazyfliesUSB_) {
+        if (iter.second.hasError()) {
+            to_erase.insert(iter.first);
+        }
+    }
+    for (size_t devid : to_erase) {
+        crazyfliesUSB_.erase(devid);
+    }
+
+    to_erase.clear();
+    for (const auto& iter : crazyradios_) {
+        if (iter.second.hasError()) {
+            to_erase.insert(iter.first);
+        }
+    }
+    for (size_t devid : to_erase) {
+        crazyradios_.erase(devid);
+        // std::cout << "rm " << devid << std::endl;
+    }
+}
+
 void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
 {
     const std::lock_guard<std::mutex> lk(mutex_);
 
+    // ToDo: this is terrible for perf
+    // updateDevices();
+
     if (!connection->isRadio_) {
-        crazyfliesUSB_[connection->devid_].addConnection(connection);
+        crazyfliesUSB_.at(connection->devid_).addConnection(connection);
         return;
     }
 
@@ -175,7 +251,7 @@ void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
     // assign a radio automatically
     if (devId == -1) {
 
-        if (radioThreads_.empty()) {
+        if (crazyradios_.empty()) {
             throw std::runtime_error("No Crazyradio dongle found!");
         }
 
@@ -188,8 +264,9 @@ void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
 
         std::map<int, std::vector<std::shared_ptr<ConnectionImpl>>> constraints;
 
-        for (size_t i = 0; i < radioThreads_.size(); ++i) {
-            auto& radioThread = radioThreads_[i];
+        for (const auto& iter : crazyradios_) {
+            size_t i = iter.first;
+            auto& radioThread = iter.second;
             for (auto con : radioThread.connections_) {
                 if (  (con->channel_ == channel)
                    || (con->datarate_ == Crazyradio::Datarate_2MPS && con->channel_+1 == channel)
@@ -209,11 +286,11 @@ void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
         //    connections
 
         if (constraints.empty()) {
-            devId = 0;
-            size_t min_connections_count = radioThreads_[0].connections_.size();
-            for (size_t i = 1; i < radioThreads_.size(); ++i) {
-                if (min_connections_count > radioThreads_[i].connections_.size()) {
-                    devId = i;
+            size_t min_connections_count = std::numeric_limits<size_t>::max();
+            for (const auto& iter : crazyradios_) {
+                if (min_connections_count > iter.second.connections_.size()) {
+                    devId = iter.first;
+                    min_connections_count = iter.second.connections_.size();
                 }
             }
             // std::cout << "use radio " << devId << " to serve " << channel << " (greedy)"  << std::endl;
@@ -236,9 +313,9 @@ void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
             for (const auto &c : constraints) {
                 if (c.first != devId) {
                     for (auto con : c.second) {
-                        radioThreads_[con->devid_].removeConnection(con);
+                        crazyradios_.at(con->devid_).removeConnection(con);
                         con->devid_ = devId;
-                        radioThreads_[devId].addConnection(con);
+                        crazyradios_.at(devId).addConnection(con);
                     }
                 }
             }
@@ -246,16 +323,16 @@ void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
     }
     assert(devId >= 0);
 
-    if (devId < 0 || devId >= (int)radioThreads_.size()) {
+    if (devId < 0 || devId >= (int)crazyradios_.size()) {
         std::stringstream sstr;
         sstr << "No Crazyradio with id=" << devId << " found.";
-        sstr << "There are " << radioThreads_.size() << " Crazyradios connected.";
+        sstr << "There are " << crazyradios_.size() << " Crazyradios connected.";
         throw std::runtime_error(sstr.str());
     }
 
     // Sanity check (connections)
-    for (auto& radioThread : radioThreads_) {
-        for (auto con : radioThread.connections_) {
+    for (auto& radioThread : crazyradios_) {
+        for (auto con : radioThread.second.connections_) {
             if (   con->channel_ == connection->channel_
                 && con->address_ == connection->address_ 
                 && con->datarate_ == connection->datarate_) {
@@ -267,25 +344,25 @@ void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
     }
 
     // Sanity checks (radio assignment)
-    for (size_t i = 0; i < radioThreads_.size(); ++i) {
-        if ((int)i != devId) {
-            auto &radioThread = radioThreads_[i];
+    for (const auto& iter : crazyradios_) {
+        if ((int)iter.first != devId) {
+            const auto& radioThread = iter.second;
             for (auto con : radioThread.connections_) {
                 if (con->channel_ == channel) {
                     std::stringstream sstr;
-                    sstr << "Channel " << channel << " is already served by Crazyradio " << i 
+                    sstr << "Channel " << channel << " is already served by Crazyradio " << iter.first 
                          << ". Cannot be served by Crazyradio " << devId << " simultaneously." << con->uri_ << " " << connection->uri_;
                     throw std::runtime_error(sstr.str());
                 }
                 if (con->datarate_ == Crazyradio::Datarate_2MPS && con->channel_+1 == channel) {
                     std::stringstream sstr;
-                    sstr << "Channels " << con->channel_ << " and " << con->channel_+1 << " are already served by Crazyradio " << i
+                    sstr << "Channels " << con->channel_ << " and " << con->channel_+1 << " are already served by Crazyradio " << iter.first
                          << " (2M mode). Cannot be served by Crazyradio " << devId << " simultaneously.";
                     throw std::runtime_error(sstr.str());
                 }
                 if (datarate == Crazyradio::Datarate_2MPS && con->channel_ == channel + 1) {
                     std::stringstream sstr;
-                    sstr << "Channel " << con->channel_ << " is already served by Crazyradio " << i
+                    sstr << "Channel " << con->channel_ << " is already served by Crazyradio " << iter.first
                          << ". Cannot be served by Crazyradio " << devId << " (2M mode) simultaneously.";
                     throw std::runtime_error(sstr.str());
                 }
@@ -296,7 +373,7 @@ void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
     // add the connection to the radio
     connection->devid_ = devId;
     // std::cout << "new connection scheduled on " << channel << " " << devId << std::endl;
-    radioThreads_[devId].addConnection(connection);
+    crazyradios_.at(devId).addConnection(connection);
 }
 
 void USBManager::removeConnection(std::shared_ptr<ConnectionImpl> con)
@@ -304,9 +381,9 @@ void USBManager::removeConnection(std::shared_ptr<ConnectionImpl> con)
     const std::lock_guard<std::mutex> lk(mutex_);
     // std::cout << "rmCon " << con->uri_ << std::endl;
     if (con->isRadio_) {
-        radioThreads_[con->devid_].removeConnection(con);
+        crazyradios_.at(con->devid_).removeConnection(con);
     } else {
-        crazyfliesUSB_[con->devid_].removeConnection(con);
+        crazyfliesUSB_.at(con->devid_).removeConnection(con);
     }
     con->devid_ = -1;
 }

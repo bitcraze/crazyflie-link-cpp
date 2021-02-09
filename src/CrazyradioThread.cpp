@@ -9,7 +9,21 @@ CrazyradioThread::CrazyradioThread(libusb_device *dev)
     : dev_(dev)
     , thread_ending_(false)
 {
+    libusb_ref_device(dev_);
+}
 
+CrazyradioThread::CrazyradioThread(CrazyradioThread &&other)
+{
+    std::unique_lock<std::mutex> rhs_lk1(other.thread_mutex_, std::defer_lock);
+    std::unique_lock<std::mutex> rhs_lk2(other.connections_mutex_, std::defer_lock);
+    std::lock(rhs_lk1, rhs_lk2);
+    dev_ = std::move(other.dev_);
+    libusb_ref_device(dev_);
+    thread_ = std::move(other.thread_);
+    thread_ending_ = std::move(other.thread_ending_);
+    connections_updated_ = std::move(other.connections_updated_);
+    connections_ = std::move(other.connections_);
+    runtime_error_ = std::move(other.runtime_error_);
 }
 
 CrazyradioThread::~CrazyradioThread()
@@ -18,6 +32,7 @@ CrazyradioThread::~CrazyradioThread()
     if (thread_.joinable()) {
         thread_.join();
     }
+    libusb_unref_device(dev_);
 }
 
 // bool CrazyradioThread::isActive() const
