@@ -48,37 +48,37 @@ target_link_libraries(crazyflieCppLink
 )
 set_property(TARGET crazyflieCppLink PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-# C++ test application
+# C++ example application
 
-# test_console
-add_executable(test_console
-  test/console.cpp
+# example_console
+add_executable(example_console
+  examples/console.cpp
 )
-target_link_libraries(test_console
+target_link_libraries(example_console
   crazyflieCppLink
 )
 
-# test_scan
-add_executable(test_scan
-  test/scan.cpp
+# example_scan
+add_executable(example_scan
+  examples/scan.cpp
 )
-target_link_libraries(test_scan
+target_link_libraries(example_scan
   crazyflieCppLink
 )
 
-# test_benchmark
-add_executable(test_benchmark
-  test/benchmark.cpp
+# example_benchmark
+add_executable(example_benchmark
+  examples/benchmark.cpp
 )
-target_link_libraries(test_benchmark
+target_link_libraries(example_benchmark
   crazyflieCppLink
 )
 
-# scan
-add_executable(test
-  test/main.cpp
+# example_test
+add_executable(example_test
+  examples/main.cpp
 )
-target_link_libraries(test
+target_link_libraries(example_test
   crazyflieCppLink
 )
 

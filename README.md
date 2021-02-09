@@ -1,5 +1,4 @@
-# native-link
-
+# Crazyflie C++ Link
 
 ## Dependencies
 
