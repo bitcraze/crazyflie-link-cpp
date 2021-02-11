@@ -13,7 +13,7 @@ git submodule init
 git submodule update
 ```
 
-## Build C++ examples
+## Build C++ lib and examples
 
 ```
 mkdir build
@@ -22,22 +22,24 @@ cmake ..
 make
 ```
 
+The library can be tested using the included example applications, e.g.,:
+
+```
+./example_scan
+```
+
 ## Build and install development version of the python binding
 
-The followind command builds the binding and register it in development mode (ie. as a link) in python.
+The following command builds the binding and register it in development mode (ie. as a link) in python.
 
 ```
 python3 setup.py develop --user
 ```
 
-## Run
-
-### Testing Python Bindings
-
-This uses the bindings installed and has some examples on how to use the bindings.
+The library can be tested using the included example scripts, e.g.,:
 
 ```
-python3 test/test_python_binding.py
+python3 examples/scan.py
 ```
 
 ## To Do

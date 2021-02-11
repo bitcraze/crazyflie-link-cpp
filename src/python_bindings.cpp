@@ -24,7 +24,7 @@ std::string toString(const T& x)
   return sstr.str();
 }
 
-PYBIND11_MODULE(nativelink, m) {
+PYBIND11_MODULE(cfcpplink, m) {
 
   // Helper for Packet
   // py::bind_vector<std::array<uint8_t, CRTP_MAXSIZE>>(m, "ByteArray");

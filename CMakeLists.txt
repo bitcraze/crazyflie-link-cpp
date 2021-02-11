@@ -74,15 +74,6 @@ target_link_libraries(example_benchmark
   crazyflieCppLink
 )
 
-# example_test
-add_executable(example_test
-  examples/main.cpp
-)
-target_link_libraries(example_test
-  crazyflieCppLink
-)
-
-
 # Python bindings
 add_subdirectory(pybind11)
 

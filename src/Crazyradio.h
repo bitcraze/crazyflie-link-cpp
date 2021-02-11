@@ -59,7 +59,7 @@ public:
             return getBitBieldValue<uint8_t, 2, 4>(data_[0]);
         }
 
-        uint8_t *data()
+        const uint8_t* data() const
         {
             return &data_[1];
         }
@@ -67,6 +67,22 @@ public:
         uint8_t size() const
         {
             return size_;
+        }
+
+        friend std::ostream &operator<<(std::ostream &out, const Ack &a)
+        {
+            out << "Ack(";
+            out << "ack=" << a.ack();
+            out << ",powerDet=" << a.powerDet();
+            out << ",retry=" << (int)a.retry();
+            out << ",data=";
+            for (size_t i = 0; i < a.size_; ++i)
+            {
+                out << (int)a.data()[i] << " ";
+            }
+            out << ")";
+
+            return out;
         }
 
     private:
