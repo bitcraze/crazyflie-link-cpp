@@ -1,4 +1,4 @@
-include README.md LICENSE pybind11/LICENSE
+include version README.md LICENSE pybind11/LICENSE
 graft pybind11/include
 graft pybind11/tools
 graft src

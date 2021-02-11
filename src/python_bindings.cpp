@@ -7,9 +7,7 @@
 
 #include "crazyflieCppLink/Packet.hpp"
 #include "crazyflieCppLink/Connection.h"
-// #include "USBManager.h"
-
-// USBManager* g_usbMgr;
+#include "crazyflieCppLink/Version.h"
 
 PYBIND11_MAKE_OPAQUE(std::array<uint8_t, CRTP_MAXSIZE>)
 
@@ -26,9 +24,7 @@ std::string toString(const T& x)
 
 PYBIND11_MODULE(cfcpplink, m) {
 
-  // Helper for Packet
-  // py::bind_vector<std::array<uint8_t, CRTP_MAXSIZE>>(m, "ByteArray");
-  // g_usbMgr = new USBManager();
+  m.attr("__version__") = version();
 
   // Packet
   py::class_<Packet>(m, "Packet", py::buffer_protocol())

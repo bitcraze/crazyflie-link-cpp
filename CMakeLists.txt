@@ -33,6 +33,7 @@ add_library(crazyflieCppLink
   src/CrazyradioThread.cpp
   src/CrazyflieUSB.cpp
   src/CrazyflieUSBThread.cpp
+  src/Version.cpp
 )
 
 # target_include_directories(libCrazyflieCppLink
