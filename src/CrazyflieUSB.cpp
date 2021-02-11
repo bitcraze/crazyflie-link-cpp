@@ -24,7 +24,7 @@ bool CrazyflieUSB::send(
     const uint8_t* data,
     uint32_t length)
 {
-    int transferred;
+    int transferred = 0;
 
     // Send data
     int status = libusb_bulk_transfer(
@@ -33,8 +33,17 @@ bool CrazyflieUSB::send(
         (uint8_t*)data,
         length,
         &transferred,
-        /*timeout*/ 100);
+        /*timeout*/ 10);
     if (status == LIBUSB_ERROR_TIMEOUT) {
+        if (transferred == (int)length) {
+            // If actually everything was transferred, avoid sending the same packet again.
+            return true;
+        } else if (transferred > 0) {
+            // Fixing partial transfers would require a protocol change, so throw an exception instead.
+            std::stringstream sstr;
+            sstr << "Timeout, but already transferred " << transferred << " of " << length << " bytes!";
+            throw std::runtime_error(sstr.str());
+        }
         return false;
     }
     if (status != LIBUSB_SUCCESS) {
