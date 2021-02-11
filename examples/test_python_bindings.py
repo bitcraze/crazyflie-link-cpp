@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-import nativelink
+import cfcpplink
 
 if __name__ == "__main__":
 
   # scan for all available Crazyflies
-  cfs = nativelink.Connection.scan("")
+  cfs = cfcpplink.Connection.scan()
   print(cfs)
 
   # connect to a CF
-  # con = nativelink.Connection("usb://0")
-  con = nativelink.Connection("radio://0/60/2M/E7E7E7E7E7")
+  # con = cfcpplink.Connection("usb://0")
+  con = cfcpplink.Connection("radio://0/80/2M/E7E7E7E7E7")
 
   while True:
-    p = con.recv(blocking=True)
+    p = con.recv(timeout=100)
     print(p)
 
   # print(con)
@@ -21,7 +21,7 @@ if __name__ == "__main__":
   # print(con.statistics)
 
   # # send a packet
-  # p = nativelink.Packet()
+  # p = cfcpplink.Packet()
   # p.port = 15     # CRTP_PORT_LINK
   # p.channel = 0   # ECHO
   # p.size = 1
