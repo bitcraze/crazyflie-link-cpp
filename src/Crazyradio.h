@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <vector>
 #include <array>
+#include <ostream>
 
 #include "USBDevice.h"
 #include "crazyflieCppLink/utils.hpp"
