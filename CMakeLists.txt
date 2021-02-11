@@ -17,10 +17,12 @@ endif()
 
 
 # dependencies
-find_library(USB_LIB usb-1.0)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/tools/build)
+find_package(libusb REQUIRED)
 
 include_directories(
   include
+  ${LIBUSB_INCLUDE_DIR}
 )
 
 # C++ library
@@ -44,7 +46,7 @@ add_library(crazyflieCppLink
 
 target_link_libraries(crazyflieCppLink
   PRIVATE
-    ${USB_LIB}
+    ${LIBUSB_LIBRARY}
     pthread
 )
 set_property(TARGET crazyflieCppLink PROPERTY POSITION_INDEPENDENT_CODE ON)
