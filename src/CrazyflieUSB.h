@@ -6,6 +6,9 @@
 
 #include "USBDevice.h"
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 class CrazyflieUSB
   : public USBDevice
 {
@@ -24,3 +27,6 @@ private:
   void setCrtpToUsb(bool crtpToUsb);
 
 };
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

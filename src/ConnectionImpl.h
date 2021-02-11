@@ -9,6 +9,9 @@
 #include "CrazyflieUSB.h"
 #include "crazyflieCppLink/Connection.h"
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 class ConnectionImpl
 {
 public:
@@ -40,3 +43,6 @@ public:
 
     std::string runtime_error_;
 };
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

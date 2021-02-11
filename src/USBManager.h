@@ -9,6 +9,9 @@
 #include "CrazyradioThread.h"
 #include "CrazyflieUSBThread.h"
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 class USBManager {
 public :
     // non construction-copyable
@@ -72,3 +75,6 @@ private :
 
     std::mutex mutex_;
 };
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

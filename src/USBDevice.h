@@ -4,6 +4,9 @@
 
 #include <libusb-1.0/libusb.h>
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 class USBDevice
 {
 protected:
@@ -26,3 +29,6 @@ protected:
   int versionMajor_;
   int versionMinor_;
 };
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

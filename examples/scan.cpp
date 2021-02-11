@@ -3,6 +3,8 @@
 
 #include "crazyflieCppLink/Connection.h"
 
+using namespace bitcraze::crazyflieCppLink;
+
 int main()
 {
     // scanning

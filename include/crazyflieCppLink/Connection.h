@@ -8,6 +8,9 @@
 
 #include "Packet.hpp"
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 class ConnectionImpl;
 
 class Connection
@@ -82,3 +85,6 @@ public:
 private:
   std::shared_ptr<ConnectionImpl> impl_;
 };
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

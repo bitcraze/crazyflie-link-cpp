@@ -7,6 +7,9 @@
 
 #include <libusb-1.0/libusb.h>
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 // forward declaration
 class USBManager;
 class ConnectionImpl;
@@ -45,3 +48,6 @@ private:
     std::shared_ptr<ConnectionImpl> connection_;
     std::string runtime_error_;
 };
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

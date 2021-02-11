@@ -5,6 +5,9 @@
 // #include "native_link/Connection.h"
 #include "ConnectionImpl.h"
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 CrazyradioThread::CrazyradioThread(libusb_device *dev)
     : dev_(dev)
     , thread_ending_(false)
@@ -263,3 +266,6 @@ void CrazyradioThread::run()
         }
     }
 }
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

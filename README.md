@@ -44,7 +44,6 @@ python3 examples/scan.py
 
 ## To Do
 
-* add namespace 
 * improved stats
   * locks?
 

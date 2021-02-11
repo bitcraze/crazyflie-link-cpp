@@ -8,6 +8,9 @@
 #include "USBDevice.h"
 #include "crazyflieCppLink/utils.hpp"
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 #define ACK_MAXSIZE 33
 
 class Crazyradio
@@ -161,3 +164,6 @@ private:
     Datarate datarate_;
     bool ackEnabled_;
 };
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

@@ -4,10 +4,11 @@
 #include <condition_variable>
 #include <chrono>
 #include <sstream>
+#include <queue>
 
 #include "crazyflieCppLink/Connection.h"
 
-#include <queue>
+using namespace bitcraze::crazyflieCppLink;
 
 class Benchmark
 {

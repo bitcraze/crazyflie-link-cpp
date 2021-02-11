@@ -5,6 +5,9 @@
 
 #include <libusb-1.0/libusb.h>
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 enum
 {
     SET_RADIO_CHANNEL   = 0x01,
@@ -216,3 +219,6 @@ void Crazyradio::send2PacketsNoAck(
         throw std::runtime_error(sstr.str());
     }
 }
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

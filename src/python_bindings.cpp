@@ -9,6 +9,8 @@
 #include "crazyflieCppLink/Connection.h"
 #include "crazyflieCppLink/Version.h"
 
+using namespace bitcraze::crazyflieCppLink;
+
 PYBIND11_MAKE_OPAQUE(std::array<uint8_t, CRTP_MAXSIZE>)
 
 namespace py = pybind11;

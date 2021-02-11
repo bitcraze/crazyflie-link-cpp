@@ -9,6 +9,9 @@
 
 #include "utils.hpp"
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 #define CRTP_MAXSIZE 32
 
 class Connection;
@@ -175,3 +178,6 @@ private:
   // sequence number for strict weak ordering
   mutable size_t seq_;
 };
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

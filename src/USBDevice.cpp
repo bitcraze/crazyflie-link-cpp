@@ -3,6 +3,9 @@
 #include <sstream>
 #include <stdexcept>
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 USBDevice::USBDevice(
     libusb_device *dev)
     : dev_(dev)
@@ -68,3 +71,6 @@ void USBDevice::sendVendorSetup(
         throw std::runtime_error(libusb_error_name(transferred));
     }
 }
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

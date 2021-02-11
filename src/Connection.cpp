@@ -10,6 +10,9 @@
 
 #include <libusb-1.0/libusb.h>
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 Connection::Connection(const std::string &uri)
     : impl_(std::make_shared<ConnectionImpl>())
 {
@@ -241,3 +244,6 @@ Connection::Statistics Connection::statistics()
   }
   return impl_->statistics_;
 }
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze

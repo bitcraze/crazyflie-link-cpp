@@ -5,6 +5,9 @@
 
 #include <libusb-1.0/libusb.h>
 
+namespace bitcraze {
+namespace crazyflieCppLink {
+
 CrazyflieUSB::CrazyflieUSB(libusb_device *dev)
     : USBDevice(dev)
 {
@@ -79,3 +82,6 @@ void CrazyflieUSB::setCrtpToUsb(bool crtpToUsb)
 {
     sendVendorSetup(0x01, 0x01, crtpToUsb, NULL, 0);
 }
+
+} // namespace crazyflieCppLink
+} // namespace bitcraze
