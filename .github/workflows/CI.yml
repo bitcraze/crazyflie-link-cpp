@@ -9,8 +9,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      # Ignore the failure of a step and avoid terminating the job.
+      continue-on-error: true
+
     - uses: actions/checkout@v2
+      with:
+        submodules: true
+    
+    - name: Pull builder image
+      run: docker pull quay.io/pypa/manylinux2014_x86_64
+
     - name: Build wheels
       run: tools/build/build-wheels.sh
