@@ -102,11 +102,11 @@ with open('version', 'r') as file:
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name="cfcpplink",
+    name="cflinkcpp",
     version=version,
     description="C++ implementation of the Crazyflie link",
     long_description="",
-    ext_modules=[CMakeExtension("cfcpplink")],
+    ext_modules=[CMakeExtension("cflinkcpp")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
 )

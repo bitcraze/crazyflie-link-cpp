@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.5)
-project(crazyflie-cpp-link)
+project(crazyflie-link-cpp)
 
 
 # Enable C++14 and warnings
@@ -27,7 +27,7 @@ include_directories(
 
 # C++ library
 
-add_library(crazyflieCppLink
+add_library(crazyflieLinkCpp
   src/USBManager.cpp
   src/Connection.cpp
   src/USBDevice.cpp
@@ -38,18 +38,18 @@ add_library(crazyflieCppLink
   src/Version.cpp
 )
 
-# target_include_directories(libCrazyflieCppLink
+# target_include_directories(libCrazyflieLinkCpp
 #   PUBLIC
 #     $<INSTALL_INTERFACE:include/crazyflie_cpp>
 #     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/crazyflie_cpp>
 # )
 
-target_link_libraries(crazyflieCppLink
+target_link_libraries(crazyflieLinkCpp
   PRIVATE
     ${LIBUSB_LIBRARY}
     pthread
 )
-set_property(TARGET crazyflieCppLink PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET crazyflieLinkCpp PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # C++ example application
 
@@ -58,7 +58,7 @@ add_executable(example_console
   examples/console.cpp
 )
 target_link_libraries(example_console
-  crazyflieCppLink
+  crazyflieLinkCpp
 )
 
 # example_scan
@@ -66,7 +66,7 @@ add_executable(example_scan
   examples/scan.cpp
 )
 target_link_libraries(example_scan
-  crazyflieCppLink
+  crazyflieLinkCpp
 )
 
 # example_benchmark
@@ -74,17 +74,17 @@ add_executable(example_benchmark
   examples/benchmark.cpp
 )
 target_link_libraries(example_benchmark
-  crazyflieCppLink
+  crazyflieLinkCpp
 )
 
 # Python bindings
 add_subdirectory(pybind11)
 
-pybind11_add_module(cfcpplink
+pybind11_add_module(cflinkcpp
   src/python_bindings.cpp
 )
 
-target_link_libraries(cfcpplink
+target_link_libraries(cflinkcpp
   PRIVATE
-    crazyflieCppLink
+    crazyflieLinkCpp
 )

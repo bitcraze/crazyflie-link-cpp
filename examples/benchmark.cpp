@@ -6,9 +6,9 @@
 #include <sstream>
 #include <queue>
 
-#include "crazyflieCppLink/Connection.h"
+#include "crazyflieLinkCpp/Connection.h"
 
-using namespace bitcraze::crazyflieCppLink;
+using namespace bitcraze::crazyflieLinkCpp;
 
 class Benchmark
 {

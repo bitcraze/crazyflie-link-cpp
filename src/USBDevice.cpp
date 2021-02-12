@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 USBDevice::USBDevice(
     libusb_device *dev)
@@ -72,5 +72,5 @@ void USBDevice::sendVendorSetup(
     }
 }
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

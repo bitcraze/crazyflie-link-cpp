@@ -10,7 +10,7 @@
 #include "CrazyflieUSBThread.h"
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 class USBManager {
 public :
@@ -76,5 +76,5 @@ private :
     std::mutex mutex_;
 };
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

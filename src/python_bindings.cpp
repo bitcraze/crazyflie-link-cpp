@@ -5,11 +5,11 @@
 #include <pybind11/stl_bind.h>
 #include <pybind11/numpy.h>
 
-#include "crazyflieCppLink/Packet.hpp"
-#include "crazyflieCppLink/Connection.h"
-#include "crazyflieCppLink/Version.h"
+#include "crazyflieLinkCpp/Packet.hpp"
+#include "crazyflieLinkCpp/Connection.h"
+#include "crazyflieLinkCpp/Version.h"
 
-using namespace bitcraze::crazyflieCppLink;
+using namespace bitcraze::crazyflieLinkCpp;
 
 PYBIND11_MAKE_OPAQUE(std::array<uint8_t, CRTP_MAXSIZE>)
 
@@ -24,7 +24,7 @@ std::string toString(const T& x)
   return sstr.str();
 }
 
-PYBIND11_MODULE(cfcpplink, m) {
+PYBIND11_MODULE(cflinkcpp, m) {
 
   m.attr("__version__") = version();
 

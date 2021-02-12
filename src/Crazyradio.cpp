@@ -6,7 +6,7 @@
 #include <libusb-1.0/libusb.h>
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 enum
 {
@@ -220,5 +220,5 @@ void Crazyradio::send2PacketsNoAck(
     }
 }
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

@@ -8,7 +8,7 @@
 #include <libusb-1.0/libusb.h>
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 // forward declaration
 class USBManager;
@@ -54,5 +54,5 @@ private:
     std::string runtime_error_;
 };
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

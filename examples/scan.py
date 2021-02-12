@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import cfcpplink
+import cflinkcpp
 
 if __name__ == "__main__":
 
   # scan for all available Crazyflies
-  cfs = cfcpplink.Connection.scan()
+  cfs = cflinkcpp.Connection.scan()
   print(cfs)

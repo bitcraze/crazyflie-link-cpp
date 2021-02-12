@@ -6,10 +6,10 @@
 #include <ostream>
 
 #include "USBDevice.h"
-#include "crazyflieCppLink/utils.hpp"
+#include "crazyflieLinkCpp/utils.hpp"
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 #define ACK_MAXSIZE 33
 
@@ -165,5 +165,5 @@ private:
     bool ackEnabled_;
 };
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

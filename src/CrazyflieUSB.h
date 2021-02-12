@@ -7,7 +7,7 @@
 #include "USBDevice.h"
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 class CrazyflieUSB
   : public USBDevice
@@ -28,5 +28,5 @@ private:
 
 };
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

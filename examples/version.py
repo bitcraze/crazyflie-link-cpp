@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import cfcpplink
+import cflinkcpp
 
 if __name__ == "__main__":
 
-  print(cfcpplink.__version__)
+  print(cflinkcpp.__version__)

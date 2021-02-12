@@ -2,7 +2,7 @@
 #include <iostream>
 #include <future>
 
-#include "crazyflieCppLink/Connection.h"
+#include "crazyflieLinkCpp/Connection.h"
 #include "ConnectionImpl.h"
 
 #include "USBManager.h"
@@ -11,7 +11,7 @@
 #include <libusb-1.0/libusb.h>
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 Connection::Connection(const std::string &uri)
     : impl_(std::make_shared<ConnectionImpl>())
@@ -245,5 +245,5 @@ Connection::Statistics Connection::statistics()
   return impl_->statistics_;
 }
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

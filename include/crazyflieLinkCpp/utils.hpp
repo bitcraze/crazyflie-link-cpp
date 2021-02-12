@@ -1,7 +1,7 @@
 #pragma once
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 template <class T, size_t Index, size_t Bits = 1>
 void setBitBieldValue(T &ref, T new_val)
@@ -17,5 +17,5 @@ T getBitBieldValue(const T &ref)
     return (ref >> Index) & mask;
 }
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

@@ -11,7 +11,7 @@
 #include "ConnectionImpl.h"
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 // extern "C" int hotplugCrazyradioCallback_C(libusb_context */*ctx*/, libusb_device *dev,
 //                                                   libusb_hotplug_event event, void *user_data)
@@ -391,5 +391,5 @@ void USBManager::removeConnection(std::shared_ptr<ConnectionImpl> con)
     con->devid_ = -1;
 }
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

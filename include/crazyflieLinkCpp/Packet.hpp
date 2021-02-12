@@ -10,7 +10,7 @@
 #include "utils.hpp"
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 #define CRTP_MAXSIZE 32
 
@@ -179,5 +179,5 @@ private:
   mutable size_t seq_;
 };
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

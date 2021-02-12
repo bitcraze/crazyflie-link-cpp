@@ -1,7 +1,7 @@
-#include "crazyflieCppLink/Version.h"
+#include "crazyflieLinkCpp/Version.h"
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 const char * version_string =
 #include "../version"
@@ -16,5 +16,5 @@ const char * version()
     return version_string;
 }
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze

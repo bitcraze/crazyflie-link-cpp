@@ -7,10 +7,10 @@
 
 #include "Crazyradio.h"
 #include "CrazyflieUSB.h"
-#include "crazyflieCppLink/Connection.h"
+#include "crazyflieLinkCpp/Connection.h"
 
 namespace bitcraze {
-namespace crazyflieCppLink {
+namespace crazyflieLinkCpp {
 
 class ConnectionImpl
 {
@@ -44,5 +44,5 @@ public:
     std::string runtime_error_;
 };
 
-} // namespace crazyflieCppLink
+} // namespace crazyflieLinkCpp
 } // namespace bitcraze
