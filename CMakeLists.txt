@@ -16,10 +16,6 @@ if (MSVC)
 else()
   # lots of warnings and all warnings as errors
   add_compile_options(-Wall -Wextra -Werror)
-  if (NOT APPLE)
-    # We can be pedantic on Linux
-    add_compile_options(-pedantic)
-  endif()
 endif()
 
 
