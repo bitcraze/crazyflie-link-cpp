@@ -12,7 +12,11 @@ if (MSVC)
   add_compile_options(/W4 /WX)
 else()
   # lots of warnings and all warnings as errors
-  add_compile_options(-Wall -Wextra -pedantic -Werror)
+  add_compile_options(-Wall -Wextra -Werror)
+  if (NOT APPLE)
+    # We can be pedantic on Linux
+    add_compile_options(-pedantic)
+  endif()
 endif()
 
 
@@ -22,7 +26,7 @@ find_package(libusb REQUIRED)
 
 include_directories(
   include
-  ${LIBUSB_INCLUDE_DIR}
+  ${LIBUSB_INCLUDE_DIR}/..
 )
 
 # C++ library
@@ -44,10 +48,23 @@ add_library(crazyflieCppLink
 #     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/crazyflie_cpp>
 # )
 
+# Apple macOS libraries
+if (APPLE)
+  set(CMAKE_EXE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation")
+  set(CMAKE_MODULE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation")
+endif()
+
+# Link pthread on Linux and Mac only
+if (NOT MSVC)
+target_link_libraries(crazyflieCppLink
+  PRIVATE
+    pthread
+)
+endif()
+
 target_link_libraries(crazyflieCppLink
   PRIVATE
     ${LIBUSB_LIBRARY}
-    pthread
 )
 set_property(TARGET crazyflieCppLink PROPERTY POSITION_INDEPENDENT_CODE ON)
 
