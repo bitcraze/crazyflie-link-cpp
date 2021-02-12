@@ -3,7 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 
 CrazyflieUSB::CrazyflieUSB(libusb_device *dev)
     : USBDevice(dev)

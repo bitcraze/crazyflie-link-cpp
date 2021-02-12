@@ -29,7 +29,7 @@ find_package(libusb REQUIRED)
 
 include_directories(
   include
-  ${LIBUSB_INCLUDE_DIR}/..
+  ${LIBUSB_INCLUDE_DIR}
 )
 
 # C++ library

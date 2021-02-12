@@ -8,7 +8,7 @@
 #include "USBManager.h"
 #include "Crazyradio.h"
 
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 
 Connection::Connection(const std::string &uri)
     : impl_(std::make_shared<ConnectionImpl>())

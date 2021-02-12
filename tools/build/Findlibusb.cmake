@@ -1,7 +1,7 @@
 # Findlibusb.cmake
 # Find and install external libusb library
 
-# Copyright (c) 2020, stlink-org All rights reserved.
+# Copyright (c) 2020, stlink-org
 # See https://github.com/stlink-org/stlink/blob/develop/cmake/modules/Findlibusb.cmake
 
 # Once done this will define

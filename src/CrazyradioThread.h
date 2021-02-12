@@ -5,7 +5,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 
 // forward declaration
 class USBManager;
