@@ -8,8 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (MSVC)
-  # warning level 4 and all warnings as errors
-  add_compile_options(/W4 /WX)
+  # Avoid min/max macros in Windows.h (pulled in from libusb)
+  add_definitions(-DNOMINMAX)
+  # warning level 4
+  # Ideally we would also treat warnings as errors (/WX), but there are still some warnings to fix
+  add_compile_options(/W4)
 else()
   # lots of warnings and all warnings as errors
   add_compile_options(-Wall -Wextra -Werror)

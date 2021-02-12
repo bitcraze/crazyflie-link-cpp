@@ -61,7 +61,7 @@ Connection::Connection(const std::string &uri)
     } else if (match[5].str() == "2M") {
       impl_->datarate_ = Crazyradio::Datarate_2MPS;
     }
-    impl_->address_ = std::stoul(match[6].str(), nullptr, 16);
+    impl_->address_ = std::stoull(match[6].str(), nullptr, 16);
     impl_->useSafelink_ = match[7].length() == 0;
     impl_->useAutoPing_ = match[8].length() == 0;
     impl_->useAckFilter_ = match[9].length() == 0;
