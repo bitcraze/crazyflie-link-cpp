@@ -1,7 +1,7 @@
-include version README.md LICENSE pybind11/LICENSE
+include version README.md LICENSE.md pybind11/LICENSE
 graft pybind11/include
 graft pybind11/tools
 graft src
-graft include/native_link
+graft include/crazyflieCppLink
 graft test
 global-include CMakeLists.txt *.cmake
