@@ -8,11 +8,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (MSVC)
-  # warning level 4 and all warnings as errors
-  add_compile_options(/W4 /WX)
+  # Avoid min/max macros in Windows.h (pulled in from libusb)
+  add_definitions(-DNOMINMAX)
+  # warning level 4
+  # Ideally we would also treat warnings as errors (/WX), but there are still some warnings to fix
+  add_compile_options(/W4)
 else()
   # lots of warnings and all warnings as errors
-  add_compile_options(-Wall -Wextra -pedantic -Werror)
+  add_compile_options(-Wall -Wextra -Werror)
 endif()
 
 
@@ -44,12 +47,25 @@ add_library(crazyflieLinkCpp
 #     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/crazyflie_cpp>
 # )
 
-target_link_libraries(crazyflieLinkCpp
+# Apple macOS libraries
+if (APPLE)
+  set(CMAKE_EXE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation")
+  set(CMAKE_MODULE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation")
+endif()
+
+# Link pthread on Linux and Mac only
+if (NOT MSVC)
+target_link_libraries(crazyflieCppLink
   PRIVATE
-    ${LIBUSB_LIBRARY}
     pthread
 )
-set_property(TARGET crazyflieLinkCpp PROPERTY POSITION_INDEPENDENT_CODE ON)
+endif()
+
+target_link_libraries(crazyflieCppLink
+  PRIVATE
+    ${LIBUSB_LIBRARY}
+)
+set_property(TARGET crazyflieCppLink PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # C++ example application
 

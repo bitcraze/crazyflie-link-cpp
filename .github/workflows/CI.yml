@@ -2,12 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, findlibusb ]
   pull_request:
     branches: [ master ]
 
 jobs:
-  build:
+  Linux:
     runs-on: ubuntu-latest
     
     steps:
@@ -24,3 +24,53 @@ jobs:
 
     - name: Build wheels
       run: tools/build/build-wheels.sh
+  
+  MacOS:
+    runs-on: macos-10.15
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: |
+          brew install python@3.9 sdl2 libusb
+          brew link --overwrite python@3.9
+          pip3 install cmake ninja wheel
+      
+      - name: Build
+        run: python3 setup.py bdist_wheel
+      
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v2.1.4
+        with:
+          name: macos-build
+          path: "dist/*.whl"
+
+  Windows:
+    runs-on: windows-2019
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      
+      # - name: Set up Python 3.6
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: 3.6
+      #     architecture: 'x86'
+
+      - name: Install dependencies
+        run: |
+          pip install wheel
+
+      - name: Build
+        run: python setup.py bdist_wheel
+      
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v2.1.4
+        with:
+          name: win-build
+          path: "dist/*.whl"

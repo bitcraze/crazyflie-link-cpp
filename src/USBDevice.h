@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 
 namespace bitcraze {
 namespace crazyflieLinkCpp {
