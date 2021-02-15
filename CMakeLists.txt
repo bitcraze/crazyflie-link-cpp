@@ -55,17 +55,17 @@ endif()
 
 # Link pthread on Linux and Mac only
 if (NOT MSVC)
-target_link_libraries(crazyflieCppLink
+target_link_libraries(crazyflieLinkCpp
   PRIVATE
     pthread
 )
 endif()
 
-target_link_libraries(crazyflieCppLink
+target_link_libraries(crazyflieLinkCpp
   PRIVATE
     ${LIBUSB_LIBRARY}
 )
-set_property(TARGET crazyflieCppLink PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET crazyflieLinkCpp PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # C++ example application
 
