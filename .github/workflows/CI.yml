@@ -32,10 +32,10 @@ jobs:
       run: tools/build/build-wheels.sh
 
     - name: Upload Build Artifact
-        uses: actions/upload-artifact@v2.1.4
-        with:
-          name: linux-build
-          path: "dist/*.whl"
+      uses: actions/upload-artifact@v2.1.4
+      with:
+        name: linux-build
+        path: "dist/*.whl"
   
   MacOS:
     runs-on: macos-10.15
