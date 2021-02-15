@@ -5,6 +5,12 @@ on:
     branches: [ master, findlibusb ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Upload to "testing" or "production"'     
+        required: true
+        default: 'testing'
 
 jobs:
   Linux:
@@ -24,9 +30,19 @@ jobs:
 
     - name: Build wheels
       run: tools/build/build-wheels.sh
+
+    - name: Upload Build Artifact
+        uses: actions/upload-artifact@v2.1.4
+        with:
+          name: linux-build
+          path: "dist/*.whl"
   
   MacOS:
     runs-on: macos-10.15
+
+    strategy:
+      matrix:
+        python: [3.8, 3.9]
 
     steps:
       - uses: actions/checkout@v2
@@ -35,8 +51,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install python@3.9 sdl2 libusb
-          brew link --overwrite python@3.9
+          brew install python@${{ matrix.python }} sdl2 libusb
+          brew link --overwrite python@${{ matrix.python }}
           pip3 install cmake ninja wheel
       
       - name: Build
@@ -51,16 +67,19 @@ jobs:
   Windows:
     runs-on: windows-2019
 
+    strategy:
+      matrix:
+        python: [3.6, 3.7, 3.8, 3.9]
+
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: true
       
-      # - name: Set up Python 3.6
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: 3.6
-      #     architecture: 'x86'
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
 
       - name: Install dependencies
         run: |
@@ -74,3 +93,14 @@ jobs:
         with:
           name: win-build
           path: "dist/*.whl"
+  
+  Publish:
+    runs-on: ubuntu-latest
+    needs: [Linux, MacOS, Windows]
+    if: github.event_name == workflow_dispatch
+
+    steps:
+      - uses: actions/download-artifact@v2
+
+      - name: Display structure of downloaded files
+        run: ls -R
