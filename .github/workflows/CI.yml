@@ -32,7 +32,7 @@ jobs:
     
     - name: Build source distribution
       run: |
-        apt-get install -y libusb-1.0-0-dev
+        sudo apt-get install -y libusb-1.0-0-dev
         pip3 wheel/*.tar.gz
 
     - name: Upload Build Artifact
