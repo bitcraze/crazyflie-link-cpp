@@ -147,13 +147,13 @@ jobs:
       run: |
         pip install twine
         
-        twine check source-build/*
-        twine check linux-build/*
-        twine check macos-build/*
-        twine check win-build/*
+        python3 -m twine check source-build/*
+        python3 -m twine check linux-build/*
+        python3 -m twine check macos-build/*
+        python3 -m twine check win-build/*
         
-        twine upload --repository-url ${{ github.event.inputs.repository_url }} source-build/*
-        twine upload --repository-url ${{ github.event.inputs.repository_url }} linux-build/*
-        twine upload --repository-url ${{ github.event.inputs.repository_url }} macos-build/*
-        twine upload --repository-url ${{ github.event.inputs.repository_url }} win-build/*
+        python3 -m twine upload --repository-url ${{ github.event.inputs.repository_url }} source-build/*
+        python3 -m twine upload --repository-url ${{ github.event.inputs.repository_url }} linux-build/*
+        python3 -m twine upload --repository-url ${{ github.event.inputs.repository_url }} macos-build/*
+        python3 -m twine upload --repository-url ${{ github.event.inputs.repository_url }} win-build/*
 
