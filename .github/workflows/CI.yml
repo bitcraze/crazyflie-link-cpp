@@ -136,11 +136,11 @@ jobs:
 
     - name: Check match between the build version and the current git tag
       run: |
-        apt install jq
+        sudo apt-get install -y jq
         pip3 install wheel-inspect
         
         export TAG=$($(echo ${{ github.ref }} | cut -d/ -f3))
-        wheel2json dist/*.whl | jq .version | grep ^\\\"$TAG\\\"$
+        python3 -m wheel_inspect dist/*.whl | jq .version | grep ^\\\"$TAG\\\"$
 
 
     - name: Publish on Pypi
