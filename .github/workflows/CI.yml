@@ -2,18 +2,36 @@ name: CI
 
 on:
   push:
-    branches: [ master, findlibusb ]
+    branches: [ master, dev-CI ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
     inputs:
-      target:
-        description: 'Upload to "testing" or "production"'     
+      guard:
+        description: 'Do not run manually. Run "publish" to publish on Pypi'
         required: true
-        default: 'testing'
+      repository_url:
+        description: 'URL of the pypi repository to upload to'     
+        required: true
+        default: 'https://test.pypi.org/legacy/'
 
 jobs:
+  PublishCheck:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Check that we are triggered by the publish workflow
+        shell: python
+        run: |
+          import sys
+
+          if "${{ github.event.inputs.guard }}" != "do-release":
+            print("This workflow should not be launched manually, launch the Publish workflow to publish on Pypi")
+            sys.exit(1)
+
   Linux:
+    needs: PublishCheck
     runs-on: ubuntu-latest
     
     steps:
@@ -38,6 +56,7 @@ jobs:
         path: "dist/*.whl"
   
   MacOS:
+    needs: PublishCheck
     runs-on: macos-10.15
 
     strategy:
@@ -65,6 +84,7 @@ jobs:
           path: "dist/*.whl"
 
   Windows:
+    needs: PublishCheck
     runs-on: windows-2019
 
     strategy:
@@ -100,7 +120,21 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' }}
 
     steps:
-      - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v2
 
-      - name: Display structure of downloaded files
-        run: ls -R
+    - name: Publish on Pypi
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        pip install twine
+        
+        twine check linux-build/*
+        twine check macos-build/*
+        twine check win-build/*
+        
+        twine upload --repository-url ${{ github.event.inputs.repository_url }} linux-build/*
+        twine upload --repository-url ${{ github.event.inputs.repository_url }} macos-build/*
+        twine upload --repository-url ${{ github.event.inputs.repository_url }} win-build/*
+
