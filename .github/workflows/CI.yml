@@ -17,7 +17,7 @@ on:
 
 jobs:
   Source:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     
     steps:
     - uses: actions/checkout@v2
@@ -32,8 +32,8 @@ jobs:
     
     - name: Build source distribution
       run: |
-        sudo apt-get install -y libusb-1.0-0-dev
-        pip3 install wheel ninja
+        sudo apt-get install -y libusb-1.0-0-dev ninja-build
+        pip3 install wheel
         pip3 wheel dist/*.tar.gz
 
     - name: Upload Build Artifact
@@ -44,6 +44,7 @@ jobs:
 
   Linux:
     runs-on: ubuntu-latest
+    needs: Source
     
     steps:
     - uses: satackey/action-docker-layer-caching@v0.0.11
@@ -68,6 +69,7 @@ jobs:
   
   MacOS:
     runs-on: macos-10.15
+    needs: Source
 
     strategy:
       matrix:
@@ -95,6 +97,7 @@ jobs:
 
   Windows:
     runs-on: windows-2019
+    needs: Source
 
     strategy:
       matrix:
