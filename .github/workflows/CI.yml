@@ -33,7 +33,7 @@ jobs:
     - name: Build source distribution
       run: |
         sudo apt-get install -y libusb-1.0-0-dev
-        pip3 wheel /*.tar.gz
+        pip3 wheel dist/*.tar.gz
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v2.1.4
