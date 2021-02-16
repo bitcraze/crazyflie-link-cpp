@@ -10,7 +10,6 @@ on:
         description: 'Release destination, "testing" for test.pypi.org, "release" for pypi.org.'     
         required: true
         default: 'testing'
-  push:
 
 jobs:
   Release:
