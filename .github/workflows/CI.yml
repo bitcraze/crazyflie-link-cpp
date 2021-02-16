@@ -16,22 +16,29 @@ on:
         default: 'https://test.pypi.org/legacy/'
 
 jobs:
-  PublishCheck:
+  Source:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' }}
-
+    
     steps:
-      - name: Check that we are triggered by the publish workflow
-        shell: python
-        run: |
-          import sys
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
 
-          if "${{ github.event.inputs.guard }}" != "do-release":
-            print("This workflow should not be launched manually, launch the Publish workflow to publish on Pypi")
-            sys.exit(1)
+    - name: Build source distribution
+      run: python3 setup.py sdist
+    
+    - name: Install from source distribution
+      run:
+        apt install -y libusb-1.0-0-dev
+        pip3 wheel/*.tar.gz 
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v2.1.4
+      with:
+        name: source-build
+        path: "dist/*.tar.gz"
 
   Linux:
-    needs: PublishCheck
     runs-on: ubuntu-latest
     
     steps:
@@ -56,7 +63,6 @@ jobs:
         path: "dist/*.whl"
   
   MacOS:
-    needs: PublishCheck
     runs-on: macos-10.15
 
     strategy:
@@ -84,7 +90,6 @@ jobs:
           path: "dist/*.whl"
 
   Windows:
-    needs: PublishCheck
     runs-on: windows-2019
 
     strategy:
@@ -116,11 +121,23 @@ jobs:
   
   Publish:
     runs-on: ubuntu-latest
-    needs: [Linux, MacOS, Windows]
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: [Source, Linux, MacOS, Windows]
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.guard == 'do-release' }}
 
     steps:
+
+    - uses: actions/checkout@v2
+    
     - uses: actions/download-artifact@v2
+
+    - name: Check match between the build version and the current git tag
+      run: |
+        apt install jq
+        pip3 install wheel-inspect
+        
+        export TAG=$($(echo ${{ github.ref }} | cut -d/ -f3))
+        wheel2json dist/*.whl | jq .version | grep ^\\\"$TAG\\\"$
+
 
     - name: Publish on Pypi
       if: ${{ github.event_name == 'workflow_dispatch' }}
@@ -130,10 +147,12 @@ jobs:
       run: |
         pip install twine
         
+        twine check source-build/*
         twine check linux-build/*
         twine check macos-build/*
         twine check win-build/*
         
+        twine upload --repository-url ${{ github.event.inputs.repository_url }} source-build/*
         twine upload --repository-url ${{ github.event.inputs.repository_url }} linux-build/*
         twine upload --repository-url ${{ github.event.inputs.repository_url }} macos-build/*
         twine upload --repository-url ${{ github.event.inputs.repository_url }} win-build/*
