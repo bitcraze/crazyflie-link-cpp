@@ -24,16 +24,16 @@ jobs:
       with:
         submodules: true
 
-    - name: Install build dependencies
+    - name: Install sdist dependencies
       run: pip3 install setuptools
 
-    - name: Build source distribution
+    - name: Generate source distribution tarball
       run: python3 setup.py sdist
     
-    - name: Install from source distribution
-      run:
-        apt install -y libusb-1.0-0-dev
-        pip3 wheel/*.tar.gz 
+    - name: Build source distribution
+      run: |
+        apt-get install -y libusb-1.0-0-dev
+        pip3 wheel/*.tar.gz
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v2.1.4
@@ -127,10 +127,7 @@ jobs:
     needs: [Source, Linux, MacOS, Windows]
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.guard == 'do-release' }}
 
-    steps:
-
-    - uses: actions/checkout@v2
-    
+    steps:    
     - uses: actions/download-artifact@v2
 
     - name: Check match between the build version and the current git tag
