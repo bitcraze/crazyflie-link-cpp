@@ -47,10 +47,6 @@ jobs:
     needs: Source
     
     steps:
-    - uses: satackey/action-docker-layer-caching@v0.0.11
-      # Ignore the failure of a step and avoid terminating the job.
-      continue-on-error: true
-
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -140,7 +136,7 @@ jobs:
         pip3 install wheel-inspect
         
         export TAG=$($(echo ${{ github.ref }} | cut -d/ -f3))
-        python3 -m wheel_inspect dist/*.whl | jq .version | grep ^\\\"$TAG\\\"$
+        python3 -m wheel_inspect *-build/*.whl | jq .version | grep ^\\\"$TAG\\\"$
 
 
     - name: Publish on Pypi
