@@ -23,4 +23,4 @@ jobs:
         workflow: CI
         token: ${{ secrets.GITHUB_TOKEN }}
         ref: ${{ github.event.inputs.tag }}
-        inputs: '{ "guard": "do-release", "repsitory_url": "https://test.pypi.org/legacy/" }'
+        inputs: '{ "guard": "do-release", "repository_url": "https://test.pypi.org/legacy/" }'
