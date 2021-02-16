@@ -21,6 +21,6 @@ jobs:
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: CI
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.PERSONAL_TOKEN }}
         ref: ${{ github.event.inputs.tag }}
         inputs: '{ "guard": "do-release", "repository_url": "https://test.pypi.org/legacy/" }'
