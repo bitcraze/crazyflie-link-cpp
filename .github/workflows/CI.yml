@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ master, dev-CI ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
@@ -123,12 +123,16 @@ jobs:
           path: "dist/*.whl"
   
   Publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [Source, Linux, MacOS, Windows]
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.guard == 'do-release' }}
 
     steps:    
     - uses: actions/download-artifact@v2
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
 
     - name: Check match between the build version and the current git tag
       run: |
@@ -145,15 +149,16 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        pip install twine
+        pip3 install setuptools
+        pip3 install twine
         
-        twine check source-build/*
-        twine check linux-build/*
-        twine check macos-build/*
-        twine check win-build/*
+        python3 -m twine check source-build/*
+        python3 -m twine check linux-build/*
+        python3 -m twine check macos-build/*
+        python3 -m twine check win-build/*
         
-        twine upload --repository-url ${{ github.event.inputs.repository_url }} source-build/*
-        twine upload --repository-url ${{ github.event.inputs.repository_url }} linux-build/*
-        twine upload --repository-url ${{ github.event.inputs.repository_url }} macos-build/*
-        twine upload --repository-url ${{ github.event.inputs.repository_url }} win-build/*
+        python3 -m twine upload --skip-existing --repository-url ${{ github.event.inputs.repository_url }} source-build/*
+        python3 -m twine upload --skip-existing --repository-url ${{ github.event.inputs.repository_url }} linux-build/*
+        python3 -m twine upload --skip-existing --repository-url ${{ github.event.inputs.repository_url }} macos-build/*
+        python3 -m twine upload --skip-existing --repository-url ${{ github.event.inputs.repository_url }} win-build/*
 
