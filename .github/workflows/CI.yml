@@ -123,13 +123,17 @@ jobs:
           path: "dist/*.whl"
   
   Publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     # needs: [Source, Linux, MacOS, Windows]
     needs: [Source, Windows]
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.guard == 'do-release' }}
 
     steps:    
     - uses: actions/download-artifact@v2
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
 
     - name: Check match between the build version and the current git tag
       run: |
@@ -146,8 +150,8 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        pip3 install twine
         pip3 install setuptools
+        pip3 install twine
         
         python3 -m twine check source-build/*
         python3 -m twine check linux-build/*
