@@ -24,3 +24,12 @@ jobs:
         token: ${{ secrets.PERSONAL_TOKEN }}
         ref: ${{ github.event.inputs.tag }}
         inputs: '{ "guard": "do-release", "repository_url": "https://test.pypi.org/legacy/" }'
+    
+    - name: Start the CI workflow for publishing to Pypi
+      if: ${{ github.event.inputs.destination == 'release' }}
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: CI
+        token: ${{ secrets.PERSONAL_TOKEN }}
+        ref: ${{ github.event.inputs.tag }}
+        inputs: '{ "guard": "do-release", "repository_url": "https://pypi.org/legacy/" }'
