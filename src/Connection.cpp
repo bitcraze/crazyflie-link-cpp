@@ -170,9 +170,9 @@ std::vector<std::string> Connection::scan_selected(const std::vector<std::string
             }
           } while (con.statistics().sent_count == 0);
         }
-        catch (...)
+        catch (const std::runtime_error& e)
         {
-          std::cout << "Oh No" << std::endl;
+          std::cout << "Error during scan: " << e.what() << std::endl;
         }
         return std::string();
       }));

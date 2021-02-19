@@ -44,15 +44,10 @@ python3 examples/scan.py
 
 ## To Do
 
-* improved stats
-  * locks?
-
-* code linter
-* Add CI for repo
+* add new test that uses echoDelay
+* Windows crash
 
 * add broadcast support
   * support send2PacketsNoAck 
 * integrate in Crazyflie_cpp and crazyflie_tools
 * Hot Plug support (Linux/Mac only)
-
-## To Discuss

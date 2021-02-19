@@ -5,6 +5,7 @@
 #include <cmath>
 #include <ostream>
 #include <vector>
+#include <memory>
 
 #include "Packet.hpp"
 
@@ -30,7 +31,7 @@ public:
       receive_count = 0;
       enqueued_count = 0;
       ack_count = 0;
-      rssi_latest = 0;
+      // rssi_latest = 0;
     }
 
     friend std::ostream &operator<<(std::ostream &out, const Connection::Statistics &s)
@@ -40,7 +41,7 @@ public:
       out << ",receive_count=" << s.receive_count;
       out << ",enqueued_count=" << s.enqueued_count;
       out << ",ack_count=" << s.ack_count;
-      out << ",rssi_latest=" << (int)s.rssi_latest;
+      // out << ",rssi_latest=" << (int)s.rssi_latest;
       out << ")";
 
       return out;
@@ -50,7 +51,7 @@ public:
     size_t receive_count;
     size_t enqueued_count;
     size_t ack_count;
-    uint8_t rssi_latest;
+    // uint8_t rssi_latest;
   };
 
 public:

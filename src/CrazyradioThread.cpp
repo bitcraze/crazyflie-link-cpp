@@ -247,10 +247,11 @@ void CrazyradioThread::run()
                 ++con->statistics_.ack_count;
                 Packet p_ack(ack.data(), ack.size());
                 if (con->useAckFilter_ &&
-                    p_ack.port() == 15 && p_ack.channel() == 3)
+                    ack.size() == 0)
+                    // p_ack.port() == 15 && p_ack.channel() == 3)
                 {
                     // Empty packet -> update stats only
-                    con->statistics_.rssi_latest = p_ack.payload()[1];
+                    // con->statistics_.rssi_latest = p_ack.payload()[1];
                 }
                 else
                 {
