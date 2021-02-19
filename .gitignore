@@ -3,3 +3,4 @@
 *.so
 dist/
 *.egg-info
+.eggs
