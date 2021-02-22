@@ -22,7 +22,7 @@ Connection::Connection(const std::string &uri)
   // "radio://*/80/2M/E7E7E7E7E7" -> auto-pick radio
   // "radio://*/80/2M/*" -> broadcast/P2P sniffing on channel 80
 
-  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]{10}|\\*)(\\[noSafelink\\])?(\\[noAutoPing\\])?(\\[noAckFilter\\])?)");
+  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]{10}|\\*)(\\?[\\w=&]+)?)");
   std::smatch match;
   if (!std::regex_match(uri, match, uri_regex)) {
     std::stringstream sstr;
@@ -65,9 +65,37 @@ Connection::Connection(const std::string &uri)
       impl_->datarate_ = Crazyradio::Datarate_2MPS;
     }
     impl_->address_ = std::stoull(match[6].str(), nullptr, 16);
-    impl_->useSafelink_ = match[7].length() == 0;
-    impl_->useAutoPing_ = match[8].length() == 0;
-    impl_->useAckFilter_ = match[9].length() == 0;
+
+    // parse flags
+    impl_->useSafelink_ = true;
+    impl_->useAutoPing_ = true;
+    impl_->useAckFilter_ = true;
+
+    if (match[7].length() > 0) {
+      std::stringstream sstr(match[7].str().substr(1));
+      std::string keyvalue;
+      const std::regex params_regex("(safelink|autoping|ackfilter)=([0|1])");
+      while (getline(sstr, keyvalue, '&')) {
+        std::smatch match;
+        if (!std::regex_match(keyvalue, match, params_regex)) {
+          std::stringstream sstr;
+          sstr << "Invalid uri (" << uri << ")! ";
+          sstr << "Unknown " << keyvalue << ".";
+          throw std::runtime_error(sstr.str());
+        }
+
+        if (match[1].str() == "safelink" && match[2].str() == "0") {
+          impl_->useSafelink_ = false;
+        }
+        if (match[1].str() == "autoping" && match[2].str() == "0") {
+          impl_->useAutoPing_ = false;
+        }
+        if (match[1].str() == "ackfilter" && match[2].str() == "0") {
+          impl_->useAckFilter_ = false;
+        }
+      }
+    }
+
     impl_->safelinkInitialized_ = false;
     impl_->safelinkUp_ = false;
     impl_->safelinkDown_ = false;
@@ -158,7 +186,7 @@ std::vector<std::string> Connection::scan_selected(const std::vector<std::string
       [uri]() {
         try
         {
-          Connection con(uri + "[noSafelink][noAutoPing][noAckFilter]");
+          Connection con(uri + "?safelink=0&autoping=0&ackfilter=0");
           const uint8_t check[] = {0xFF, 0xFF, 0xFF};
           Packet p(check, sizeof(check));
           con.send(p);
