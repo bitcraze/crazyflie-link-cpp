@@ -30,6 +30,8 @@ The library can be tested using the included example applications, e.g.,:
 
 ## Build and install development version of the python binding
 
+Building the python binding requires python>=3.6, cmake and Ninja. Ninja and CMake can be installed with pip on Windows and Mac (```pip install cmake ninja```), or using apt-get on Ubuntu/debian (```apt-get install cmake ninja-build```).
+
 The following command builds the binding and register it in development mode (ie. as a link) in python.
 
 ```
