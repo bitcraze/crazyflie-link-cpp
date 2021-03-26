@@ -22,7 +22,7 @@ Connection::Connection(const std::string &uri)
   // "radio://*/80/2M/E7E7E7E7E7" -> auto-pick radio
   // "radio://*/80/2M/*" -> broadcast/P2P sniffing on channel 80
 
-  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]{10}|\\*)(\\?[\\w=&]+)?)");
+  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]+|\\*)(\\?[\\w=&]+)?)");
   std::smatch match;
   if (!std::regex_match(uri, match, uri_regex)) {
     std::stringstream sstr;
@@ -63,6 +63,13 @@ Connection::Connection(const std::string &uri)
       impl_->datarate_ = Crazyradio::Datarate_1MPS;
     } else if (match[5].str() == "2M") {
       impl_->datarate_ = Crazyradio::Datarate_2MPS;
+    }
+
+    // Address is represented by 40 bytes => 10 hex chars max
+    if (match[6].str().length() > 10) {
+        std::stringstream sstr;
+        sstr << "Invalid uri (" << uri << ")!";
+        throw std::runtime_error(sstr.str());
     }
     impl_->address_ = std::stoull(match[6].str(), nullptr, 16);
 
