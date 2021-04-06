@@ -34,7 +34,7 @@ public:
 
         Packet p;
         p.setPort(15);   // Link port
-        p.setChannel(1); // echo channel
+        p.setChannel(0); // echo channel
         p.setPayloadSize(sizeof(uint32_t));
         
         // Latency experiment
