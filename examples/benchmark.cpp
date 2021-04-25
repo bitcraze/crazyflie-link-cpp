@@ -32,19 +32,54 @@ public:
             }
         }
 
-        Packet p;
-        // p.setPort(15);   // Link port
-        p.setPort(2);   // param port
-        p.setChannel(0); // toc channel
-        p.setPayloadSize(sizeof(uint32_t));
-        int i = 3;
-        std::memcpy(p.payload(), &i, sizeof(i));
-        con.send(p);
-        Packet p_recv = con.recv(0);
+        sendInt(2,0,0, con);
 
+        sendInt(2,0,3, con);
+        
+        Packet p_recv = con.recv(0);
         std::cout << p_recv << std::endl;
         int num_param = p_recv.payload()[1];
         std::cout << num_param << std::endl;
+
+        p_recv = con.recv(0);
+        sendInt(2,0,0, con);
+        std::cout << p_recv << std::endl;
+        do
+        {
+            p_recv = con.recv(0);
+        } while (p_recv.port() != 2);
+        std::cout << p_recv << std::endl;
+    
+
+        sendInt(2,0,1, con);
+        do
+        {
+            p_recv = con.recv(0);
+        std::cout << p_recv << std::endl;
+
+        } while (p_recv.port() != 2);
+
+        sendInt(2,0,1, con);
+        do
+        {
+            p_recv = con.recv(0);
+            if(p_recv.port()==0)
+            std::cout << p_recv.payload() << std::endl;
+
+        } while (p_recv.port() != 2);
+        
+    }
+        
+
+    void sendInt(int port, int channel, int intigerToSend, Connection& con)
+    {
+        Packet p;
+        p.setPort(port);   
+        p.setChannel(channel); 
+        p.setPayloadSize(sizeof(uint32_t));
+        std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
+
+        con.send(p);
     }
 
 
@@ -73,11 +108,6 @@ int main()
     for (auto& t : threads) {
         t.join();
     }
-
-    // for (auto& b: benchmarks) {
-    //     std::cout << "Latency: Min: " << b.latency_min * 1.0f << " ms; Avg: " << b.latency_avg * 1000.0f << " ms" << std::endl;
-    //     std::cout << "Bandwidth: " << b.bandwidth << " packets/s" << std::endl;
-    // }
 
     return 0;
 }
