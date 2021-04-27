@@ -18,6 +18,34 @@
 
 using namespace bitcraze::crazyflieLinkCpp;
 
+struct TocItem
+{
+    std::string _groupName;
+    std::string _paramName;
+    uint8_t _cmdNum;
+    uint8_t _paramType;
+    uint16_t _paramId;
+
+    TocItem( Packet& p_recv)
+    {
+        _cmdNum = p_recv.payload()[0];
+        _paramId = 0;
+        memcpy(&_paramId, &p_recv.payload()[1], sizeof(_paramId));
+        _paramType = p_recv.payload()[3];
+        _groupName = (char *)(&p_recv.payload()[4]);
+        _paramName = (char *)(&p_recv.payload()[4] + _groupName.length() + 1);
+    }
+    friend std::ostream &operator<<(std::ostream &out, const TocItem &tocItem)
+    {
+        out << "cmdNum: " << (int)tocItem._cmdNum << std::endl;
+        out << "paramId: " << (int)tocItem._paramId << std::endl;
+        out << "paramType: " << (int)tocItem._paramType << std::endl;
+        out << "groupName: " << tocItem._groupName << std::endl;
+        out << "paramName: " << tocItem._paramName << std::endl;
+        return out;
+    }
+};
+
 class Benchmark
 {
 public:
@@ -56,19 +84,14 @@ public:
         sendInt(con, PARAM_PORT, TOC_CHANNEL, CMD_TOC_ITEM_V2, 0);
         p_recv = con.recv(0);
         std::cout << p_recv << std::endl;
+        TocItem tocItem(p_recv);
+        std::cout << tocItem << std::endl;
 
-        uint8_t cmdNum = p_recv.payload()[0];
-        uint16_t paramId = 0;
-        memcpy(&paramId, &p_recv.payload()[1], sizeof(paramId));
-        uint8_t paramType = p_recv.payload()[3];
-        const char *groupName = (const char *)(&p_recv.payload()[4]);
-        const char *paramName = (const char *)(groupName + strlen(groupName) + 1);
-
-        std::cout << "cmdNum: " << (int)cmdNum << std::endl;
-        std::cout << "paramId: " << (int)paramId << std::endl;
-        std::cout << "paramType: " << (int)paramType << std::endl;
-        std::cout << "groupName: " << groupName << std::endl;
-        std::cout << "paramName: " << paramName << std::endl;
+        // std::cout << "cmdNum: " << (int)cmdNum << std::endl;
+        // std::cout << "paramId: " << (int)paramId << std::endl;
+        // std::cout << "paramType: " << (int)paramType << std::endl;
+        // std::cout << "groupName: " << groupName << std::endl;
+        // std::cout << "paramName: " << paramName << std::endl;
         // p_recv = con.recv(0);
         // sendInt(2,0,0, con);
         // std::cout << p_recv << std::endl;
