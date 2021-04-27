@@ -87,59 +87,36 @@ public:
         TocItem tocItem(p_recv);
         std::cout << tocItem << std::endl;
 
-        // std::cout << "cmdNum: " << (int)cmdNum << std::endl;
-        // std::cout << "paramId: " << (int)paramId << std::endl;
-        // std::cout << "paramType: " << (int)paramType << std::endl;
-        // std::cout << "groupName: " << groupName << std::endl;
-        // std::cout << "paramName: " << paramName << std::endl;
-        // p_recv = con.recv(0);
-        // sendInt(2,0,0, con);
-        // std::cout << p_recv << std::endl;
-        // do
-        // {
-        //     p_recv = con.recv(0);
-        // } while (p_recv.port() != 2);
-        // std::cout << p_recv << std::endl;
-
-        // sendInt(2,0,1, con);
-        // do
-        // {
-        //     p_recv = con.recv(0);
-        // std::cout << p_recv << std::endl;
-
-        // } while (p_recv.port() != 2);
-
-        // sendInt(2,0,1, con);
-        // do
-        // {
-        //     p_recv = con.recv(0);
-        //     if(p_recv.port()==0)
-        //     std::cout << p_recv.payload() << std::endl;
-
-        // } while (p_recv.port() != 2);
+        for(uint8_t i = 0; i < num_of_elements; i++)
+        {
+            sendInt(con, PARAM_PORT, TOC_CHANNEL, CMD_TOC_ITEM_V2, i);
+            p_recv = con.recv(0);
+            TocItem tocItem(p_recv);
+            std::cout << tocItem._paramId << ": "<< tocItem._groupName << "." << tocItem._paramName << std::endl;
+        }
     }
 
-    void sendInt(Connection &con, int port, int channel, int intigerToSend)
+    void sendInt(Connection &con, int port, int channel, uint8_t intigerToSend)
     {
         Packet p;
         p.setPort(port);
         p.setChannel(channel);
 
-        p.setPayloadSize(sizeof(uint32_t));
+        p.setPayloadSize(sizeof(intigerToSend));
         std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
 
         con.send(p);
     }
 
-    void sendInt(Connection &con, int port, int channel, int intigerToSend, int extraData)
+    void sendInt(Connection &con, int port, int channel, uint8_t intigerToSend, uint8_t extraData)
     {
         Packet p;
         p.setPort(port);
         p.setChannel(channel);
 
-        p.setPayloadSize(sizeof(uint32_t) * 2);
+        p.setPayloadSize(sizeof(intigerToSend) + sizeof(extraData));
         std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
-        std::memcpy(p.payload() + sizeof(uint32_t), &extraData, sizeof(extraData));
+        std::memcpy(p.payload() + sizeof(intigerToSend), &extraData, sizeof(extraData));
 
         con.send(p);
     }
