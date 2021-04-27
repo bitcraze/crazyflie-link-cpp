@@ -49,8 +49,26 @@ public:
         uint32_t crc = 0;
         memcpy(&num_of_elements, &p_recv.payload()[1], sizeof(num_of_elements));
         memcpy(&crc, &p_recv.payload()[3], sizeof(crc));
-        std::cout <<"num of elements: "<< num_of_elements << std::endl;
-        std::cout << "crc: "<<crc << std::endl;
+        std::cout << "num of elements: " << num_of_elements << std::endl;
+        std::cout << "crc: " << crc << std::endl;
+
+        //ask for item
+        sendInt(con, PARAM_PORT, TOC_CHANNEL, CMD_TOC_ITEM_V2, 0);
+        p_recv = con.recv(0);
+        std::cout << p_recv << std::endl;
+
+        uint8_t cmdNum = p_recv.payload()[0];
+        uint16_t paramId = 0;
+        memcpy(&paramId, &p_recv.payload()[1], sizeof(paramId));
+        uint8_t paramType = p_recv.payload()[3];
+        const char *groupName = (const char *)(&p_recv.payload()[4]);
+        const char *paramName = (const char *)(groupName + strlen(groupName) + 1);
+
+        std::cout << "cmdNum: " << (int)cmdNum << std::endl;
+        std::cout << "paramId: " << (int)paramId << std::endl;
+        std::cout << "paramType: " << (int)paramType << std::endl;
+        std::cout << "groupName: " << groupName << std::endl;
+        std::cout << "paramName: " << paramName << std::endl;
         // p_recv = con.recv(0);
         // sendInt(2,0,0, con);
         // std::cout << p_recv << std::endl;
@@ -78,22 +96,27 @@ public:
         // } while (p_recv.port() != 2);
     }
 
-    void sendInt(Connection &con, int port, int channel, int intigerToSend, int extraData = 0)
+    void sendInt(Connection &con, int port, int channel, int intigerToSend)
     {
         Packet p;
         p.setPort(port);
         p.setChannel(channel);
-        if (extraData != 0)
-        {
-            p.setPayloadSize(sizeof(uint32_t) * 2);
-            std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
-            std::memcpy(p.payload() + sizeof(uint32_t), &extraData, sizeof(extraData));
-        }
-        else
-        {
-            p.setPayloadSize(sizeof(uint32_t));
-            std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
-        }
+
+        p.setPayloadSize(sizeof(uint32_t));
+        std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
+
+        con.send(p);
+    }
+
+    void sendInt(Connection &con, int port, int channel, int intigerToSend, int extraData)
+    {
+        Packet p;
+        p.setPort(port);
+        p.setChannel(channel);
+
+        p.setPayloadSize(sizeof(uint32_t) * 2);
+        std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
+        std::memcpy(p.payload() + sizeof(uint32_t), &extraData, sizeof(extraData));
 
         con.send(p);
     }
