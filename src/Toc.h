@@ -127,30 +127,7 @@ public:
         }
     }
 
-    void sendInt(Connection &con, int port, int channel, uint8_t intigerToSend)
-    {
-        Packet p;
-        p.setPort(port);
-        p.setChannel(channel);
-
-        p.setPayloadSize(sizeof(intigerToSend));
-        std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
-
-        con.send(p);
-    }
-
-    void sendInt(Connection &con, int port, int channel, uint8_t intigerToSend, uint8_t extraData)
-    {
-        Packet p;
-        p.setPort(port);
-        p.setChannel(channel);
-
-        p.setPayloadSize(sizeof(intigerToSend) + sizeof(extraData));
-        std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
-        std::memcpy(p.payload() + sizeof(intigerToSend), &extraData, sizeof(extraData));
-
-        con.send(p);
-    }
+    
 
 private:
     Connection _con;

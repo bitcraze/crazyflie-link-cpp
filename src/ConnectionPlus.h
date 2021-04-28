@@ -10,21 +10,19 @@
 #include <vector>
 #include "crazyflieLinkCpp/Connection.h"
 
-
-
 class ConnectionPlus : public bitcraze::crazyflieLinkCpp::Connection
 {
 private:
-    /* data */
+    bitcraze::crazyflieLinkCpp::Packet _packet;
 public:
-    ConnectionPlus(/* args */);
+    ConnectionPlus(std::string uri);
     ~ConnectionPlus();
+
+    void setPort(int port);
+    void setChannel(int channel);
+    void sendInt(uint8_t intigerToSend);
+    void sendInt(uint8_t intigerToSend, uint8_t extraData);
+    
+    void sendInt(uint8_t intigerToSend, int port, int channel);
+    void sendInt(uint8_t intigerToSend, uint8_t extraData, int port, int channel);
 };
-
-// ConnectionPlus::ConnectionPlus(/* args */)
-// {
-// }
-
-// ConnectionPlus::~ConnectionPlus()
-// {
-// }
