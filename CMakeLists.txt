@@ -39,6 +39,8 @@ add_library(crazyflieLinkCpp
   src/CrazyflieUSB.cpp
   src/CrazyflieUSBThread.cpp
   src/Version.cpp
+  src/Toc.cpp
+  src/ConnectionPlus.cpp
 )
 
 # target_include_directories(libCrazyflieLinkCpp
@@ -90,6 +92,14 @@ add_executable(example_benchmark
   examples/benchmark.cpp
 )
 target_link_libraries(example_benchmark
+  crazyflieLinkCpp
+)
+
+# example_test
+add_executable(example_test
+  examples/test.cpp
+)
+target_link_libraries(example_test
   crazyflieLinkCpp
 )
 
