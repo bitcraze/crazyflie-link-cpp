@@ -8,7 +8,9 @@
 #include <sstream>
 #include <queue>
 #include <vector>
-#include "crazyflieLinkCpp/Connection.h"
+#include "Connection.h"
+
+
 
 class ConnectionPlus : public bitcraze::crazyflieLinkCpp::Connection
 {
@@ -21,8 +23,8 @@ public:
     void setPort(int port);
     void setChannel(int channel);
     void sendInt(uint8_t intigerToSend);
-    void sendInt(uint8_t intigerToSend, uint8_t extraData);
+    void sendInt(uint8_t intigerToSend, uint16_t extraData);
     
     void sendInt(uint8_t intigerToSend, int port, int channel);
-    void sendInt(uint8_t intigerToSend, uint8_t extraData, int port, int channel);
+    void sendInt(uint8_t intigerToSend, uint16_t extraData, int port, int channel);
 };

@@ -1,4 +1,4 @@
-#include "Toc.h"
+#include "crazyflieLinkCpp/Toc.h"
 
 
 
@@ -38,6 +38,8 @@ std::ostream &operator<<(std::ostream &out, const TocInfo &tocInfo)
 Toc::Toc(const std::string &uri)
     : _con(uri)
 {
+    _con.setPort(PARAM_PORT);
+    _con.setChannel(TOC_CHANNEL);
 }
 
 void Toc::run()
@@ -49,6 +51,7 @@ void Toc::run()
         bitcraze::crazyflieLinkCpp::Packet p = _con.recv(100);
         if (!p)
         {
+
             break;
         }
     }
@@ -58,14 +61,15 @@ void Toc::run()
 TocInfo Toc::getTocInfo()
 {
     //ask for the toc info
-    _con.sendInt(PARAM_PORT, TOC_CHANNEL, CMD_TOC_INFO_V2);
+
+    _con.sendInt(CMD_TOC_INFO_V2);
     bitcraze::crazyflieLinkCpp::Packet p_recv = _con.recv(0);
     return TocInfo(p_recv);
 }
 TocItem Toc::getItemFromToc(uint16_t id)
 {
     //ask for a param with the given id
-    _con.sendInt(PARAM_PORT, TOC_CHANNEL, CMD_TOC_ITEM_V2, id);
+    _con.sendInt(CMD_TOC_ITEM_V2, id);
     bitcraze::crazyflieLinkCpp::Packet p_recv = _con.recv(0);
     return TocItem(p_recv);
 }
@@ -75,15 +79,18 @@ std::vector<TocItem> Toc::getToc()
     std::vector<TocItem> tocItems;
 
     uint16_t num_of_elements = getTocInfo()._numberOfElements;
+
     for (uint16_t i = 0; i < num_of_elements; i++)
     {
         tocItems.push_back(getItemFromToc(i));
     }
+
     return tocItems;
 }
 void Toc::printToc()
 {
     auto tocItems = getToc();
+
     for (TocItem tocItem : tocItems)
     {
         // tocItem

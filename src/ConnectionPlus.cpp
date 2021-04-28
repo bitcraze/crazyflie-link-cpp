@@ -1,4 +1,7 @@
-#include "ConnectionPlus.h"
+#include "crazyflieLinkCpp/ConnectionPlus.h"
+
+using namespace bitcraze::crazyflieLinkCpp;
+
 
 ConnectionPlus::ConnectionPlus(std::string uri) : Connection(uri)
 {
@@ -16,7 +19,7 @@ void ConnectionPlus::sendInt(uint8_t intigerToSend)
     this->send(_packet);
 }
 
-void ConnectionPlus::sendInt(uint8_t intigerToSend, uint8_t extraData)
+void ConnectionPlus::sendInt(uint8_t intigerToSend, uint16_t extraData)
 {
 
     _packet.setPayloadSize(sizeof(intigerToSend) + sizeof(extraData));
@@ -40,8 +43,9 @@ void ConnectionPlus::sendInt(uint8_t intigerToSend, int port, int channel)
     this->setChannel(channel);
     this->sendInt(intigerToSend);
 }
-void ConnectionPlus::sendInt(uint8_t intigerToSend, uint8_t extraData, int port, int channel)
+void ConnectionPlus::sendInt(uint8_t intigerToSend, uint16_t extraData, int port, int channel)
 {
+
     this->setPort(port);
     this->setChannel(channel);
     this->sendInt(intigerToSend, extraData);
