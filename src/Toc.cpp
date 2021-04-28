@@ -1,6 +1,5 @@
 #include "crazyflieLinkCpp/Toc.h"
-
-
+#include <bitset>
 
 TocItem::TocItem(bitcraze::crazyflieLinkCpp::Packet &p_recv)
 {
@@ -94,6 +93,23 @@ void Toc::printToc()
     for (TocItem tocItem : tocItems)
     {
         // tocItem
-        std::cout << tocItem._paramId << ": " << (int)tocItem._paramType << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
+        std::cout << tocItem._paramId << ": " << getStrType(tocItem._paramType) << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
     }
+}
+
+std::string Toc::getStrType(uint8_t type)
+{
+    std::string accessType;
+    // std::cout << std::bitset<8>(type).to_string()<< std::endl;
+    // std::cout << (int)(type & ACCESS_TYPE_BYTE) << std::endl;
+
+    if((bool)(type & ACCESS_TYPE_BYTE) == (bool)RO_ACCESS)
+    {
+        accessType = "RO";
+        type = type & ~ACCESS_TYPE_BYTE;
+    }
+    else{
+        accessType = "RW";
+    }
+    return accessType +":"+ types[type].first;
 }
