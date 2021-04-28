@@ -5,15 +5,71 @@
 #include <chrono>
 #include <sstream>
 #include <queue>
+#include <vector>
 
 #include "crazyflieLinkCpp/Connection.h"
 
+#define PARAM_PORT 2
+#define TOC_CHANNEL 0
+
+#define CMD_TOC_ELEMENT 0 // original version: up to 255 entries
+#define CMD_TOC_INFO 1    // original version: up to 255 entries
+#define CMD_TOC_ITEM_V2 2 // version 2: up to 16k entries
+#define CMD_TOC_INFO_V2 3 // version 2: up to 16k entries
+
 using namespace bitcraze::crazyflieLinkCpp;
+
+struct TocItem
+{
+    std::string _groupName;
+    std::string _paramName;
+    uint8_t _cmdNum;
+    uint8_t _paramType;
+    uint16_t _paramId;
+
+    TocItem(Packet &p_recv)
+    {
+        _cmdNum = p_recv.payload()[0];
+        _paramId = 0;
+        memcpy(&_paramId, &p_recv.payload()[1], sizeof(_paramId));
+        _paramType = p_recv.payload()[3];
+        _groupName = (char *)(&p_recv.payload()[4]);
+        _paramName = (char *)(&p_recv.payload()[4] + _groupName.length() + 1);
+    }
+    friend std::ostream &operator<<(std::ostream &out, const TocItem &tocItem)
+    {
+        out << "cmdNum: " << (int)tocItem._cmdNum << std::endl;
+        out << "paramId: " << (int)tocItem._paramId << std::endl;
+        out << "paramType: " << (int)tocItem._paramType << std::endl;
+        out << "groupName: " << tocItem._groupName << std::endl;
+        out << "paramName: " << tocItem._paramName << std::endl;
+        return out;
+    }
+};
+
+struct TocInfo
+{
+    uint16_t _numberOfElements;
+    uint32_t _crc;
+
+    TocInfo(Packet& p_recv)
+    {
+        memcpy(&_numberOfElements, &p_recv.payload()[1], sizeof(_numberOfElements));
+        memcpy(&_crc, &p_recv.payload()[3], sizeof(_crc));
+    }
+
+    friend std::ostream &operator<<(std::ostream &out, const TocInfo &tocInfo)
+    {
+        out << "numberOfElements: " << (int)tocInfo._numberOfElements << std::endl;
+        out << "crc: " << (int)tocInfo._crc << std::endl;
+        return out;
+    }
+};
 
 class Benchmark
 {
 public:
-    Benchmark(const std::string& uri)
+    Benchmark(const std::string &uri)
         : uri_(uri)
     {
     }
@@ -31,113 +87,96 @@ public:
                 break;
             }
         }
-
-        Packet p;
-        p.setPort(15);   // Link port
-        p.setChannel(0); // echo channel
-        p.setPayloadSize(sizeof(uint32_t));
         
-        // Latency experiment
-        double latency_sum = 0.0;
-        latency_min = std::numeric_limits<double>::max();
-        const size_t count = 1000;
-        for (uint32_t i = 0; i < count; ++i)
-        {
-            std::memcpy(p.payload(), &i, sizeof(i));
-            auto start = std::chrono::steady_clock::now();
-            con.send(p);
-            Packet p_recv = con.recv(0);
-            auto end = std::chrono::steady_clock::now();
-            std::chrono::duration<double> diff = end - start;
-
-            uint32_t recv_i;
-            std::memcpy(&recv_i, p_recv.payload(), sizeof(recv_i));
-            if (p_recv.payloadSize() != p.payloadSize() || i != recv_i)
-            {
-                std::stringstream sstr;
-                sstr << "Latency: Sent " << i << " but received " << recv_i << "! (" << p_recv << ")";
-                throw std::runtime_error(sstr.str());
-            }
-            latency_sum += diff.count();
-            latency_min = std::min(diff.count(), latency_min);
-            // std::cout << p_recv << " " << diff.count() << std::endl;
-        }
-        latency_avg = latency_sum / (double)count;
-
-        // Bandwidth experiment
-        auto start = std::chrono::steady_clock::now();
-        for (uint32_t i = 0; i < count; ++i)
-        {
-            std::memcpy(p.payload(), &i, sizeof(i));
-            con.send(p);
-        }
-        Packet p_old;
-        for (uint32_t i = 0; i < count; ++i)
-        {
-            Packet p_recv = con.recv(0);
-            uint32_t recv_i;
-            std::memcpy(&recv_i, p_recv.payload(), sizeof(recv_i));
-            if (p_recv.payloadSize() != p.payloadSize() || i != recv_i)
-            {
-                std::stringstream sstr;
-                sstr << "Bandwith: Sent " << i << " but received " << recv_i << "! (" << p_recv << ")";
-
-                // DBG
-                sstr << std::endl;
-                sstr << " previous: " << p_old << std::endl;
-                sstr << " current: " << p_recv << std::endl;
-                sstr << " new/future ";
-                for (size_t k = 0; k < 10; ++k) {
-                    Packet p_recv2 = con.recv(0);
-                    sstr << p_recv2 << std::endl;
-                }
-
-                // DBG
-
-
-                throw std::runtime_error(sstr.str());
-            }
-            p_old = p_recv;
-        }
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<double> diff = end - start;
-        double total_duration = diff.count();
-        bandwidth = count / total_duration;
+        printToc(con);
+      
+        
+    }
+    TocInfo getTocInfo(Connection& con)
+    {
+        //ask for the toc info
+        sendInt(con, PARAM_PORT, TOC_CHANNEL, CMD_TOC_INFO_V2);
+        Packet p_recv = con.recv(0);
+        return TocInfo(p_recv);
+    }
+    TocItem getItemFromToc(Connection& con, uint16_t id)
+    {
+        //ask for a param with the given id
+        sendInt(con, PARAM_PORT, TOC_CHANNEL, CMD_TOC_ITEM_V2, id);
+        Packet p_recv = con.recv(0);
+        return TocItem (p_recv);
     }
 
+    std::vector<TocItem> getToc(Connection& con)
+    {
+        std::vector<TocItem> tocItems;
+
+        uint16_t num_of_elements = getTocInfo(con)._numberOfElements;
+        for (uint16_t i = 0; i < num_of_elements; i++)
+        {
+            tocItems.push_back(getItemFromToc(con, i));
+        }
+        return tocItems;
+    }
+    void printToc(Connection& con)
+    {
+        auto tocItems = getToc(con);
+        for(TocItem tocItem : tocItems)
+        {
+            // tocItem
+            std::cout << tocItem._paramId << ": " << (int)tocItem._paramType << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
+        }
+    }
+
+    void sendInt(Connection &con, int port, int channel, uint8_t intigerToSend)
+    {
+        Packet p;
+        p.setPort(port);
+        p.setChannel(channel);
+
+        p.setPayloadSize(sizeof(intigerToSend));
+        std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
+
+        con.send(p);
+    }
+
+    void sendInt(Connection &con, int port, int channel, uint8_t intigerToSend, uint8_t extraData)
+    {
+        Packet p;
+        p.setPort(port);
+        p.setChannel(channel);
+
+        p.setPayloadSize(sizeof(intigerToSend) + sizeof(extraData));
+        std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
+        std::memcpy(p.payload() + sizeof(intigerToSend), &extraData, sizeof(extraData));
+
+        con.send(p);
+    }
 
 public:
-    double latency_avg;
-    double latency_min;
-    double bandwidth;
-
 private:
     std::string uri_;
-
 };
 
 int main()
 {
-    // std::vector<std::string> uris({"radio://*/80/2M/E7E7E7E7E7", "radio://*/90/2M/E7E7E7E7E7"});
-    std::vector<std::string> uris({"radio://*/80/2M/E7E7E7E7E7"});
+    std::vector<std::string> uris({"usb://0"});
+    std::cout << "connecting to crazyflie via usb 0" << std::endl;
 
     std::vector<Benchmark> benchmarks;
     benchmarks.reserve(uris.size());
     std::vector<std::thread> threads;
     threads.reserve(uris.size());
 
-    for (const auto& uri : uris) {
+    for (const auto &uri : uris)
+    {
         benchmarks.emplace_back(Benchmark(uri));
         threads.emplace_back(std::thread(&Benchmark::run, &benchmarks.back()));
     }
 
-    for (auto& t : threads) {
+    for (auto &t : threads)
+    {
         t.join();
-    }
-
-    for (auto& b: benchmarks) {
-        std::cout << "Latency: Min: " << b.latency_min * 1000.0f << " ms; Avg: " << b.latency_avg * 1000.0f << " ms" << std::endl;
-        std::cout << "Bandwidth: " << b.bandwidth << " packets/s" << std::endl;
     }
 
     return 0;
