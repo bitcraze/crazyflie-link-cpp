@@ -93,23 +93,29 @@ void Toc::printToc()
     for (TocItem tocItem : tocItems)
     {
         // tocItem
-        std::cout << tocItem._paramId << ": " << getStrType(tocItem._paramType) << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
+        auto accessAndType = getAccessAndStrType(tocItem._paramType);
+        std::string accessStr;
+        if (RO_ACCESS == accessAndType.first)
+            accessStr = "RO";
+        else
+            accessStr = "RW";
+
+        std::cout << tocItem._paramId << ": " << accessStr << ":" << accessAndType.second << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
     }
 }
 
-std::string Toc::getStrType(uint8_t type)
+std::pair<int, std::string> Toc::getAccessAndStrType(uint8_t type)
 {
-    std::string accessType;
-    // std::cout << std::bitset<8>(type).to_string()<< std::endl;
-    // std::cout << (int)(type & ACCESS_TYPE_BYTE) << std::endl;
+    int accessType;
 
-    if((bool)(type & ACCESS_TYPE_BYTE) == (bool)RO_ACCESS)
+    if ((bool)(type & ACCESS_TYPE_BYTE) == (bool)RO_ACCESS)
     {
-        accessType = "RO";
+        accessType = RO_ACCESS;
         type = type & ~ACCESS_TYPE_BYTE;
     }
-    else{
-        accessType = "RW";
+    else
+    {
+        accessType = RW_ACCESS;
     }
-    return accessType +":"+ types[type].first;
+    return std::pair<int, std::string>(accessType, types[type].first);
 }

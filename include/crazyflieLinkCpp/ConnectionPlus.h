@@ -12,6 +12,11 @@
 
 #define PAYLOAD_MAX_SIZE CRTP_MAXSIZE-2
 
+#define PARAM_PORT 2
+
+
+
+
 class ConnectionPlus : public bitcraze::crazyflieLinkCpp::Connection
 {
 private:
@@ -28,12 +33,12 @@ public:
     void sendInt(uint8_t intigerToSend, int port, int channel);
     void sendInt(uint8_t intigerToSend, uint16_t extraData, int port, int channel);
 
-    template <typename IntType>
-    void sendObject(const IntType& objectToSend)
+    template <typename ObjectToSendType>
+    void sendObject(const ObjectToSendType& objectToSend)
     {
         std::cout << (int)objectToSend << std::endl;
 
-        if(sizeof(IntType) > PAYLOAD_MAX_SIZE)
+        if(sizeof(ObjectToSendType) > PAYLOAD_MAX_SIZE)
             throw std::runtime_error("Object to large to send as a backage. Size: " + sizeof(objectToSend));
         _packet.setPayloadSize(sizeof(objectToSend));
         std::memcpy(_packet.payload(), &objectToSend, sizeof(objectToSend));

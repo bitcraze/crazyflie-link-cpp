@@ -5,7 +5,6 @@
 #include <map>
 #include "ConnectionPlus.h"
 
-#define PARAM_PORT 2
 #define TOC_CHANNEL 0
 
 #define CMD_TOC_ELEMENT 0 // original version: up to 255 entries
@@ -51,7 +50,7 @@ public:
     void run();
     TocInfo getTocInfo();
     TocItem getItemFromToc(uint16_t id);
-    std::string getStrType(uint8_t type);
+    std::pair<int, std::string> getAccessAndStrType(uint8_t type);
 
     std::vector<TocItem> getToc();
     void printToc();
@@ -72,5 +71,5 @@ public:
          TypeMapPair(0x07, StrPair({"double", "<d"}))};
 
 private:
-    ConnectionPlus _con;
+    ConnectionPlus& _con;
 };
