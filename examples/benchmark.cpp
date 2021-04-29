@@ -7,7 +7,7 @@
 #include <queue>
 #include <vector>
 
-#include "crazyflieLinkCpp/ConnectionPlus.h"
+#include "crazyflieLinkCpp/ConnectionWrapper.h"
 
 #define PARAM_PORT 2
 #define TOC_CHANNEL 0
@@ -78,7 +78,8 @@ public:
 
     void run()
     {
-        ConnectionPlus con(uri_);
+        Connection con(uri_);
+        ConnectionWrapper conWrapper(con);
 
         // empty receiver queue
         while (true)
@@ -90,11 +91,11 @@ public:
             }
         }
 
-        con.setPort(PARAM_PORT);
-        con.setChannel(PARAM_READ_CHANNEL);
+        conWrapper.setPort(PARAM_PORT);
+        conWrapper.setChannel(PARAM_READ_CHANNEL);
         for (uint16_t i = 0; i < 100; i++)
         {
-            con.sendObject<uint16_t>(i);
+            conWrapper.sendObject<uint16_t>(i);
 
             while (true)
             {

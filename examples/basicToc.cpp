@@ -34,7 +34,8 @@ using namespace bitcraze::crazyflieLinkCpp;
 
 int main()
 {
-    Toc toc("usb://0");
+    Connection con("usb://0");
+    Toc toc(con);
     toc.run();
     // std::vector<std::string> uris({"usb://0"});
     // std::cout << "connecting to crazyflie via usb 0" << std::endl;

@@ -40,7 +40,8 @@ add_library(crazyflieLinkCpp
   src/CrazyflieUSBThread.cpp
   src/Version.cpp
   src/Toc.cpp
-  src/ConnectionPlus.cpp
+  src/Param.cpp
+  src/ConnectionWrapper.cpp
 )
 
 # target_include_directories(libCrazyflieLinkCpp
