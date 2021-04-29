@@ -95,11 +95,19 @@ target_link_libraries(example_benchmark
   crazyflieLinkCpp
 )
 
-# example_test
-add_executable(example_test
-  examples/test.cpp
+# example_basicToc
+add_executable(example_basicToc
+  examples/basicToc.cpp
 )
-target_link_libraries(example_test
+target_link_libraries(example_basicToc
+  crazyflieLinkCpp
+)
+
+# example_basicParam
+add_executable(example_basicParam
+  examples/basicParam.cpp
+)
+target_link_libraries(example_basicParam
   crazyflieLinkCpp
 )
 
