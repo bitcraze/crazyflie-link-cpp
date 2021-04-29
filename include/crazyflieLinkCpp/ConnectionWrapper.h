@@ -13,9 +13,14 @@
 #define PAYLOAD_MAX_SIZE CRTP_MAXSIZE-2
 
 #define PARAM_PORT 2
-
-
-
+#pragma push(pack)
+#pragma pack(1)
+struct
+{
+    uint8_t a;
+    uint16_t b;
+};
+#pragma pop(pack)
 
 class ConnectionWrapper
 {

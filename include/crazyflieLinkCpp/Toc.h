@@ -53,10 +53,11 @@ public:
     void printToc();
     std::string accessTypeToStr(int accessType);
 
-        typedef std::pair<std::string, std::string> StrPair;
+    typedef std::pair<std::string, std::string> StrPair;
     typedef std::pair<uint8_t, StrPair> TypeMapPair;
     std::map<uint8_t, StrPair>
-        types = {TypeMapPair(0x08, StrPair({"uint8_t", "<B"})),
+        types = {//          TypeId     TypeName
+                 TypeMapPair(0x08, StrPair({"uint8_t", "<B"})),
                  TypeMapPair(0x09, StrPair({"uint16_t", "<H"})),
                  TypeMapPair(0x0A, StrPair({"uint32_t", "<L"})),
                  TypeMapPair(0x0B, StrPair({"uint64_t", "<Q"})),
