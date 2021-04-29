@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <map>
-#include "ConnectionPlus.h"
+#include "ConnectionWrapper.h"
 
 #define TOC_CHANNEL 0
 
@@ -15,8 +15,6 @@
 #define RW_ACCESS 0
 #define RO_ACCESS 1
 #define ACCESS_TYPE_BYTE 64
-
-
 
 struct TocItem
 {
@@ -42,10 +40,9 @@ struct TocInfo
 
 class Toc
 {
-    
-    
+
 public:
-    Toc(const std::string &uri);
+    Toc(bitcraze::crazyflieLinkCpp::Connection &uri);
 
     void run();
     TocInfo getTocInfo();
@@ -54,22 +51,24 @@ public:
 
     std::vector<TocItem> getToc();
     void printToc();
+    std::string accessTypeToStr(int accessType);
 
-    typedef std::pair<std::string, std::string> StrPair;
+        typedef std::pair<std::string, std::string> StrPair;
     typedef std::pair<uint8_t, StrPair> TypeMapPair;
     std::map<uint8_t, StrPair>
-    types = {TypeMapPair(0x08, StrPair({"uint8_t", "<B"})),
-         TypeMapPair(0x09, StrPair({"uint16_t", "<H"})),
-         TypeMapPair(0x0A, StrPair({"uint32_t", "<L"})),
-         TypeMapPair(0x0B, StrPair({"uint64_t", "<Q"})),
-         TypeMapPair(0x00, StrPair({"int8_t", "<b"})),
-         TypeMapPair(0x01, StrPair({"int16_t", "<h"})),
-         TypeMapPair(0x02, StrPair({"int32_t", "<i"})),
-         TypeMapPair(0x03, StrPair({"int64_t", "<q"})),
-         TypeMapPair(0x05, StrPair({"FP16", ""})),
-         TypeMapPair(0x06, StrPair({"float", "<f"})),
-         TypeMapPair(0x07, StrPair({"double", "<d"}))};
+        types = {TypeMapPair(0x08, StrPair({"uint8_t", "<B"})),
+                 TypeMapPair(0x09, StrPair({"uint16_t", "<H"})),
+                 TypeMapPair(0x0A, StrPair({"uint32_t", "<L"})),
+                 TypeMapPair(0x0B, StrPair({"uint64_t", "<Q"})),
+                 TypeMapPair(0x00, StrPair({"int8_t", "<b"})),
+                 TypeMapPair(0x01, StrPair({"int16_t", "<h"})),
+                 TypeMapPair(0x02, StrPair({"int32_t", "<i"})),
+                 TypeMapPair(0x03, StrPair({"int64_t", "<q"})),
+                 TypeMapPair(0x05, StrPair({"FP16", ""})),
+                 TypeMapPair(0x06, StrPair({"float", "<f"})),
+                 TypeMapPair(0x07, StrPair({"double", "<d"}))};
 
 private:
-    ConnectionPlus& _con;
+    ConnectionWrapper _conWrapper;
+    bitcraze::crazyflieLinkCpp::Connection &_con;
 };

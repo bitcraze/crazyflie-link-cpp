@@ -1,5 +1,6 @@
 #include "crazyflieLinkCpp/Toc.h"
 #include <bitset>
+using namespace bitcraze::crazyflieLinkCpp;
 
 TocItem::TocItem(bitcraze::crazyflieLinkCpp::Packet &p_recv)
 {
@@ -34,11 +35,11 @@ std::ostream &operator<<(std::ostream &out, const TocInfo &tocInfo)
     return out;
 }
 
-Toc::Toc(const std::string &uri)
-    : _con(uri)
+Toc::Toc(Connection &con)
+    : _conWrapper(con), _con(con)
 {
-    _con.setPort(PARAM_PORT);
-    _con.setChannel(TOC_CHANNEL);
+    _conWrapper.setPort(PARAM_PORT);
+    _conWrapper.setChannel(TOC_CHANNEL);
 }
 
 void Toc::run()
@@ -61,14 +62,16 @@ TocInfo Toc::getTocInfo()
 {
     //ask for the toc info
 
-    _con.sendInt(CMD_TOC_INFO_V2);
+
+    _conWrapper.sendInt(CMD_TOC_INFO_V2);
     bitcraze::crazyflieLinkCpp::Packet p_recv = _con.recv(0);
+ 
     return TocInfo(p_recv);
 }
 TocItem Toc::getItemFromToc(uint16_t id)
 {
     //ask for a param with the given id
-    _con.sendInt(CMD_TOC_ITEM_V2, id);
+    _conWrapper.sendInt(CMD_TOC_ITEM_V2, id);
     bitcraze::crazyflieLinkCpp::Packet p_recv = _con.recv(0);
     return TocItem(p_recv);
 }
@@ -94,14 +97,15 @@ void Toc::printToc()
     {
         // tocItem
         auto accessAndType = getAccessAndStrType(tocItem._paramType);
-        std::string accessStr;
-        if (RO_ACCESS == accessAndType.first)
-            accessStr = "RO";
-        else
-            accessStr = "RW";
-
-        std::cout << tocItem._paramId << ": " << accessStr << ":" << accessAndType.second << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
+        std::cout << tocItem._paramId << ": " << accessTypeToStr(accessAndType.first) << ":" << accessAndType.second << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
     }
+}
+std::string Toc::accessTypeToStr(int accessType)
+{
+    if (RO_ACCESS == accessType)
+        return "RO";
+    else
+        return "RW";
 }
 
 std::pair<int, std::string> Toc::getAccessAndStrType(uint8_t type)
