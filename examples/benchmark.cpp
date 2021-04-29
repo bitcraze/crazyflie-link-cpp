@@ -7,10 +7,12 @@
 #include <queue>
 #include <vector>
 
-#include "crazyflieLinkCpp/Connection.h"
+#include "crazyflieLinkCpp/ConnectionPlus.h"
 
 #define PARAM_PORT 2
 #define TOC_CHANNEL 0
+#define PARAM_READ_CHANNEL 1
+#define PARAM_WRITE_CHANNEL 2
 
 #define CMD_TOC_ELEMENT 0 // original version: up to 255 entries
 #define CMD_TOC_INFO 1    // original version: up to 255 entries
@@ -52,7 +54,7 @@ struct TocInfo
     uint16_t _numberOfElements;
     uint32_t _crc;
 
-    TocInfo(Packet& p_recv)
+    TocInfo(Packet &p_recv)
     {
         memcpy(&_numberOfElements, &p_recv.payload()[1], sizeof(_numberOfElements));
         memcpy(&_crc, &p_recv.payload()[3], sizeof(_crc));
@@ -76,7 +78,7 @@ public:
 
     void run()
     {
-        Connection con(uri_);
+        ConnectionPlus con(uri_);
 
         // empty receiver queue
         while (true)
@@ -87,71 +89,60 @@ public:
                 break;
             }
         }
-        
-        printToc(con);
-      
-        
-    }
-    TocInfo getTocInfo(Connection& con)
-    {
-        //ask for the toc info
-        sendInt(con, PARAM_PORT, TOC_CHANNEL, CMD_TOC_INFO_V2);
-        Packet p_recv = con.recv(0);
-        return TocInfo(p_recv);
-    }
-    TocItem getItemFromToc(Connection& con, uint16_t id)
-    {
-        //ask for a param with the given id
-        sendInt(con, PARAM_PORT, TOC_CHANNEL, CMD_TOC_ITEM_V2, id);
-        Packet p_recv = con.recv(0);
-        return TocItem (p_recv);
-    }
 
-    std::vector<TocItem> getToc(Connection& con)
-    {
-        std::vector<TocItem> tocItems;
+        con.setPort(PARAM_PORT);
+        con.setChannel(PARAM_READ_CHANNEL);
+        for (uint16_t i = 0; i < 100; i++)
+        {
+            con.sendObject<uint16_t>(i);
 
-        uint16_t num_of_elements = getTocInfo(con)._numberOfElements;
-        for (uint16_t i = 0; i < num_of_elements; i++)
-        {
-            tocItems.push_back(getItemFromToc(con, i));
-        }
-        return tocItems;
-    }
-    void printToc(Connection& con)
-    {
-        auto tocItems = getToc(con);
-        for(TocItem tocItem : tocItems)
-        {
-            // tocItem
-            std::cout << tocItem._paramId << ": " << (int)tocItem._paramType << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
+            while (true)
+            {
+                Packet p = con.recv(100);
+
+                if (!p)
+                {
+                    break;
+                }
+                std::cout << p << std::endl;
+            }
         }
     }
+    // TocInfo getTocInfo(Connection& con)
+    // {
+    //     //ask for the toc info
+    //     sendInt(con, PARAM_PORT, TOC_CHANNEL, CMD_TOC_INFO_V2);
+    //     Packet p_recv = con.recv(0);
+    //     return TocInfo(p_recv);
+    // }
+    // TocItem getItemFromToc(Connection& con, uint16_t id)
+    // {
+    //     //ask for a param with the given id
+    //     sendInt(con, PARAM_PORT, TOC_CHANNEL, CMD_TOC_ITEM_V2, id);
+    //     Packet p_recv = con.recv(0);
+    //     return TocItem (p_recv);
+    // }
 
-    void sendInt(Connection &con, int port, int channel, uint8_t intigerToSend)
-    {
-        Packet p;
-        p.setPort(port);
-        p.setChannel(channel);
+    // std::vector<TocItem> getToc(Connection& con)
+    // {
+    //     std::vector<TocItem> tocItems;
 
-        p.setPayloadSize(sizeof(intigerToSend));
-        std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
-
-        con.send(p);
-    }
-
-    void sendInt(Connection &con, int port, int channel, uint8_t intigerToSend, uint8_t extraData)
-    {
-        Packet p;
-        p.setPort(port);
-        p.setChannel(channel);
-
-        p.setPayloadSize(sizeof(intigerToSend) + sizeof(extraData));
-        std::memcpy(p.payload(), &intigerToSend, sizeof(intigerToSend));
-        std::memcpy(p.payload() + sizeof(intigerToSend), &extraData, sizeof(extraData));
-
-        con.send(p);
-    }
+    //     uint16_t num_of_elements = getTocInfo(con)._numberOfElements;
+    //     for (uint16_t i = 0; i < num_of_elements; i++)
+    //     {
+    //         tocItems.push_back(getItemFromToc(con, i));
+    //     }
+    //     return tocItems;
+    // }
+    // void printToc(Connection& con)
+    // {
+    //     auto tocItems = getToc(con);
+    //     for(TocItem tocItem : tocItems)
+    //     {
+    //         // tocItem
+    //         std::cout << tocItem._paramId << ": " << (int)tocItem._paramType << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
+    //     }
+    // }
 
 public:
 private:
