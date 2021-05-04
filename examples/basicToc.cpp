@@ -37,6 +37,7 @@ int main()
     Connection con("usb://0");
     Toc toc(con);
     toc.run();
+    std::cout << "------------------------------------" << std::endl;
     // std::vector<std::string> uris({"usb://0"});
     // std::cout << "connecting to crazyflie via usb 0" << std::endl;
 

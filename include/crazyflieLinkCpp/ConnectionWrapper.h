@@ -13,14 +13,14 @@
 #define PAYLOAD_MAX_SIZE CRTP_MAXSIZE-2
 
 #define PARAM_PORT 2
-#pragma push(pack)
-#pragma pack(1)
-struct
+// #pragma push(pack)
+// #pragma pack(1)
+struct TocItemMessage
 {
-    uint8_t a;
-    uint16_t b;
+    uint8_t _cmd;
+    uint16_t _id;
 };
-#pragma pop(pack)
+// #pragma pop(pack)
 
 class ConnectionWrapper
 {

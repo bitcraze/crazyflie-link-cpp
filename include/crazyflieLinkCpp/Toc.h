@@ -31,6 +31,7 @@ struct TocItem
 struct TocInfo
 {
     uint16_t _numberOfElements;
+    // uint16_t _getItemFromToc;
     uint32_t _crc;
 
     TocInfo(bitcraze::crazyflieLinkCpp::Packet &p_recv);
@@ -73,3 +74,6 @@ private:
     ConnectionWrapper _conWrapper;
     bitcraze::crazyflieLinkCpp::Connection &_con;
 };
+
+
+void sendData(uint32_t data1, uint32_t data1_len, uint32_t data2 = 0 , uint32_t data2_len =0);
