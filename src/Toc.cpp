@@ -44,20 +44,18 @@ Toc::Toc(Connection &con)
 
 void Toc::run()
 {
-
     // empty receiver queue
     while (true)
     {
         bitcraze::crazyflieLinkCpp::Packet p = _con.recv(100);
         if (!p)
         {
-
             break;
         }
     }
-
     printToc();
 }
+
 TocInfo Toc::getTocInfo()
 {
     //ask for the toc info
@@ -68,6 +66,7 @@ TocInfo Toc::getTocInfo()
  
     return TocInfo(p_recv);
 }
+
 TocItem Toc::getItemFromToc(uint16_t id)
 {
     //ask for a param with the given id
@@ -89,9 +88,10 @@ std::vector<TocItem> Toc::getToc()
 
     return tocItems;
 }
+
 void Toc::printToc()
 {
-    auto tocItems = getToc();
+    auto tocItems = getToc(); 
 
     for (TocItem tocItem : tocItems)
     {
@@ -100,6 +100,7 @@ void Toc::printToc()
         std::cout << tocItem._paramId << ": " << accessTypeToStr(accessAndType.first) << ":" << accessAndType.second << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
     }
 }
+
 std::string Toc::accessTypeToStr(int accessType)
 {
     if (RO_ACCESS == accessType)
