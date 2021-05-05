@@ -21,8 +21,9 @@ Connection::Connection(const std::string &uri)
   // "radio://0/80/2M/E7E7E7E7E7" -> connect over radio
   // "radio://*/80/2M/E7E7E7E7E7" -> auto-pick radio
   // "radio://*/80/2M/*" -> broadcast/P2P sniffing on channel 80
+  // "radio://0/80/2M/*?broadcast=1 -> broadcast to all crazyflies on channel 80
 
-  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]+|\\*)(\\?[\\w=&]+)?)");
+  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/(broadcast|([a-fA-F0-9]+|\\*)(\\?[\\w=&]+)?))");
   std::smatch match;
   if (!std::regex_match(uri, match, uri_regex)) {
     std::stringstream sstr;
@@ -65,42 +66,52 @@ Connection::Connection(const std::string &uri)
       impl_->datarate_ = Crazyradio::Datarate_2MPS;
     }
 
-    // Address is represented by 40 bytes => 10 hex chars max
-    if (match[6].str().length() > 10) {
-        std::stringstream sstr;
-        sstr << "Invalid uri (" << uri << ")!";
-        throw std::runtime_error(sstr.str());
+    if (match[6].str() == "broadcast") {
+        impl_->address_ = BROADCAST_ADDRESS;
+        impl_->useSafelink_ = false;
+        impl_->useAutoPing_ = false;
+        impl_->useAckFilter_ = false;
+        impl_->broadcast_ = true;
     }
-    impl_->address_ = std::stoull(match[6].str(), nullptr, 16);
+    else {
+        // Address is represented by 40 bytes => 10 hex chars max
+        if (match[6].str().length() > 10) {
+            std::stringstream sstr;
+            sstr << "Invalid uri (" << uri << ")!";
+            throw std::runtime_error(sstr.str());
+        }
+        impl_->address_ = std::stoull(match[6].str(), nullptr, 16);
 
-    // parse flags
-    impl_->useSafelink_ = true;
-    impl_->useAutoPing_ = true;
-    impl_->useAckFilter_ = true;
+        // parse flags
+        impl_->useSafelink_ = true;
+        impl_->useAutoPing_ = true;
+        impl_->useAckFilter_ = true;
+        impl_->broadcast_ = false;
 
-    if (match[7].length() > 0) {
-      std::stringstream sstr(match[7].str().substr(1));
-      std::string keyvalue;
-      const std::regex params_regex("(safelink|autoping|ackfilter)=([0|1])");
-      while (getline(sstr, keyvalue, '&')) {
-        std::smatch match;
-        if (!std::regex_match(keyvalue, match, params_regex)) {
-          std::stringstream sstr;
-          sstr << "Invalid uri (" << uri << ")! ";
-          sstr << "Unknown " << keyvalue << ".";
-          throw std::runtime_error(sstr.str());
-        }
+        if (match[8].length() > 0) {
+            std::stringstream sstr(match[7].str().substr(1));
+            std::string keyvalue;
+            const std::regex params_regex("(safelink|autoping|ackfilter)=([0|1])");
+            while (getline(sstr, keyvalue, '&')) {
+                std::smatch match;
+                if (!std::regex_match(keyvalue, match, params_regex)) {
+                    std::stringstream sstr;
+                    sstr << "Invalid uri (" << uri << ")! ";
+                    sstr << "Unknown " << keyvalue << ".";
+                    throw std::runtime_error(sstr.str());
+                }
 
-        if (match[1].str() == "safelink" && match[2].str() == "0") {
-          impl_->useSafelink_ = false;
+                if (match[1].str() == "safelink" && match[2].str() == "0") {
+                    impl_->useSafelink_ = false;
+                }
+                if (match[1].str() == "autoping" && match[2].str() == "0") {
+                    impl_->useAutoPing_ = false;
+                }
+                if (match[1].str() == "ackfilter" && match[2].str() == "0") {
+                    impl_->useAckFilter_ = false;
+                }
+            }
         }
-        if (match[1].str() == "autoping" && match[2].str() == "0") {
-          impl_->useAutoPing_ = false;
-        }
-        if (match[1].str() == "ackfilter" && match[2].str() == "0") {
-          impl_->useAckFilter_ = false;
-        }
-      }
     }
 
     impl_->safelinkInitialized_ = false;

@@ -93,6 +93,15 @@ target_link_libraries(example_benchmark
   crazyflieLinkCpp
 )
 
+# example_broadcast
+add_executable(example_broadcast
+  examples/broadcast.cpp
+  examples/PacketUtils.hpp
+)
+target_link_libraries(example_broadcast
+  crazyflieLinkCpp
+)
+
 # Python bindings
 add_subdirectory(pybind11)
 

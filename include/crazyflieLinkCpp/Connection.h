@@ -9,6 +9,8 @@
 
 #include "Packet.hpp"
 
+#define BROADCAST_ADDRESS 0xFFE7E7E7E7
+
 namespace bitcraze {
 namespace crazyflieLinkCpp {
 

@@ -32,6 +32,7 @@ public:
     bool safelinkInitialized_;
     bool safelinkDown_;
     bool safelinkUp_;
+    bool broadcast_;
 
     std::mutex queue_send_mutex_;
     std::priority_queue<Packet, std::vector<Packet>, std::greater<Packet>> queue_send_;
