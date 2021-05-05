@@ -75,7 +75,7 @@ Connection::Connection(const std::string &uri)
     }
     else {
         // Address is represented by 40 bytes => 10 hex chars max
-        if (match[6].str().length() > 10) {
+        if (match[7].str().length() > 10) {
             std::stringstream sstr;
             sstr << "Invalid uri (" << uri << ")!";
             throw std::runtime_error(sstr.str());
@@ -89,7 +89,7 @@ Connection::Connection(const std::string &uri)
         impl_->broadcast_ = false;
 
         if (match[8].length() > 0) {
-            std::stringstream sstr(match[7].str().substr(1));
+            std::stringstream sstr(match[8].str().substr(1));
             std::string keyvalue;
             const std::regex params_regex("(safelink|autoping|ackfilter)=([0|1])");
             while (getline(sstr, keyvalue, '&')) {
