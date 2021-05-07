@@ -227,10 +227,9 @@ void CrazyradioThread::run()
                 const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
                 if (!con->queue_send_.empty())
                 {
-                    auto p = con->queue_send_.top();
+                    const auto p = con->queue_send_.top();
                     if (con->broadcast_)
                     {
-                        p.setSafelink(0);
                         radio.sendPacketNoAck(p.raw(), p.size());
                         ++con->statistics_.sent_count;
                         con->queue_send_.pop();

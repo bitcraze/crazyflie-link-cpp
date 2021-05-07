@@ -96,7 +96,6 @@ target_link_libraries(example_benchmark
 # example_broadcast
 add_executable(example_broadcast
   examples/broadcast.cpp
-  examples/PacketUtils.hpp
 )
 target_link_libraries(example_broadcast
   crazyflieLinkCpp
