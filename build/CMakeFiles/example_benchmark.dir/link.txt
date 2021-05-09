@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/example_benchmark.dir/examples/benchmark.cpp.o -o example_benchmark  libcrazyflieLinkCpp.a -lpthread /usr/lib/x86_64-linux-gnu/libusb-1.0.so 
