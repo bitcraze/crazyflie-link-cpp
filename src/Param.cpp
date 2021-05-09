@@ -15,7 +15,7 @@ float Param::getFloat(uint16_t paramId)
 
     _conWrapper.sendData(paramId, sizeof(paramId));
 
-    bitcraze::crazyflieLinkCpp::Packet p = _con.recv(0);
+    bitcraze::crazyflieLinkCpp::Packet p = _conWrapper.recvFilteredData(0);;
 
     std::memcpy(&res, p.payload() + PAYLOAD_VALUE_BEGINING_INDEX, sizeof(res));
 
@@ -28,7 +28,7 @@ uint32_t Param::getUInt(uint16_t paramId)
 
     _conWrapper.sendData(paramId, sizeof(paramId));
 
-    bitcraze::crazyflieLinkCpp::Packet p = _con.recv(0);
+    bitcraze::crazyflieLinkCpp::Packet p = _conWrapper.recvFilteredData(0);;
 
     std::memcpy(&res, p.payload() + PAYLOAD_VALUE_BEGINING_INDEX, sizeof(res));
 

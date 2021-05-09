@@ -67,8 +67,9 @@ TocInfo Toc::getTocInfo()
 
 
     _conWrapper.sendData(CMD_TOC_INFO_V2, sizeof(uint8_t));
-    bitcraze::crazyflieLinkCpp::Packet p_recv = _con.recv(0);
- 
+    bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);;
+    std::cout << "info: " << p_recv << std::endl;
+    
     return TocInfo(p_recv);
 }
 
@@ -76,7 +77,8 @@ TocItem Toc::getItemFromToc(uint16_t id)
 {
     //ask for a param with the given id
     _conWrapper.sendData(CMD_TOC_ITEM_V2, sizeof(uint8_t), id, sizeof(id));
-    bitcraze::crazyflieLinkCpp::Packet p_recv = _con.recv(0);
+    bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);;
+    std::cout << "info: " << p_recv << std::endl;
     return TocItem(p_recv);
 }
 

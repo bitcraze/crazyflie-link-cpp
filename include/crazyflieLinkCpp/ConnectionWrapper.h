@@ -9,6 +9,7 @@
 #include <queue>
 #include <vector>
 #include "Connection.h"
+#include <type_traits>
 
 #define PAYLOAD_MAX_SIZE CRTP_MAXSIZE - 2
 
@@ -21,7 +22,9 @@ struct TocItemMessage
     uint16_t _id;
 };
 // #pragma pop(pack)
+bool isBigEdian();
 
+const bool IS_BIG_EDIAN = isBigEdian();
 class ConnectionWrapper
 {
 private:
@@ -30,6 +33,11 @@ private:
 
 public:
     ConnectionWrapper(bitcraze::crazyflieLinkCpp::Connection &con);
+
+    bitcraze::crazyflieLinkCpp::Packet recvFilteredData(int timeout, int port, int channel);
+
+    //returns the data only from the same port and channel as the current _packet
+    bitcraze::crazyflieLinkCpp::Packet recvFilteredData(int timeout);
 
     ~ConnectionWrapper();
     bitcraze::crazyflieLinkCpp::Connection &getConnection();
