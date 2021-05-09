@@ -45,15 +45,18 @@ Toc::Toc(Connection &con)
 }
 
 void Toc::run()
-{
+{   
+    int i = 0;
     // empty receiver queue
     while(true)
     {
+        i++;
         bitcraze::crazyflieLinkCpp::Packet p = _con.recv(100);
         if (!p)
         {
             break;
         }
+        std::cout << "pass " << i << std::endl;
     }
     printToc();
 }
@@ -63,7 +66,7 @@ TocInfo Toc::getTocInfo()
     //ask for the toc info
 
 
-    _conWrapper.sendInt(CMD_TOC_INFO_V2);
+    _conWrapper.sendData(CMD_TOC_INFO_V2, sizeof(uint8_t));
     bitcraze::crazyflieLinkCpp::Packet p_recv = _con.recv(0);
  
     return TocInfo(p_recv);
@@ -72,7 +75,7 @@ TocInfo Toc::getTocInfo()
 TocItem Toc::getItemFromToc(uint16_t id)
 {
     //ask for a param with the given id
-    _conWrapper.sendInt(CMD_TOC_ITEM_V2, id);
+    _conWrapper.sendData(CMD_TOC_ITEM_V2, sizeof(uint8_t), id, sizeof(id));
     bitcraze::crazyflieLinkCpp::Packet p_recv = _con.recv(0);
     return TocItem(p_recv);
 }

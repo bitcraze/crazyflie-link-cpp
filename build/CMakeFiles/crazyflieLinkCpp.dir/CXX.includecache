@@ -58,25 +58,9 @@ sstream
 utils.hpp
 ../include/crazyflieLinkCpp/utils.hpp
 
-../include/crazyflieLinkCpp/Toc.h
-iostream
--
-sstream
--
-vector
--
-string
--
-map
--
-ConnectionWrapper.h
-../include/crazyflieLinkCpp/ConnectionWrapper.h
-
 ../include/crazyflieLinkCpp/utils.hpp
 
-/home/makeruser/crazyflie-link-cpp/src/Toc.cpp
-crazyflieLinkCpp/Toc.h
-/home/makeruser/crazyflie-link-cpp/src/crazyflieLinkCpp/Toc.h
-bitset
--
+/home/makeruser/crazyflie-link-cpp/src/ConnectionWrapper.cpp
+crazyflieLinkCpp/ConnectionWrapper.h
+/home/makeruser/crazyflie-link-cpp/src/crazyflieLinkCpp/ConnectionWrapper.h
 

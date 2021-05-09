@@ -21,52 +21,7 @@
 
 using namespace bitcraze::crazyflieLinkCpp;
 
-struct TocItem
-{
-    std::string _groupName;
-    std::string _paramName;
-    uint8_t _cmdNum;
-    uint8_t _paramType;
-    uint16_t _paramId;
 
-    TocItem(Packet &p_recv)
-    {
-        _cmdNum = p_recv.payload()[0];
-        _paramId = 0;
-        memcpy(&_paramId, &p_recv.payload()[1], sizeof(_paramId));
-        _paramType = p_recv.payload()[3];
-        _groupName = (char *)(&p_recv.payload()[4]);
-        _paramName = (char *)(&p_recv.payload()[4] + _groupName.length() + 1);
-    }
-    friend std::ostream &operator<<(std::ostream &out, const TocItem &tocItem)
-    {
-        out << "cmdNum: " << (int)tocItem._cmdNum << std::endl;
-        out << "paramId: " << (int)tocItem._paramId << std::endl;
-        out << "paramType: " << (int)tocItem._paramType << std::endl;
-        out << "groupName: " << tocItem._groupName << std::endl;
-        out << "paramName: " << tocItem._paramName << std::endl;
-        return out;
-    }
-};
-
-struct TocInfo
-{
-    uint16_t _numberOfElements;
-    uint32_t _crc;
-
-    TocInfo(Packet &p_recv)
-    {
-        memcpy(&_numberOfElements, &p_recv.payload()[1], sizeof(_numberOfElements));
-        memcpy(&_crc, &p_recv.payload()[3], sizeof(_crc));
-    }
-
-    friend std::ostream &operator<<(std::ostream &out, const TocInfo &tocInfo)
-    {
-        out << "numberOfElements: " << (int)tocInfo._numberOfElements << std::endl;
-        out << "crc: " << (int)tocInfo._crc << std::endl;
-        return out;
-    }
-};
 
 class Benchmark
 {
@@ -95,7 +50,7 @@ public:
         conWrapper.setChannel(PARAM_READ_CHANNEL);
         for (uint16_t i = 0; i < 100; i++)
         {
-            conWrapper.sendObject<uint16_t>(i);
+            conWrapper.sendData(i, sizeof(i));
 
             while (true)
             {

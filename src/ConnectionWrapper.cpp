@@ -2,8 +2,7 @@
 
 using namespace bitcraze::crazyflieLinkCpp;
 
-
-ConnectionWrapper::ConnectionWrapper(Connection& con) : _con(con)
+ConnectionWrapper::ConnectionWrapper(Connection &con) : _con(con)
 {
 }
 
@@ -11,23 +10,22 @@ ConnectionWrapper::~ConnectionWrapper()
 {
 }
 
-void ConnectionWrapper::sendInt(uint8_t intigerToSend)
+void ConnectionWrapper::sendData(uint32_t data1, size_t data1_len, uint32_t data2, size_t data2_len)
 {
-    _packet.setPayloadSize(sizeof(intigerToSend));
-    std::memcpy(_packet.payload(), &intigerToSend, sizeof(intigerToSend));
-    std::cout << "sending: " << _packet << std::endl;
+    _packet.setPayloadSize(data1_len + data2_len );
+    std::memcpy(_packet.payload(), &data1, data1_len);
 
+    if (data2_len != 0)
+    {
+        std::memcpy(_packet.payload()+ data1_len, &data2 , data2_len);
+    }
+    std::cout << _packet << std::endl;
     _con.send(_packet);
 }
 
-void ConnectionWrapper::sendInt(uint8_t intigerToSend, uint16_t extraData)
+Connection &ConnectionWrapper::getConnection()
 {
-
-    _packet.setPayloadSize(sizeof(intigerToSend) + sizeof(extraData));
-    std::memcpy(_packet.payload(), &intigerToSend, sizeof(intigerToSend));
-    std::memcpy(_packet.payload() + sizeof(intigerToSend), &extraData, sizeof(extraData));
-
-    _con.send(_packet);
+    return _con;
 }
 
 void ConnectionWrapper::setPort(int port)
@@ -37,22 +35,4 @@ void ConnectionWrapper::setPort(int port)
 void ConnectionWrapper::setChannel(int channel)
 {
     _packet.setChannel(channel);
-}
-void ConnectionWrapper::sendInt(uint8_t intigerToSend, int port, int channel)
-{
-    this->setPort(port);
-    this->setChannel(channel);
-    this->sendInt(intigerToSend);
-}
-void ConnectionWrapper::sendInt(uint8_t intigerToSend, uint16_t extraData, int port, int channel)
-{
-
-    this->setPort(port);
-    this->setChannel(channel);
-    this->sendInt(intigerToSend, extraData);
-}
-
-Connection& ConnectionWrapper::getConnection()
-{
-    return _con;
 }

@@ -75,5 +75,3 @@ private:
     bitcraze::crazyflieLinkCpp::Connection &_con;
 };
 
-
-void sendData(uint32_t data1, uint32_t data1_len, uint32_t data2 = 0 , uint32_t data2_len =0);
