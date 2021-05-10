@@ -12,7 +12,7 @@ int main()
      * crazyflies on channel 80. Note that this requires
      * updating the Crazyradio firmware from its factory version
      */
-    Connection broadcastConnection("radio://*/80/2M/broadcast");
+    Connection broadcastConnection("radiobroadcast://*/80/2M");
 
     // Requires high level commander enabled (param commander.enHighLevel == 1)
     std::cout << "Taking off..." << std::endl;

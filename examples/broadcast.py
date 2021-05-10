@@ -48,7 +48,7 @@ if __name__ == "__main__":
    crazyflies on channel 80. Note that this requires
    updating the Crazyradio firmware from its factory version
    """
-  broadcastConnection = cflinkcpp.Connection("radio://0/80/2M/broadcast")
+  broadcastConnection = cflinkcpp.Connection("radiobroadcast://0/80/2M")
 
   # Requires high level commander enabled (param commander.enHighLevel == 1)
   print("Taking off...")
