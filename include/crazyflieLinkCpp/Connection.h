@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <string>
 #include <cstdint>
 #include <cmath>
@@ -24,6 +25,14 @@ public:
     {
       reset();
     }
+
+    Statistics(const Statistics& other)
+    {
+      std::atomic_store(&sent_count, std::atomic_load(&other.sent_count));
+      std::atomic_store(&receive_count, std::atomic_load(&other.receive_count));
+      std::atomic_store(&enqueued_count, std::atomic_load(&other.enqueued_count));
+      std::atomic_store(&ack_count, std::atomic_load(&other.ack_count));
+    }
     
     void reset()
     {
@@ -47,11 +56,10 @@ public:
       return out;
     }
 
-    size_t sent_count;
-    size_t receive_count;
-    size_t enqueued_count;
-    size_t ack_count;
-    // uint8_t rssi_latest;
+    std::atomic_size_t sent_count;
+    std::atomic_size_t receive_count;
+    std::atomic_size_t enqueued_count;
+    std::atomic_size_t ack_count;
   };
 
 public:
