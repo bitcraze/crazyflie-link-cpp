@@ -224,15 +224,21 @@ void CrazyradioThread::run()
                 }
             } else {
                 // no safelink
-                const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
                 if (!con->queue_send_.empty())
                 {
-                    const auto p = con->queue_send_.top();
+                    Packet p;
+                    { // guard the send queue with this block
+                        const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
+                        p = con->queue_send_.top();
+                        con->queue_send_.pop();
+                    }
+
                     ack = radio.sendPacket(p.raw(), p.size());
                     ++con->statistics_.sent_count;
-                    if (ack)
+                    if (!ack)
                     {
-                        con->queue_send_.pop();
+                        const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
+                        con->queue_send_.push(p);
                     }
                 }
                 else if (con->useAutoPing_)
