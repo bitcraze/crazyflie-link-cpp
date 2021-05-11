@@ -224,27 +224,34 @@ void CrazyradioThread::run()
                 }
             } else {
                 // no safelink
-                if (!con->queue_send_.empty())
+                Packet p;
+
+                if (con->retry_)
                 {
-                    Packet p;
+                    p = con->retry_;
+                }
+                else if (!con->queue_send_.empty())
+                {
                     { // guard the send queue with this block
                         const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
                         p = con->queue_send_.top();
                         con->queue_send_.pop();
                     }
-
-                    ack = radio.sendPacket(p.raw(), p.size());
-                    ++con->statistics_.sent_count;
-                    if (!ack)
-                    {
-                        const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
-                        con->queue_send_.push(p);
-                    }
                 }
                 else if (con->useAutoPing_)
                 {
-                    ack = radio.sendPacket(ping, sizeof(ping));
-                    ++con->statistics_.sent_count;
+                    p = Packet(ping, sizeof(ping));
+                }
+
+                ack = radio.sendPacket(p.raw(), p.size());
+                ++con->statistics_.sent_count;
+                if (ack)
+                {
+                    con->retry_ = Packet();
+                }
+                else
+                {
+                    con->retry_ = p;
                 }
             }
 
