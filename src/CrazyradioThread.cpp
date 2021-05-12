@@ -180,65 +180,53 @@ void CrazyradioThread::run()
                     if (ack) {
                         con->safelinkInitialized_ = true;
                     }
-                } else {
-                    // send actual packet via safelink
-
-
-                    Packet p(ping, sizeof(ping));
-
-                    if (con->retry_) {
-                        p = con->retry_;
-                    } else {
-                        const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
-                        if (!con->queue_send_.empty())
-                        {
-                            p = con->queue_send_.top();
-                            con->queue_send_.pop();
-                        } else if (!con->useAutoPing_)
-                        {
-                            continue;
-                        }
-                    }
-
-                    p.setSafelink(con->safelinkUp_ << 1 | con->safelinkDown_);
-                    ack = radio.sendPacket(p.raw(), p.size());
-                    ++con->statistics_.sent_count;
-
-                    if (ack)
-                    {
-                        con->safelinkUp_ = !con->safelinkUp_;
-                        if (con->retry_) {
-                            con->retry_ = Packet();
-                        }
-                    } else {
-                        con->retry_ = p;
-                    }
-
-                    if (ack && ack.size() > 0 && (ack.data()[0] & 0x04) == (con->safelinkDown_ << 2)) {
-                        con->safelinkDown_ = !con->safelinkDown_;
-                    } else {
-                        // reset ack to be invalid since safelink does not match
-                        ack = Crazyradio::Ack();
-                    }
-
                 }
+            }
+
+            Packet p(ping, sizeof(ping));
+
+            if (con->retry_) {
+                p = con->retry_;
             } else {
-                // no safelink
                 const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
                 if (!con->queue_send_.empty())
                 {
-                    const auto p = con->queue_send_.top();
-                    ack = radio.sendPacket(p.raw(), p.size());
-                    ++con->statistics_.sent_count;
-                    if (ack)
-                    {
-                        con->queue_send_.pop();
-                    }
-                }
-                else if (con->useAutoPing_)
+                    p = con->queue_send_.top();
+                    con->queue_send_.pop();
+                } else if (!con->useAutoPing_)
                 {
-                    ack = radio.sendPacket(ping, sizeof(ping));
-                    ++con->statistics_.sent_count;
+                    continue;
+                }
+            }
+
+            if (con->useSafelink_)
+            {
+                p.setSafelink(con->safelinkUp_ << 1 | con->safelinkDown_);
+            }
+
+            ack = radio.sendPacket(p.raw(), p.size());
+            ++con->statistics_.sent_count;
+            if (ack)
+            {
+                if (con->useSafelink_)
+                {
+                    con->safelinkUp_ = !con->safelinkUp_;
+                }
+
+                if (con->retry_) {
+                    con->retry_ = Packet();
+                }
+            } else {
+                con->retry_ = p;
+            }
+
+            if (con->useSafelink_)
+            {
+                if (ack && ack.size() > 0 && (ack.data()[0] & 0x04) == (con->safelinkDown_ << 2)) {
+                    con->safelinkDown_ = !con->safelinkDown_;
+                } else {
+                    // reset ack to be invalid since safelink does not match
+                    ack = Crazyradio::Ack();
                 }
             }
 
