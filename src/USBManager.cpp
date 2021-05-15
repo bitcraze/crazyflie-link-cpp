@@ -81,6 +81,7 @@ USBManager::~USBManager()
 {
     // Fixes a crash where device gets destroyed before it gets unref'ed
     crazyradios_.clear();
+    crazyfliesUSB_.clear();
 
     // function returns void => no error checking
     libusb_exit(ctx_);
