@@ -53,47 +53,40 @@ void Toc::run()
 
 TocInfo Toc::getTocInfo()
 {
-    //ask for the toc info
+    // ask for the toc info
     _conWrapper.sendData(CMD_TOC_INFO_V2, sizeof(uint8_t));
-    bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);;
-    // std::cout << "info: " << p_recv << std::endl;
+    bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);
     return TocInfo(p_recv);
 }
 
 TocItem Toc::getItemFromToc(uint16_t id)
 {
-    //ask for a param with the given id
+    // ask for a param with the given id
     _conWrapper.sendData(CMD_TOC_ITEM_V2, sizeof(uint8_t), id, sizeof(id));
     bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);
-    // std::cout << "info: " << p_recv << std::endl;
     return TocItem(p_recv);
 }
 
 std::vector<TocItem> Toc::getToc()
 {
     std::vector<TocItem> tocItems;
-
     uint16_t num_of_elements = getTocInfo()._numberOfElements;
-
     for (uint16_t i = 0; i < num_of_elements; i++)
     {
         tocItems.push_back(getItemFromToc(i));
     }
-
     return tocItems;
 }
 
 void Toc::printToc()
 {
     auto tocItems = getToc(); 
-
     for (TocItem tocItem : tocItems)
     {
         // tocItem
         auto accessAndType = getAccessAndStrType(tocItem._paramType);
         std::cout << tocItem._paramId << ": " << accessTypeToStr(accessAndType.first) << ":" << accessAndType.second << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
     }
-    
 }
 
 std::string Toc::accessTypeToStr(int accessType)
