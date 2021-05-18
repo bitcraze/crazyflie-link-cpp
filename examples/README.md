@@ -1,5 +1,6 @@
 # TODO list
 TOC/Param(s) - one class or many? maybe Manager class with a container (list)
+
 Caching for TOC params ?
 ## Single struct returned instead of multiple API calls:
     auto tocItem = toc.getItemFromToc(i);
