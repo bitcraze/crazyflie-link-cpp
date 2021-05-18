@@ -24,9 +24,8 @@ void ConnectionWrapper::sendData(uint32_t data1, size_t data1_len, uint32_t data
 {
     _packet.setPayloadSize(data1_len + data2_len);
 
-    if (IS_BIG_EDIAN)
+    if (IS_BIG_ENDIAN)
     {
-        // std::cout << "IS BIG: " << IS_BIG_EDIAN << std::endl;
         std::reverse_copy((uint8_t*)&data1 + data1_len, (uint8_t*)&data1, _packet.payload());
         if (data2_len != 0)
         {
@@ -35,7 +34,7 @@ void ConnectionWrapper::sendData(uint32_t data1, size_t data1_len, uint32_t data
     }
     else
     {
-        // std::cout << "IS LITTLE: " << !IS_BIG_EDIAN << std::endl;
+        // std::cout << "IS LITTLE: " << !IS_BIG_ENDIAN << std::endl;
         // std::cout << "data1: " << data1 << "len: " << data1_len << std::endl;
         // std::cout << "data2: " << data2 << "len: " << data2_len << std::endl;
         std::copy( (uint8_t*)&data1, (uint8_t*)&data1 + data1_len, _packet.payload());

@@ -24,7 +24,7 @@ struct TocItemMessage
 // #pragma pop(pack)
 bool isBigEndian();
 
-const bool IS_BIG_EDIAN = isBigEndian();
+const bool IS_BIG_ENDIAN = isBigEndian();
 class ConnectionWrapper
 {
 private:
