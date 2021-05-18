@@ -46,30 +46,17 @@ Toc::Toc(Connection &con)
 
 void Toc::run()
 {   
-    int i = 0;
     // empty receiver queue
-    while(true)
-    {
-        i++;
-        bitcraze::crazyflieLinkCpp::Packet p = _con.recv(100);
-        if (!p)
-        {
-            break;
-        }
-        // std::cout << "pass " << i << std::endl;
-    }
+    while (_con.recv(100)) {}
     printToc();
 }
 
 TocInfo Toc::getTocInfo()
 {
     //ask for the toc info
-
-
     _conWrapper.sendData(CMD_TOC_INFO_V2, sizeof(uint8_t));
     bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);;
     // std::cout << "info: " << p_recv << std::endl;
-    
     return TocInfo(p_recv);
 }
 
@@ -77,7 +64,7 @@ TocItem Toc::getItemFromToc(uint16_t id)
 {
     //ask for a param with the given id
     _conWrapper.sendData(CMD_TOC_ITEM_V2, sizeof(uint8_t), id, sizeof(id));
-    bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);;
+    bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);
     // std::cout << "info: " << p_recv << std::endl;
     return TocItem(p_recv);
 }
@@ -111,10 +98,7 @@ void Toc::printToc()
 
 std::string Toc::accessTypeToStr(int accessType)
 {
-    if (RO_ACCESS == accessType)
-        return "RO";
-    else
-        return "RW";
+    return RO_ACCESS == accessType ? "RO" : "RW";
 }
 
 std::pair<int, std::string> Toc::getAccessAndStrType(uint8_t type)
