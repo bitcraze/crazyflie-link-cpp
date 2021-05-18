@@ -1,7 +1,7 @@
 # TODO list
-TOC/Param(s) - once class or many? maybe Manager class with a container (list)
+TOC/Param(s) - one class or many? maybe Manager class with a container (list)
 
-? Caching for TOC params ?
+Caching for TOC params ?
 
 ## Single struct returned instead of multiple API calls:
         auto tocItem = toc.getItemFromToc(i);
@@ -13,6 +13,6 @@ TOC/Param(s) - once class or many? maybe Manager class with a container (list)
 
 
 ## getParamValue
-        simplify to uint32_t, float, rest - throw exception (btw there is no use of int)
+simplify to uint32_t, float, rest - throw exception (btw there is no use of int)
             
 
