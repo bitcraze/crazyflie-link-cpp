@@ -8,5 +8,3 @@ Caching for TOC params ?
     std::string strAccessType = toc.accessTypeToStr(toc.getAccessAndStrType(tocItem._paramType).first);
 ## TOC.h
     std::map<uint8_t, StrPair> - change StrPair to only string
-## getParamValue
-simplify to uint32_t, float, rest - throw exception (btw there is no use of int)
