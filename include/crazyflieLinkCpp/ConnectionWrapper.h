@@ -22,9 +22,9 @@ struct TocItemMessage
     uint16_t _id;
 };
 // #pragma pop(pack)
-bool isBigEdian();
+bool isBigEndian();
 
-const bool IS_BIG_EDIAN = isBigEdian();
+const bool IS_BIG_EDIAN = isBigEndian();
 class ConnectionWrapper
 {
 private:

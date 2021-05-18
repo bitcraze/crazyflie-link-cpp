@@ -10,7 +10,7 @@ ConnectionWrapper::~ConnectionWrapper()
 {
 }
 
-bool isBigEdian()
+bool isBigEndian()
 {
     union {
         uint32_t i;

@@ -19,7 +19,6 @@ int main()
     Toc toc(con);
     Param param(con);
     uint16_t numOfElements = toc.getTocInfo()._numberOfElements;
-    // uint16_t getItemFromToc = toc.getItemFromToc()._getItemFromToc;
 
     for (uint16_t i = 0; i < numOfElements; i++)
     {
@@ -28,23 +27,17 @@ int main()
         std::string strAccessType = toc.accessTypeToStr(toc.getAccessAndStrType(tocItem._paramType).first);
         std::cout << tocItem._paramId << ": " << strAccessType << ":" << strType << "  " << tocItem._groupName << "." << tocItem._paramName << " val=";
 
-
         if (strType.find("int") != std::string::npos)
         {
             std::cout << (int)param.getUInt(i);
         }
-       
         else if ("float" == strType)
         {
             std::cout << param.getFloat(i);
         }
-        
         std::cout << std::endl;
     }
-
     std::cout << "numOfElements: " << (int) numOfElements << std::endl;
-
-    
 
     return 0;
 }
