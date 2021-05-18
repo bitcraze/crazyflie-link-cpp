@@ -11,17 +11,16 @@
 #include "Connection.h"
 #include <type_traits>
 
-#define PAYLOAD_MAX_SIZE CRTP_MAXSIZE - 2
+#define PAYLOAD_MAX_SIZE (CRTP_MAXSIZE - 2)
 
 #define PARAM_PORT 2
-// #pragma push(pack)
-// #pragma pack(1)
+
 struct TocItemMessage
 {
     uint8_t _cmd;
     uint16_t _id;
 };
-// #pragma pop(pack)
+
 bool isBigEndian();
 
 const bool IS_BIG_ENDIAN = isBigEndian();
@@ -36,12 +35,12 @@ public:
 
     bitcraze::crazyflieLinkCpp::Packet recvFilteredData(int timeout, int port, int channel);
 
-    //returns the data only from the same port and channel as the current _packet
+    // returns the data only from the same port and channel as the current _packet
     bitcraze::crazyflieLinkCpp::Packet recvFilteredData(int timeout);
 
-    ~ConnectionWrapper();
     bitcraze::crazyflieLinkCpp::Connection &getConnection();
     void setPort(int port);
     void setChannel(int channel);
     void sendData(uint32_t data1, size_t data1_len, uint32_t data2 = 0, size_t data2_len = 0);
+    ~ConnectionWrapper();
 };
