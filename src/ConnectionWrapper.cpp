@@ -49,7 +49,7 @@ bitcraze::crazyflieLinkCpp::Packet ConnectionWrapper::recvFilteredData(int timeo
     while (true)
     {
         bitcraze::crazyflieLinkCpp::Packet p = _con.recv(timeout);
-        if (p.channel() == channel && p.port() == port || !p)
+        if ((p.channel() == channel && p.port() == port) || !p)
             return p;
     }
 }
