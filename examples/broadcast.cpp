@@ -2,7 +2,7 @@
 #include <thread>
 
 #include "crazyflieLinkCpp/Connection.h"
-#include "PacketUtils.hpp";
+#include "PacketUtils.hpp"
 
 using namespace bitcraze::crazyflieLinkCpp;
 
