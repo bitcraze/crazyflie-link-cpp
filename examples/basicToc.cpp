@@ -16,7 +16,6 @@ int main()
     Connection con("usb://0");
     Toc toc(con);
     toc.run();
-    std::cout << "------------------------------------" << std::endl;
 
     return 0;
 }

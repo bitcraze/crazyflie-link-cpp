@@ -1,12 +1,4 @@
 #include <iostream>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <chrono>
-#include <sstream>
-#include <queue>
-#include <vector>
-#include <byteswap.h>
 
 #include "crazyflieLinkCpp/Param.h"
 #include "crazyflieLinkCpp/Toc.h"
