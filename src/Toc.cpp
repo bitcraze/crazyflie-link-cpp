@@ -1,7 +1,5 @@
 #include "crazyflieLinkCpp/Toc.h"
 
-#include <bitset>
-
 using namespace bitcraze::crazyflieLinkCpp;
 
 TocItem::TocItem(bitcraze::crazyflieLinkCpp::Packet &p_recv)
