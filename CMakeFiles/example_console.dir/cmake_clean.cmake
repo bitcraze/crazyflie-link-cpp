@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/example_console.dir/examples/console.cpp.o"
-  "example_console"
   "example_console.pdb"
+  "example_console"
 )
 
 # Per-language clean rules from dependency scanning.

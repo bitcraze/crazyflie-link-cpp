@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/example_basicParam.dir/examples/basicParam.cpp.o"
-  "example_basicParam"
   "example_basicParam.pdb"
+  "example_basicParam"
 )
 
 # Per-language clean rules from dependency scanning.

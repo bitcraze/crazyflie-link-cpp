@@ -4,17 +4,17 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/Connection.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Connection.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/ConnectionWrapper.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/ConnectionWrapper.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/CrazyflieUSB.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/CrazyflieUSB.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/CrazyflieUSBThread.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/CrazyflieUSBThread.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/Crazyradio.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Crazyradio.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/CrazyradioThread.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/CrazyradioThread.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/Param.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Param.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/Toc.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Toc.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/USBDevice.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/USBDevice.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/USBManager.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/USBManager.cpp.o"
-  "/home/flight-host/crazyflie-link-cpp-expanded/src/Version.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Version.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/Connection.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Connection.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/ConnectionWrapper.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/ConnectionWrapper.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/CrazyflieUSB.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/CrazyflieUSB.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/CrazyflieUSBThread.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/CrazyflieUSBThread.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/Crazyradio.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Crazyradio.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/CrazyradioThread.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/CrazyradioThread.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/Param.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Param.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/Toc.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Toc.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/USBDevice.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/USBDevice.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/USBManager.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/USBManager.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/src/Version.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/src/Version.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

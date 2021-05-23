@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/example_basicToc.dir/examples/basicToc.cpp.o -o example_basicToc  libcrazyflieLinkCpp.a -lpthread /usr/lib/x86_64-linux-gnu/libusb-1.0.so 
+/usr/bin/c++     CMakeFiles/example_basicToc.dir/examples/basicToc.cpp.o  -o example_basicToc libcrazyflieLinkCpp.a -lpthread /usr/lib/x86_64-linux-gnu/libusb-1.0.so 

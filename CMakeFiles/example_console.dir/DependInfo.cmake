@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/flight-host/crazyflie-link-cpp-expanded/examples/console.cpp" "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/example_console.dir/examples/console.cpp.o"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/examples/console.cpp" "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/example_console.dir/examples/console.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -16,7 +16,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/flight-host/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/DependInfo.cmake"
+  "/home/makeruser/nitay/crazyflie-link-cpp-expanded/CMakeFiles/crazyflieLinkCpp.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.
