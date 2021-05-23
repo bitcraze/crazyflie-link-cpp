@@ -1,7 +1,7 @@
 #include "crazyflieLinkCpp/Param.h"
-#include "crazyflieLinkCpp/Toc.h"
 
 #define PAYLOAD_VALUE_BEGINING_INDEX 3
+#define NOT_FOUND (-999)
 
 
 Param::Param(bitcraze::crazyflieLinkCpp::Connection &con) : _conWrapper(con), _con(con)
@@ -32,29 +32,31 @@ uint32_t Param::getUInt(uint16_t paramId)
     return res;
 }
 
-// template <typename T>
-// T Param::getByName(Toc toc, std::string group, std::string name)
-// {
-//     uint16_t numOfElements = toc.getTocInfo()._numberOfElements;
+int Param::getByName(Toc toc, std::string group, std::string name)
+{
+    uint16_t numOfElements = toc.getTocInfo()._numberOfElements;
 
-//     for (uint16_t i = 0; i < numOfElements; i++)
-//     {
-//         auto tocItem = toc.getItemFromToc(i);
-//         std::string strType = toc.getAccessAndStrType(tocItem._paramType).second;
-//         std::string strAccessType = toc.accessTypeToStr(toc.getAccessAndStrType(tocItem._paramType).first);
-//         if (tocItem._groupName == group && tocItem._paramName == name)
-//         {
-//             if (strType.find("int") != std::string::npos)
-//             {
-//                 return getUInt(i);
-//             }
-//             else if ("float" == strType)
-//             {
-//                 return getFloat(i);
-//             }
-//         }
-//     }
-// }
+    for (uint16_t i = 0; i < numOfElements; i++)
+    {
+        auto tocItem = toc.getItemFromToc(i);
+        std::string strType = toc.getAccessAndStrType(tocItem._paramType).second;
+        std::string strAccessType = toc.accessTypeToStr(toc.getAccessAndStrType(tocItem._paramType).first);
+        if (tocItem._groupName == group && tocItem._paramName == name)
+        {
+            if (strType.find("int") != std::string::npos)
+            {
+                return getUInt(i);
+            }
+            else if ("float" == strType)
+            {
+                std::cout << "Wrong parameter type!\n";
+                return NOT_FOUND;
+            }
+        }
+    }
+    std::cout << "Didn't find anything!" << std::endl;
+    return NOT_FOUND;
+}
 
 Param::~Param()
 {}

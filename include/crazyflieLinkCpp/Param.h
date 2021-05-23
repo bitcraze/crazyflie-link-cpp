@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "ConnectionWrapper.h"
+#include "crazyflieLinkCpp/Toc.h"
 
 #define PARAM_READ_CHANNEL 1
 
@@ -19,5 +20,5 @@ public:
 
     float getFloat(uint16_t paramId);
     uint32_t getUInt(uint16_t paramId);
-    // int getByName(Toc toc, std::string group, std::string name);
+    int getByName(Toc toc, std::string group, std::string name);
 };

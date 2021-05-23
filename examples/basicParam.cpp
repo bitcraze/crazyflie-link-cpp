@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "crazyflieLinkCpp/Param.h"
-#include "crazyflieLinkCpp/Toc.h"
 
 using namespace bitcraze::crazyflieLinkCpp;
 
@@ -30,6 +29,10 @@ int main()
         std::cout << std::endl;
     }
     std::cout << "numOfElements: " << (int) numOfElements << std::endl;
+    std::cout << "------------------" << std::endl;
+
+    std::cout << "Get by name:\n";
+    std::cout << param.getByName(toc, "lighthouse", "sweepStd") << std::endl;
 
     return 0;
 }

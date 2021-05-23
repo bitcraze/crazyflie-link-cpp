@@ -1,15 +1,8 @@
 #pragma once
 
 #include <iostream>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <chrono>
-#include <sstream>
-#include <queue>
-#include <vector>
+
 #include "Connection.h"
-#include <type_traits>
 
 #define PAYLOAD_MAX_SIZE (CRTP_MAXSIZE - 2)
 
