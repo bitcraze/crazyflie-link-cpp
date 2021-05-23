@@ -2,13 +2,16 @@
 
 #include "crazyflieLinkCpp/Param.h"
 
+using std::cout;
+using std::endl;
 using namespace bitcraze::crazyflieLinkCpp;
 
 int main()
 {
     Connection con("usb://0");
-    Toc toc(con);
     Param param(con);
+    Toc toc = param.getToc();
+
     uint16_t numOfElements = toc.getTocInfo()._numberOfElements;
 
     for (uint16_t i = 0; i < numOfElements; i++)
@@ -16,23 +19,15 @@ int main()
         auto tocItem = toc.getItemFromToc(i);
         std::string strType = toc.getAccessAndStrType(tocItem._paramType).second;
         std::string strAccessType = toc.accessTypeToStr(toc.getAccessAndStrType(tocItem._paramType).first);
-        std::cout << tocItem._paramId << ": " << strAccessType << ":" << strType << "  " << tocItem._groupName << "." << tocItem._paramName << " val=";
+        cout << tocItem._paramId << ": " << strAccessType << ":" << strType << "  " << tocItem._groupName << "." << tocItem._paramName << " val=";
 
-        if (strType.find("int") != std::string::npos)
-        {
-            std::cout << (int)param.getUInt(i);
-        }
-        else if ("float" == strType)
-        {
-            std::cout << param.getFloat(i);
-        }
-        std::cout << std::endl;
+        cout << param.getById(tocItem._paramId) << endl;
     }
-    std::cout << "numOfElements: " << (int) numOfElements << std::endl;
-    std::cout << "------------------" << std::endl;
+    cout << "numOfElements: " << (int) numOfElements << endl;
+    cout << "------------------" << endl;
 
-    std::cout << "Get by name:\n";
-    std::cout << param.getByName(toc, "lighthouse", "sweepStd") << std::endl;
+    cout << "Get by name:\n";
+    cout << param.getByName("activeMarker", "mode") << endl;
 
     return 0;
 }

@@ -1,10 +1,6 @@
 #include "crazyflieLinkCpp/Param.h"
 
-#define PAYLOAD_VALUE_BEGINING_INDEX 3
-#define NOT_FOUND (-999)
-
-
-Param::Param(bitcraze::crazyflieLinkCpp::Connection &con) : _conWrapper(con), _con(con)
+Param::Param(bitcraze::crazyflieLinkCpp::Connection &con) : _conWrapper(con), _con(con), toc(con)
 {
     _conWrapper.setPort(PARAM_PORT);
     _conWrapper.setChannel(PARAM_READ_CHANNEL);
@@ -15,7 +11,7 @@ float Param::getFloat(uint16_t paramId)
     float res;
 
     _conWrapper.sendData(paramId, sizeof(paramId));
-    bitcraze::crazyflieLinkCpp::Packet p = _conWrapper.recvFilteredData(0);
+    bitcraze::crazyflieLinkCpp::Packet p = _conWrapper.recvFilteredData(0);;
     std::memcpy(&res, p.payload() + PAYLOAD_VALUE_BEGINING_INDEX, sizeof(res));
 
     return res;
@@ -32,7 +28,26 @@ uint32_t Param::getUInt(uint16_t paramId)
     return res;
 }
 
-int Param::getByName(Toc toc, std::string group, std::string name)
+float Param::getById(short paramId)
+{
+    auto tocItem = toc.getItemFromToc(paramId);
+    std::string strType = toc.getAccessAndStrType(tocItem._paramType).second;
+    if (strType.find("int") != std::string::npos)
+    {
+        return (float)getUInt(paramId); // TODO: CHECK THIS CAST
+    }
+    else if ("float" == strType)
+    {
+        return getFloat(paramId);
+    }
+    else
+    {
+        std::cout << "Didn't find anything!" << std::endl;
+        return NOT_FOUND;
+    }
+}
+
+float Param::getByName(std::string group, std::string name)
 {
     uint16_t numOfElements = toc.getTocInfo()._numberOfElements;
 
@@ -45,17 +60,21 @@ int Param::getByName(Toc toc, std::string group, std::string name)
         {
             if (strType.find("int") != std::string::npos)
             {
-                return getUInt(i);
+                return (float)getUInt(i); // TODO: CHECK THIS CAST
             }
             else if ("float" == strType)
             {
-                std::cout << "Wrong parameter type!\n";
-                return NOT_FOUND;
+                return getFloat(i);
             }
         }
     }
     std::cout << "Didn't find anything!" << std::endl;
     return NOT_FOUND;
+}
+
+Toc Param::getToc()
+{
+    return toc;
 }
 
 Param::~Param()

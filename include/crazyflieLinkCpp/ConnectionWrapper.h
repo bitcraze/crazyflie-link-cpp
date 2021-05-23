@@ -1,11 +1,9 @@
 #pragma once
 
 #include <iostream>
-
 #include "Connection.h"
 
 #define PAYLOAD_MAX_SIZE (CRTP_MAXSIZE - 2)
-
 #define PARAM_PORT 2
 
 struct TocItemMessage
