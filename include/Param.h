@@ -4,7 +4,7 @@
 #include <cstring>
 
 #include "ConnectionWrapper.h"
-#include "crazyflieLinkCpp/Toc.h"
+#include "Toc.h"
 
 #define PAYLOAD_VALUE_BEGINING_INDEX 3
 #define NOT_FOUND (-9.99)

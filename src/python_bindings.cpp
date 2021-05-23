@@ -5,9 +5,9 @@
 #include <pybind11/stl_bind.h>
 #include <pybind11/numpy.h>
 
-#include "crazyflieLinkCpp/Packet.hpp"
-#include "crazyflieLinkCpp/Connection.h"
-#include "crazyflieLinkCpp/Version.h"
+#include "Packet.hpp"
+#include "Connection.h"
+#include "Version.h"
 
 using namespace bitcraze::crazyflieLinkCpp;
 

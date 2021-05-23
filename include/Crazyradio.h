@@ -6,7 +6,7 @@
 #include <ostream>
 
 #include "USBDevice.h"
-#include "crazyflieLinkCpp/utils.hpp"
+#include "utils.hpp"
 
 namespace bitcraze {
 namespace crazyflieLinkCpp {

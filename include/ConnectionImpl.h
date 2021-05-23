@@ -7,7 +7,7 @@
 
 #include "Crazyradio.h"
 #include "CrazyflieUSB.h"
-#include "crazyflieLinkCpp/Connection.h"
+#include "Connection.h"
 
 namespace bitcraze {
 namespace crazyflieLinkCpp {

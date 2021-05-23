@@ -1,4 +1,4 @@
-#include "crazyflieLinkCpp/ConnectionWrapper.h"
+#include "ConnectionWrapper.h"
 
 using namespace bitcraze::crazyflieLinkCpp;
 

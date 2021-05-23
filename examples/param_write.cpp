@@ -6,7 +6,7 @@
 #include <sstream>
 #include <queue>
 
-#include "crazyflieLinkCpp/Connection.h"
+#include "Connection.h"
 
 using namespace bitcraze::crazyflieLinkCpp;
 

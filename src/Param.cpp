@@ -1,4 +1,4 @@
-#include "crazyflieLinkCpp/Param.h"
+#include "Param.h"
 
 Param::Param(bitcraze::crazyflieLinkCpp::Connection &con) : _conWrapper(con), _con(con), toc(con)
 {
@@ -11,7 +11,7 @@ float Param::getFloat(uint16_t paramId)
     float res;
 
     _conWrapper.sendData(paramId, sizeof(paramId));
-    bitcraze::crazyflieLinkCpp::Packet p = _conWrapper.recvFilteredData(0);;
+    bitcraze::crazyflieLinkCpp::Packet p = _conWrapper.recvFilteredData(0);
     std::memcpy(&res, p.payload() + PAYLOAD_VALUE_BEGINING_INDEX, sizeof(res));
 
     return res;

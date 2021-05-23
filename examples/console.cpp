@@ -1,7 +1,7 @@
 #include <iostream>
 #include <thread>
 
-#include "crazyflieLinkCpp/Connection.h"
+#include "Connection.h"
 
 using namespace bitcraze::crazyflieLinkCpp;
 

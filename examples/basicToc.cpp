@@ -7,7 +7,7 @@
 #include <queue>
 #include <vector>
 
-#include "crazyflieLinkCpp/Toc.h"
+#include "Toc.h"
 
 using namespace bitcraze::crazyflieLinkCpp;
 

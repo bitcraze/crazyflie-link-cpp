@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "crazyflieLinkCpp/Param.h"
+#include "Param.h"
 
 using std::cout;
 using std::endl;

@@ -1,4 +1,4 @@
-#include "crazyflieLinkCpp/Version.h"
+#include "Version.h"
 
 namespace bitcraze {
 namespace crazyflieLinkCpp {
