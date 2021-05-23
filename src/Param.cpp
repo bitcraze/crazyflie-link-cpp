@@ -34,7 +34,7 @@ float Param::getById(short paramId)
     std::string strType = toc.getAccessAndStrType(tocItem._paramType).second;
     if (strType.find("int") != std::string::npos)
     {
-        return (float)getUInt(paramId); // TODO: CHECK THIS CAST
+        return (float)getUInt(paramId);
     }
     else if ("float" == strType)
     {
@@ -58,14 +58,7 @@ float Param::getByName(std::string group, std::string name)
         std::string strAccessType = toc.accessTypeToStr(toc.getAccessAndStrType(tocItem._paramType).first);
         if (tocItem._groupName == group && tocItem._paramName == name)
         {
-            if (strType.find("int") != std::string::npos)
-            {
-                return (float)getUInt(i); // TODO: CHECK THIS CAST
-            }
-            else if ("float" == strType)
-            {
-                return getFloat(i);
-            }
+            return getById(i);
         }
     }
     std::cout << "Didn't find anything!" << std::endl;
