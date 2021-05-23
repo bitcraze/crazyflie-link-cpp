@@ -47,7 +47,6 @@ float Param::getById(short paramId)
     }
 }
 
-// MAYBE THERE'S A BETTER WAY TO DO IT ?
 float Param::getByName(std::string group, std::string name)
 {
     uint16_t numOfElements = toc.getTocInfo()._numberOfElements;
