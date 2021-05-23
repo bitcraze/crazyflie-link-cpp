@@ -55,8 +55,6 @@ float Param::getByName(std::string group, std::string name)
     for (uint16_t i = 0; i < numOfElements; i++)
     {
         auto tocItem = toc.getItemFromToc(i);
-        std::string strType = toc.getAccessAndStrType(tocItem._paramType).second;
-        std::string strAccessType = toc.accessTypeToStr(toc.getAccessAndStrType(tocItem._paramType).first);
         if (tocItem._groupName == group && tocItem._paramName == name)
         {
             return getById(i);
