@@ -7,7 +7,6 @@ This project allow us to get parameter value from a specific parameter in a spec
 
 ```
 
-
 ## Dependencies
 
 ```
