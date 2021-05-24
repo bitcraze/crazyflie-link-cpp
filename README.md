@@ -28,7 +28,12 @@ The library can be tested using the included example applications, e.g.,:
 ./example_scan
 ```
 
+## For Visual Studio Editting Best Experience
 
+1. Install c/c++ add-on
+2. Install CMakeLists add-on
+3. Allow intelisense for c/c++
+4. Allow intelisense for CMakeLists (let the compiler guess which g++ version to use) 
 
 
 ## Build and install development version of the python binding
