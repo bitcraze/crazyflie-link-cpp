@@ -43,13 +43,3 @@ The library can be tested using the included example scripts, e.g.,:
 ```
 python3 examples/scan.py
 ```
-
-## To Do
-
-* add new test that uses echoDelay
-* Windows crash
-
-* add broadcast support
-  * support send2PacketsNoAck 
-* integrate in Crazyflie_cpp and crazyflie_tools
-* Hot Plug support (Linux/Mac only)
