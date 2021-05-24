@@ -32,8 +32,9 @@ The library can be tested using the included example applications, e.g.,:
 
 1. Install c/c++ add-on
 2. Install CMakeLists add-on
-3. Allow intelisense for c/c++
-4. Allow intelisense for CMakeLists (let the compiler guess which g++ version to use) 
+3. Open Directory in Vscode
+4. Allow intelisense for c/c++
+5. Allow intelisense for CMakeLists (let the compiler guess which g++ version to use) 
 
 
 ## Build and install development version of the python binding
