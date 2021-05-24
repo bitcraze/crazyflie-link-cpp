@@ -7,7 +7,7 @@
 #include "Toc.h"
 
 #define PAYLOAD_VALUE_BEGINING_INDEX 3
-#define NOT_FOUND (-9.99)
+#define NOT_FOUND 0
 #define PARAM_READ_CHANNEL 1
 
 class Param
@@ -15,7 +15,7 @@ class Param
 private:
     ConnectionWrapper _conWrapper;
     bitcraze::crazyflieLinkCpp::Connection& _con;
-    Toc toc;
+    Toc _toc;
 
 public:
     Param(bitcraze::crazyflieLinkCpp::Connection &con);
@@ -23,8 +23,10 @@ public:
 
     uint32_t getUInt(uint16_t paramId);
     float getFloat(uint16_t paramId);
-    float getById(short paramId);
-    float getByName(std::string group, std::string name);
+    float getFloatById(uint16_t paramId);
+    uint32_t getUIntById(uint16_t paramId);
+    uint32_t getUIntByName(std::string group, std::string name);
+    float getFloatByName(std::string group, std::string name);
 
     Toc getToc();
 };
