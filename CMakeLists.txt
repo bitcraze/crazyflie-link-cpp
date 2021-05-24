@@ -112,6 +112,14 @@ target_link_libraries(example_basicParam
   crazyflieLinkCpp
 )
 
+# example_basicParamWrite
+add_executable(example_basicParamWrite
+  examples/basicParamWrite.cpp
+)
+target_link_libraries(example_basicParamWrite
+  crazyflieLinkCpp
+)
+
 # Python bindings
 add_subdirectory(pybind11)
 
