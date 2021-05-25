@@ -1,4 +1,6 @@
-# Crazyflie link cpp include (the lib itself)
+# Crazyflie C++ Link - "include" directory
+
+This contains the headers of the files that are part of the library that a coder can use.
 
 ### `ConectionWrapper.h`
 
