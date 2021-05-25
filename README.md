@@ -22,7 +22,7 @@ cmake ..
 make
 ```
 
-The library can be tested using the included example applications, e.g.,:
+The library can be tested from the build directory using the example applications, e.g.,:
 
 ```
 ./example_scan
