@@ -1,7 +1,7 @@
 # Crazyflie C++ Link (and Lib)
 
 This repo has two uses: First it is a "link" library meaning it could link c++ implementation of functions that work with the crazyflie 
-drone with python, so that a programmer could use this library to write code in python that uses the functions written in here. For this Second reason is to be a library which you could include into your c++ project and run the functions in here to code yourself a program for the crazyflie.
+drone with python, so that a programmer could use this library to write code in python that uses the functions written in here. The second reason is to be a library which you could include into your c++ project and run the functions in here to code yourself a program for the crazyflie.
 
 ## Development
 
