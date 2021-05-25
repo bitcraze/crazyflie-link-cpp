@@ -4,9 +4,10 @@ contains all files that are connected to the library
 
 ## Files Explained
 
-**`isBigEndian`** - returns true if the current cpu is big edian and false if it is small edian.
 
 ### `ConnectionWrapper.cpp`
+
+**`isBigEndian`** - returns true if the current cpu is big edian and false if it is small edian.
 
 **`ConnectionWrapper`** - Takes a connection as an arguement, the class acts as a 'wrapper' to that connection given to the constructor, which it keeps an reference of.
 
