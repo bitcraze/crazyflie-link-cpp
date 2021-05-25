@@ -1,34 +1,19 @@
-# Crazyflie C++ Link
+# Crazyflie C++ Link (and Lib)
 
-## Dependencies
+This repo has two uses: First it is a "link" library meaning it could link c++ implementation of functions that work with the crazyflie 
+drone with python, so that a programmer could use this library to write code in python that uses the functions written in here. The second reason is to be a library which you could include into your c++ project and run the functions in here to code yourself a program for the crazyflie.
 
-```
-sudo apt install -y libusb-1.0-0-dev
-```
+## Development
 
-This relies on pybind11, which is a submodule, so don't forget to
+### Repo Structure
 
-```
-git submodule init 
-git submodule update
-```
+* `src` - source files for crazyflie lib classes and functions
 
-## Build C++ lib and examples
+* `examples` - example files which you can run
 
-```
-mkdir build
-cd build
-cmake ..
-make
-```
+* `include/crazflieLinkCpp` - contains all header files for crazyflie lib
 
-The library can be tested using the included example applications, e.g.,:
-
-```
-./example_scan
-```
-
-## For Visual Studio Editting Best Experience
+### For Visual Studio Editting Best Experience
 
 1. Install c/c++ add-on
 2. Install CMakeLists add-on
@@ -36,8 +21,7 @@ The library can be tested using the included example applications, e.g.,:
 4. Allow intelisense for c/c++
 5. Allow intelisense for CMakeLists (let the compiler guess which g++ version to use) 
 
-
-## Build and install development version of the python binding
+### Build and install development version of the python binding
 
 **Building the python binding requires python>=3.6**, cmake and Ninja. Ninja and CMake can be installed with pip on Windows and Mac (```pip install cmake ninja```), or using apt-get on Ubuntu/debian (```apt-get install cmake ninja-build```).
 
@@ -52,3 +36,38 @@ The library can be tested using the included example scripts, e.g.,:
 ```
 python3 examples/scan.py
 ```
+
+## How to run
+
+### Dependencies
+
+```
+sudo apt install -y libusb-1.0-0-dev
+```
+
+This relies on pybind11, which is a submodule, so don't forget to
+
+```
+git submodule init 
+git submodule update
+```
+
+### Build C++ lib and examples
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+The library can be tested from the build directory using the example applications, e.g.,:
+
+```
+./example_scan
+```
+
+
+
+
+
