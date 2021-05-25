@@ -1,8 +1,17 @@
-# Crazyflie C++ Link
+# Crazyflie C++ Link (and Lib)
+
+This repo is has two reasons for existing: First it is a "link" library meaning it could link c++ implementation of functions that work with the crazyflie 
+drone with python, so that a programmer could use this library to write code in python that uses the functions written in here. Second reason is to be a library which you could include into your c++ project and run the functions in here to code yourself a program for the crazyflie.
 
 ## Development
 
+### Repo Structure
 
+* `src` - source files for crazyflie lib classes and functions
+
+* `examples` - example files which you can run
+
+* `include/crazflieLinkCpp` - contains all header files for crazyflie lib
 
 ### For Visual Studio Editting Best Experience
 
