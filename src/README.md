@@ -4,7 +4,7 @@ contains all files that are connected to the library
 
 ## Files Explained
 
-### `ConnectionWrapper.cpp`/`.h` 
+### `ConnectionWrapper.cpp`
 
 #### Class `ConnectionWrapper` 
 Adds additional functionality to the `Connection` class like removing the need to use a `Packet` object together with the `Connection` class to send or recieve packets.
