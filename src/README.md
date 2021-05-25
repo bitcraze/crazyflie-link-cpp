@@ -15,6 +15,10 @@ Adds additional functionality to the `Connection` class like removing the need t
 
 **`recvFilteredData`** - returns the first Packet recieved with the specified port and channel. If no port and channel specified it uses the same port and channel used by the ConnectionWrapper itself.
 
+**`sendData`** - takes 2 or 4 arguements. The pointer of the data and the second argument is the size of the data. It combins the first and second data together (if porvided) and sends it all to the crazyflie.
+
+
+
 
 
  
