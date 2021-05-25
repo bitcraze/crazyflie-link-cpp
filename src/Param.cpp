@@ -11,7 +11,7 @@ float Param::getFloat(uint16_t paramId)
     _conWrapper.setChannel(PARAM_READ_CHANNEL);
     float res = 0;
 
-    _conWrapper.sendData(paramId, sizeof(paramId));
+    _conWrapper.sendData(&paramId, sizeof(paramId));
     bitcraze::crazyflieLinkCpp::Packet p = _conWrapper.recvFilteredData(0);
     std::memcpy(&res, p.payload() + PAYLOAD_VALUE_BEGINING_INDEX, sizeof(res));
 
@@ -24,7 +24,7 @@ uint32_t Param::getUInt(uint16_t paramId)
 
     uint32_t res = 0;
 
-    _conWrapper.sendData(paramId, sizeof(paramId));
+    _conWrapper.sendData(&paramId, sizeof(paramId));
 
     bitcraze::crazyflieLinkCpp::Packet p = _conWrapper.recvFilteredData(0);
  
@@ -113,7 +113,7 @@ bool Param::setParam(uint16_t paramId, float newValue)
 {
     _conWrapper.setChannel(PARAM_WRITE_CHANNEL);
 
-    _conWrapper.sendData(paramId, sizeof(paramId), newValue, sizeof(newValue));
+    _conWrapper.sendData(&paramId, sizeof(paramId), &newValue, sizeof(newValue));
 
     return true;
 }
@@ -122,7 +122,7 @@ bool Param::setParam(uint16_t paramId, uint32_t newValue, size_t valueSize)
 {
     _conWrapper.setChannel(PARAM_WRITE_CHANNEL);
 
-    _conWrapper.sendData(paramId, sizeof(paramId), newValue, valueSize);
+    _conWrapper.sendData(&paramId, sizeof(paramId), &newValue, valueSize);
 
     return true;
 }

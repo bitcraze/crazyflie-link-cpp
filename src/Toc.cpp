@@ -52,15 +52,18 @@ void Toc::run()
 TocInfo Toc::getTocInfo()
 {
     // ask for the toc info
-    _conWrapper.sendData(CMD_TOC_INFO_V2, sizeof(uint8_t));
+    uint8_t cmd = CMD_TOC_INFO_V2;
+    _conWrapper.sendData(&cmd, sizeof(uint8_t));
     bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);
     return TocInfo(p_recv);
 }
 
 TocItem Toc::getItemFromToc(uint16_t id)
 {
+    uint8_t cmd = CMD_TOC_ITEM_V2;
+
     // ask for a param with the given id
-    _conWrapper.sendData(CMD_TOC_ITEM_V2, sizeof(uint8_t), id, sizeof(id));
+    _conWrapper.sendData(&cmd, sizeof(uint8_t), &id, sizeof(id));
     bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapper.recvFilteredData(0);
     return TocItem(p_recv);
 }

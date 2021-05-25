@@ -1,3 +1,6 @@
+#ifndef __CONNECTIONWRAPPER_H__
+#define __CONNECTIONWRAPPER_H__
+
 #include "ConnectionWrapper.h"
 
 using namespace bitcraze::crazyflieLinkCpp;
@@ -20,24 +23,24 @@ bool isBigEndian()
     return bint.c[0] == 1; 
 }
 
-void ConnectionWrapper::sendData(uint32_t data1, size_t data1_len, uint32_t data2, size_t data2_len)
+void ConnectionWrapper::sendData(void* data1, size_t data1_len, void* data2, size_t data2_len)
 {
     _packet.setPayloadSize(data1_len + data2_len);
 
     if (IS_BIG_ENDIAN)
     {
-        std::reverse_copy((uint8_t*)&data1 + data1_len, (uint8_t*)&data1, _packet.payload());
-        if (data2_len != 0)
+        std::reverse_copy((uint8_t*)data1 + data1_len, (uint8_t*)data1, _packet.payload());
+        if (data2_len > 0)
         {
-            std::reverse_copy((uint8_t*)&data2 + data2_len, (uint8_t*)&data2, _packet.payload() + data1_len);
+            std::reverse_copy((uint8_t*)data2 + data2_len, (uint8_t*)data2, _packet.payload() + data1_len);
         }
     }
     else
     {
-        std::copy( (uint8_t*)&data1, (uint8_t*)&data1 + data1_len, _packet.payload());
-        if (data2_len != 0)
+        std::copy( (uint8_t*)data1, (uint8_t*)data1 + data1_len, _packet.payload());
+        if (data2_len > 0)
         {
-            std::copy( (uint8_t*)&data2, (uint8_t*)&data2 + data2_len, _packet.payload() + data1_len);
+            std::copy( (uint8_t*)data2, (uint8_t*)data2 + data2_len, _packet.payload() + data1_len);
         }
     }
     _con.send(_packet);
@@ -73,3 +76,4 @@ void ConnectionWrapper::setChannel(int channel)
 {
     _packet.setChannel(channel);
 }
+#endif // __CONNECTIONWRAPPER_H__

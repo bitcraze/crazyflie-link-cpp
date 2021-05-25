@@ -32,6 +32,6 @@ public:
     bitcraze::crazyflieLinkCpp::Connection &getConnection();
     void setPort(int port);
     void setChannel(int channel);
-    void sendData(uint32_t data1, size_t data1_len, uint32_t data2 = 0, size_t data2_len = 0);
+    void sendData(void* data1, size_t data1_len, void* data2 = nullptr, size_t data2_len = 0);
     ~ConnectionWrapper();
 };
