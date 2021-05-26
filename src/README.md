@@ -4,6 +4,29 @@ contains all files that are connected to the library
 
 ## Files Explained
 
-`ConnectionWrapper.cpp` - created by VulcaN, implements the class `ConnectionWrapper` which adds additional functionality
-to the `Connection` class like removing the need to use a `Packet` object together with the `Connection` class to send or recieve packets.
+
+### `ConnectionWrapper.cpp`
+
+**`isBigEndian`** - returns true if the current cpu is big edian and false if it is small edian.
+
+**`ConnectionWrapper`** - Takes a connection as an arguement, the class acts as a 'wrapper' to that connection given to the constructor, which it keeps an reference of.
+
+**`recvFilteredData`** - returns the first Packet recieved with the specified port and channel. If no port and channel specified it uses the same port and channel used by the ConnectionWrapper itself.
+
+**`sendData`** - takes 2 or 4 arguements. The pointer of the data and the second argument is the size of the data. It combins the first and second data together (if porvided) and sends it all to the crazyflie. Sends the data through the connection by writing it into the packet
+
+**`getConnection`** - returns a reference to the connection stored in the connectionWrapper.
+
+**`setPort`** - sets the port of the packet used by the connectionWrapper.
+
+**`setChannel`** - sets the channel of the packet used by the connectionWrapper.
+
+
+
+
+
+ 
+ 
+
+
 
