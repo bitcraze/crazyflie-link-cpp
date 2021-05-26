@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Param.h"
+#include "Crazyflie.h"
 
 using std::cout;
 using std::endl;
@@ -8,32 +8,30 @@ using namespace bitcraze::crazyflieLinkCpp;
 
 int main()
 {
-    Connection con("usb://0");
-    Param param(con);
-    Toc toc = param.getToc();
+    Crazyflie crazyflie("usb://0");
 
-    uint16_t numOfElements = toc.getTocInfo()._numberOfElements;
+    uint16_t numOfElements = crazyflie.getTocInfo()._numberOfElements;
 
     for (uint16_t i = 0; i < numOfElements; i++)
     {
-        auto tocItem = toc.getItemFromToc(i);
-        std::string strType = toc.getAccessAndStrType(tocItem._paramType).second;
-        std::string strAccessType = toc.accessTypeToStr(toc.getAccessAndStrType(tocItem._paramType).first);
+        auto tocItem = crazyflie.getItemFromToc(i);
+        std::string strType = crazyflie.getAccessAndStrType(tocItem._paramType).second;
+        std::string strAccessType = crazyflie.accessTypeToStr(crazyflie.getAccessAndStrType(tocItem._paramType).first);
         cout << tocItem._paramId << ": " << strAccessType << ":" << strType << "  " << tocItem._groupName << "." << tocItem._paramName << " val=";
         if(strType.find("int") != std::string::npos)
-            cout << param.getUIntById(tocItem._paramId) << endl;
+            cout << crazyflie.getUIntById(tocItem._paramId) << endl;
         else 
-            cout << param.getFloatById(tocItem._paramId) << endl;
+            cout << crazyflie.getFloatById(tocItem._paramId) << endl;
     }
     cout << "------------------\n" << "numOfElements: " << (int) numOfElements << "\n------------------\n\n\n" << endl;
 
     cout << "Get by name:                activeMarker . mode  \n";
     
-    cout << param.getUIntByName("activeMarker", "mode") << endl;
+    cout << crazyflie.getUIntByName("activeMarker", "mode") << endl;
 
 
     cout << "Get by name:                usd . logging  \n";
-    cout << param.getUIntByName("usd", "logging") << endl;
+    cout << crazyflie.getUIntByName("usd", "logging") << endl;
 
     return 0;
 }

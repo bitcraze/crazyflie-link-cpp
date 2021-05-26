@@ -19,10 +19,11 @@ class ConnectionWrapper
 {
 private:
     bitcraze::crazyflieLinkCpp::Packet _packet;
-    bitcraze::crazyflieLinkCpp::Connection &_con;
+    bitcraze::crazyflieLinkCpp::Connection* _conPtr;
 
 public:
-    ConnectionWrapper(bitcraze::crazyflieLinkCpp::Connection &con);
+    ConnectionWrapper(bitcraze::crazyflieLinkCpp::Connection & conPtr);
+    ConnectionWrapper& operator=(bitcraze::crazyflieLinkCpp::Connection& con);
 
     bitcraze::crazyflieLinkCpp::Packet recvFilteredData(int timeout, int port, int channel);
 
