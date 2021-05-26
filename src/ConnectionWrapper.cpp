@@ -2,10 +2,18 @@
 #define __CONNECTIONWRAPPER_H__
 
 #include "ConnectionWrapper.h"
+#include <functional>
 
 using namespace bitcraze::crazyflieLinkCpp;
 
-ConnectionWrapper::ConnectionWrapper(Connection &con) : _con(con)
+ConnectionWrapper& ConnectionWrapper::operator=(bitcraze::crazyflieLinkCpp::Connection& con)
+{
+    _conPtr = &con;
+    return *this;
+}
+
+
+ConnectionWrapper::ConnectionWrapper(Connection &con) : _conPtr(&con)
 {
 }
 
@@ -43,7 +51,7 @@ void ConnectionWrapper::sendData(void* data1, size_t data1_len, void* data2, siz
             std::copy( (uint8_t*)data2, (uint8_t*)data2 + data2_len, _packet.payload() + data1_len);
         }
     }
-    _con.send(_packet);
+    _conPtr->send(_packet);
 }
 
 
@@ -51,7 +59,7 @@ Packet ConnectionWrapper::recvFilteredData(int timeout, int port, int channel)
 {
     while (true)
     {
-        Packet p = _con.recv(timeout);
+        Packet p = _conPtr->recv(timeout);
         if ((p.channel() == channel && p.port() == port) || !p)
             return p;
     }
@@ -64,7 +72,7 @@ Packet ConnectionWrapper::recvFilteredData(int timeout)
 
 Connection &ConnectionWrapper::getConnection()
 {
-    return _con;
+    return *_conPtr;
 }
 
 void ConnectionWrapper::setPort(int port)

@@ -39,8 +39,6 @@ add_library(crazyflieLinkCpp
   src/CrazyflieUSB.cpp
   src/CrazyflieUSBThread.cpp
   src/Version.cpp
-  src/Toc.cpp
-  src/Param.cpp
   src/ConnectionWrapper.cpp
   src/Crazyflie.cpp
 )
