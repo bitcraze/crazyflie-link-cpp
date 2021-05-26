@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <chrono>
 #include "Crazyflie.h"
 
 using std::cout;
@@ -11,7 +11,7 @@ int main()
     Crazyflie crazyflie("usb://0");
 
     uint16_t numOfElements = crazyflie.getTocInfo()._numberOfElements;
-
+    auto start = std::chrono::steady_clock::now();
     for (uint16_t i = 0; i < numOfElements; i++)
     {
         auto tocItem = crazyflie.getItemFromToc(i);
@@ -23,6 +23,8 @@ int main()
         else 
             cout << crazyflie.getFloatById(tocItem._paramId) << endl;
     }
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> diff = end - start;
     cout << "------------------\n" << "numOfElements: " << (int) numOfElements << "\n------------------\n\n\n" << endl;
 
     cout << "Get by name:                activeMarker . mode  \n";
@@ -32,6 +34,8 @@ int main()
 
     cout << "Get by name:                usd . logging  \n";
     cout << crazyflie.getUIntByName("usd", "logging") << endl;
+
+    cout << "Time: " << (double)diff.count() << endl;
 
     return 0;
 }
