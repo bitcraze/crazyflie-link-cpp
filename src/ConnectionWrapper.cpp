@@ -47,17 +47,17 @@ void ConnectionWrapper::sendData(void* data1, size_t data1_len, void* data2, siz
 }
 
 
-bitcraze::crazyflieLinkCpp::Packet ConnectionWrapper::recvFilteredData(int timeout, int port, int channel)
+Packet ConnectionWrapper::recvFilteredData(int timeout, int port, int channel)
 {
     while (true)
     {
-        bitcraze::crazyflieLinkCpp::Packet p = _con.recv(timeout);
+        Packet p = _con.recv(timeout);
         if ((p.channel() == channel && p.port() == port) || !p)
             return p;
     }
 }
 
-bitcraze::crazyflieLinkCpp::Packet ConnectionWrapper::recvFilteredData(int timeout)
+Packet ConnectionWrapper::recvFilteredData(int timeout)
 {
     return this->recvFilteredData(timeout, _packet.port(), _packet.channel());
 }
