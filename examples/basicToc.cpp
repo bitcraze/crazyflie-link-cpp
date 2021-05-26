@@ -7,15 +7,14 @@
 #include <queue>
 #include <vector>
 
-#include "Toc.h"
+#include "Crazyflie.h"
 
 using namespace bitcraze::crazyflieLinkCpp;
 
 int main()
 {
-    Connection con("usb://0");
-    Toc toc(con);
-    toc.run();
+    Crazyflie crazyflie("usb://0");
+    crazyflie.printToc();
 
     return 0;
 }
