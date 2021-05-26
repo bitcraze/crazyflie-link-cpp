@@ -33,7 +33,9 @@ bool isBigEndian()
 
 void ConnectionWrapper::sendData(const void* data1, const size_t& data1_len, const void* data2, const size_t& data2_len) const
 {
-    Packet p = _packet;
+    Packet p;
+    p.setChannel(_channel);
+    p.setPort(_port);
     p.setPayloadSize(data1_len + data2_len);
 
     if (IS_BIG_ENDIAN)
@@ -68,7 +70,7 @@ Packet ConnectionWrapper::recvFilteredData(int timeout, int port, int channel) c
 
 Packet ConnectionWrapper::recvFilteredData(int timeout) const
 {
-    return this->recvFilteredData(timeout, _packet.port(), _packet.channel());
+    return this->recvFilteredData(timeout, _port, _channel);
 }
 
 Connection &ConnectionWrapper::getConnection()
@@ -78,11 +80,11 @@ Connection &ConnectionWrapper::getConnection()
 
 void ConnectionWrapper::setPort(int port)
 {
-    _packet.setPort(port);
+    _port = port;
 }
 
 void ConnectionWrapper::setChannel(int channel)
 {
-    _packet.setChannel(channel);
+    _channel = channel;
 }
 #endif // __CONNECTIONWRAPPER_H__

@@ -18,7 +18,9 @@ const bool IS_BIG_ENDIAN = isBigEndian();
 class ConnectionWrapper
 {
 private:
-    bitcraze::crazyflieLinkCpp::Packet _packet;
+    uint8_t _port;
+    uint8_t _channel;
+
     bitcraze::crazyflieLinkCpp::Connection* _conPtr;
 
 public:
