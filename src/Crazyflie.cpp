@@ -1,17 +1,18 @@
 #include "Crazyflie.h"
 
-Crazyflie::Crazyflie(const std::string& uri) : _con(uri), _conWrapperParamRead(_con),_conWrapperParamWrite(_con), _conWrapperToc(_con)
+Crazyflie::Crazyflie(const std::string& uri) : _con(uri), _conWrapperParamRead(_con),_conWrapperParamWrite(_con), _conWrapperToc(_con), _conWrapperAppchannel(_con)
 {
     _conWrapperToc.setPort(PARAM_PORT);
     _conWrapperParamRead.setPort(PARAM_PORT);
     _conWrapperParamWrite.setPort(PARAM_PORT);
+    _conWrapperAppchannel.setPort(APPCHANNEL_PORT);
 
     _conWrapperToc.setChannel(TOC_CHANNEL);
     _conWrapperParamRead.setChannel(PARAM_READ_CHANNEL);
     _conWrapperParamWrite.setChannel(PARAM_WRITE_CHANNEL);
 }
 
-float Crazyflie::getFloat(uint16_t paramId)
+float Crazyflie::getFloat(uint16_t paramId) const
 {
     float res = 0;
 
@@ -22,9 +23,8 @@ float Crazyflie::getFloat(uint16_t paramId)
     return res;
 }
 
-uint32_t Crazyflie::getUInt(uint16_t paramId)
+uint32_t Crazyflie::getUInt(uint16_t paramId) const
 {
-    _conWrapperParamRead.setChannel(PARAM_READ_CHANNEL);
 
     uint32_t res = 0;
 
@@ -37,7 +37,7 @@ uint32_t Crazyflie::getUInt(uint16_t paramId)
     return res;
 }
 
-float Crazyflie::getFloatById(uint16_t paramId)
+float Crazyflie::getFloatById(uint16_t paramId) const
 {
     auto tocItem = this->getItemFromToc(paramId);
     std::string strType = this->getAccessAndStrType(tocItem._paramType).second;
@@ -53,7 +53,7 @@ float Crazyflie::getFloatById(uint16_t paramId)
     }
 }
 
-uint32_t Crazyflie::getUIntById(uint16_t paramId)
+uint32_t Crazyflie::getUIntById(uint16_t paramId) const
 {
 
     auto tocItem = this->getItemFromToc(paramId);
@@ -69,7 +69,7 @@ uint32_t Crazyflie::getUIntById(uint16_t paramId)
     }
 }
 
-float Crazyflie::getFloatByName(std::string group, std::string name)
+float Crazyflie::getFloatByName(const std::string& group, const std::string& name) const
 {
     uint16_t numOfElements = this->getTocInfo()._numberOfElements;
 
@@ -87,7 +87,7 @@ float Crazyflie::getFloatByName(std::string group, std::string name)
     return NOT_FOUND;
 }
 
-uint32_t Crazyflie::getUIntByName(std::string group, std::string name)
+uint32_t Crazyflie::getUIntByName(const std::string& group, const std::string& name) const
 {
     uint16_t numOfElements = this->getTocInfo()._numberOfElements;
 
@@ -110,30 +110,26 @@ Crazyflie::~Crazyflie()
 
 bool Crazyflie::setParam(uint16_t paramId, float newValue) 
 {
-    _conWrapperParamWrite.setChannel(PARAM_WRITE_CHANNEL);
-
     _conWrapperParamWrite.sendData(&paramId, sizeof(paramId), &newValue, sizeof(newValue));
 
     return true;
 }
 
-bool Crazyflie::setParam(uint16_t paramId, uint32_t newValue, size_t valueSize) 
+bool Crazyflie::setParam(uint16_t paramId, uint32_t newValue, const size_t& valueSize) 
 {
-    _conWrapperParamWrite.setChannel(PARAM_WRITE_CHANNEL);
-
     _conWrapperParamWrite.sendData(&paramId, sizeof(paramId), &newValue, valueSize);
 
     return true;
 }
 
-TocItem::TocItem(bitcraze::crazyflieLinkCpp::Packet &p_recv)
+TocItem::TocItem(const bitcraze::crazyflieLinkCpp::Packet& p_recv)
 {
     _cmdNum = p_recv.payload()[0];
     _paramId = 0;
     memcpy(&_paramId, &p_recv.payload()[1], sizeof(_paramId));
     _paramType = p_recv.payload()[3];
-    _groupName = (char *)(&p_recv.payload()[4]);
-    _paramName = (char *)(&p_recv.payload()[4] + _groupName.length() + 1);
+    _groupName = (const char *)(p_recv.payload())+4;
+    _paramName = (const char *)(p_recv.payload())+ 4 + _groupName.length() + 1;
 }
 
 std::ostream &operator<<(std::ostream &out, const TocItem &tocItem)
@@ -146,7 +142,10 @@ std::ostream &operator<<(std::ostream &out, const TocItem &tocItem)
     return out;
 }
 
-TocInfo::TocInfo(bitcraze::crazyflieLinkCpp::Packet &p_recv)
+
+
+
+TocInfo::TocInfo(const bitcraze::crazyflieLinkCpp::Packet &p_recv) 
 {
     memcpy(&_numberOfElements, &p_recv.payload()[1], sizeof(_numberOfElements));
     memcpy(&_crc, &p_recv.payload()[3], sizeof(_crc));
@@ -160,7 +159,7 @@ std::ostream &operator<<(std::ostream &out, const TocInfo &tocInfo)
 }
 
 
-TocInfo Crazyflie::getTocInfo()
+TocInfo Crazyflie::getTocInfo() const 
 {
     // ask for the toc info
     uint8_t cmd = CMD_TOC_INFO_V2;
@@ -170,7 +169,7 @@ TocInfo Crazyflie::getTocInfo()
     return TocInfo(p_recv);
 }
 
-TocItem Crazyflie::getItemFromToc(uint16_t id)
+TocItem Crazyflie::getItemFromToc(uint16_t id) const
 {
     uint8_t cmd = CMD_TOC_ITEM_V2;
 
@@ -220,5 +219,7 @@ std::pair<int, std::string> Crazyflie::getAccessAndStrType(uint8_t type)
     {
         accessType = RW_ACCESS;
     }
-    return std::pair<int, std::string>(accessType, types[type].first);
+
+    
+    return std::pair<int, std::string>(accessType, PARAM_TYPES.find(type)->second.first);
 }
