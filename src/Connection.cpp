@@ -21,8 +21,9 @@ Connection::Connection(const std::string &uri)
   // "radio://0/80/2M/E7E7E7E7E7" -> connect over radio
   // "radio://*/80/2M/E7E7E7E7E7" -> auto-pick radio
   // "radio://*/80/2M/*" -> broadcast/P2P sniffing on channel 80
+  // "radiobroadcast://0/80/2M -> broadcast to all crazyflies on channel 80
 
-  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]+|\\*)(\\?[\\w=&]+)?)");
+  const std::regex uri_regex("(usb:\\/\\/(\\d+)|radio:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M)\\/([a-fA-F0-9]+|\\*)(\\?[\\w=&]+)?)|(radiobroadcast:\\/\\/(\\d+|\\*)\\/(\\d+)\\/(250K|1M|2M))");
   std::smatch match;
   if (!std::regex_match(uri, match, uri_regex)) {
     std::stringstream sstr;
@@ -50,57 +51,78 @@ Connection::Connection(const std::string &uri)
     impl_->isRadio_ = false;
   } else {
     // radio
-    if (match[3].str() == "*") {
-      impl_->devid_ = -1;
-    } else {
-      impl_->devid_ = std::stoi(match[3].str());
+    uint8_t devIdMatchIndex = 3;
+    uint8_t channelMatchIndex = 4;
+    uint8_t datarateMatchIndex = 5;
+
+    // broadcast
+    if (match[8].matched) {
+        impl_->address_ = BROADCAST_ADDRESS;
+        impl_->useSafelink_ = false;
+        impl_->useAutoPing_ = false;
+        impl_->useAckFilter_ = false;
+        impl_->broadcast_ = true;
+        devIdMatchIndex = 9;
+        channelMatchIndex = 10;
+        datarateMatchIndex = 11;
+    }
+    else {
+        // Address is represented by 40 bytes => 10 hex chars max
+        if (match[6].str().length() > 10) {
+            std::stringstream sstr;
+            sstr << "Invalid uri (" << uri << ")!";
+            throw std::runtime_error(sstr.str());
+        }
+        impl_->address_ = std::stoull(match[6].str(), nullptr, 16);
+
+        // parse flags
+        impl_->useSafelink_ = true;
+        impl_->useAutoPing_ = true;
+        impl_->useAckFilter_ = true;
+        impl_->broadcast_ = false;
+
+        if (match[7].length() > 0) {
+            std::stringstream sstr(match[7].str().substr(1));
+            std::string keyvalue;
+            const std::regex params_regex("(safelink|autoping|ackfilter)=([0|1])");
+            while (getline(sstr, keyvalue, '&')) {
+                std::smatch match;
+                if (!std::regex_match(keyvalue, match, params_regex)) {
+                    std::stringstream sstr;
+                    sstr << "Invalid uri (" << uri << ")! ";
+                    sstr << "Unknown " << keyvalue << ".";
+                    throw std::runtime_error(sstr.str());
+                }
+
+                if (match[1].str() == "safelink" && match[2].str() == "0") {
+                    impl_->useSafelink_ = false;
+                }
+                if (match[1].str() == "autoping" && match[2].str() == "0") {
+                    impl_->useAutoPing_ = false;
+                }
+                if (match[1].str() == "ackfilter" && match[2].str() == "0") {
+                    impl_->useAckFilter_ = false;
+                }
+            }
+        }
     }
 
-    impl_->channel_ = std::stoi(match[4].str());
-    if (match[5].str() == "250K") {
-      impl_->datarate_ = Crazyradio::Datarate_250KPS;
-    } else if (match[5].str() == "1M") {
-      impl_->datarate_ = Crazyradio::Datarate_1MPS;
-    } else if (match[5].str() == "2M") {
-      impl_->datarate_ = Crazyradio::Datarate_2MPS;
+    if (match[devIdMatchIndex].str() == "*") {
+        impl_->devid_ = -1;
+    }
+    else {
+        impl_->devid_ = std::stoi(match[devIdMatchIndex].str());
     }
 
-    // Address is represented by 40 bytes => 10 hex chars max
-    if (match[6].str().length() > 10) {
-        std::stringstream sstr;
-        sstr << "Invalid uri (" << uri << ")!";
-        throw std::runtime_error(sstr.str());
+    impl_->channel_ = std::stoi(match[channelMatchIndex].str());
+    if (match[datarateMatchIndex].str() == "250K") {
+        impl_->datarate_ = Crazyradio::Datarate_250KPS;
     }
-    impl_->address_ = std::stoull(match[6].str(), nullptr, 16);
-
-    // parse flags
-    impl_->useSafelink_ = true;
-    impl_->useAutoPing_ = true;
-    impl_->useAckFilter_ = true;
-
-    if (match[7].length() > 0) {
-      std::stringstream sstr(match[7].str().substr(1));
-      std::string keyvalue;
-      const std::regex params_regex("(safelink|autoping|ackfilter)=([0|1])");
-      while (getline(sstr, keyvalue, '&')) {
-        std::smatch match;
-        if (!std::regex_match(keyvalue, match, params_regex)) {
-          std::stringstream sstr;
-          sstr << "Invalid uri (" << uri << ")! ";
-          sstr << "Unknown " << keyvalue << ".";
-          throw std::runtime_error(sstr.str());
-        }
-
-        if (match[1].str() == "safelink" && match[2].str() == "0") {
-          impl_->useSafelink_ = false;
-        }
-        if (match[1].str() == "autoping" && match[2].str() == "0") {
-          impl_->useAutoPing_ = false;
-        }
-        if (match[1].str() == "ackfilter" && match[2].str() == "0") {
-          impl_->useAckFilter_ = false;
-        }
-      }
+    else if (match[datarateMatchIndex].str() == "1M") {
+        impl_->datarate_ = Crazyradio::Datarate_1MPS;
+    }
+    else if (match[datarateMatchIndex].str() == "2M") {
+        impl_->datarate_ = Crazyradio::Datarate_2MPS;
     }
 
     impl_->safelinkInitialized_ = false;
@@ -109,8 +131,8 @@ Connection::Connection(const std::string &uri)
 
     impl_->isRadio_ = true;
   }
-  USBManager::get().addConnection(impl_);
 
+  USBManager::get().addConnection(impl_);
 }
 
 Connection::~Connection()

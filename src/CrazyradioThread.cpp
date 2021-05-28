@@ -228,11 +228,20 @@ void CrazyradioThread::run()
                 if (!con->queue_send_.empty())
                 {
                     const auto p = con->queue_send_.top();
-                    ack = radio.sendPacket(p.raw(), p.size());
-                    ++con->statistics_.sent_count;
-                    if (ack)
+                    if (con->broadcast_)
                     {
+                        radio.sendPacketNoAck(p.raw(), p.size());
+                        ++con->statistics_.sent_count;
                         con->queue_send_.pop();
+                    }
+                    else
+                    {
+                        ack = radio.sendPacket(p.raw(), p.size());
+                        ++con->statistics_.sent_count;
+                        if (ack)
+                        {
+                            con->queue_send_.pop();
+                        }
                     }
                 }
                 else if (con->useAutoPing_)
