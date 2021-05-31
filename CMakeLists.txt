@@ -119,6 +119,14 @@ target_link_libraries(example_basicParamWrite
   crazyflieLinkCpp
 )
 
+# example_appChannelTest
+add_executable(example_appChannelTest
+  examples/appChannelTest.cpp
+)
+target_link_libraries(example_appChannelTest
+  crazyflieLinkCpp
+)
+
 # Python bindings
 add_subdirectory(pybind11)
 

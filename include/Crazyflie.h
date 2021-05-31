@@ -92,6 +92,7 @@ public:
     static std::pair<int, std::string> getAccessAndStrType(uint8_t type) ;
 
     std::vector<TocItem> getToc();
+    std::vector<uint8_t> recvAppChannelData();
 
     void printToc();
 
