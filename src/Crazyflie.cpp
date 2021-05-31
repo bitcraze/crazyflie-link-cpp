@@ -12,6 +12,8 @@ Crazyflie::Crazyflie(const std::string& uri) : _con(uri), _conWrapperParamRead(_
     _conWrapperToc.setChannel(TOC_CHANNEL);
     _conWrapperParamRead.setChannel(PARAM_READ_CHANNEL);
     _conWrapperParamWrite.setChannel(PARAM_WRITE_CHANNEL);
+    _conWrapperAppchannel.setChannel(APP_CHANNEL);
+
 }
 
 void Crazyflie::sendAppChannelData(const void* data, const size_t& dataLen)
@@ -21,10 +23,8 @@ void Crazyflie::sendAppChannelData(const void* data, const size_t& dataLen)
 
 std::vector<uint8_t> Crazyflie::recvAppChannelData()
 {
-        std::cout << "pass2" << std::endl;
 
     Packet p = _conWrapperAppchannel.recvFilteredData(0);
-        std::cout << "pass2" << std::endl;
 
     std::vector<uint8_t> res;
     std::copy(p.payload(), p.payload() + p.payloadSize(), std::back_inserter(res));
