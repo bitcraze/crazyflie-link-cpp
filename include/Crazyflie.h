@@ -7,7 +7,7 @@
 #define PAYLOAD_VALUE_BEGINING_INDEX 3
 #define NOT_FOUND 0
 
-#define APP_CHANNEL 
+#define APP_CHANNEL 2
 
 #define TOC_CHANNEL 0
 #define PARAM_READ_CHANNEL 1
@@ -115,6 +115,7 @@ public:
     static std::pair<int, std::string> getAccessAndStrType(uint8_t type) ;
 
     std::vector<TocItem> getToc();
+    std::vector<uint8_t> recvAppChannelData();
 
     void printToc(); //print the TOC to the console
 

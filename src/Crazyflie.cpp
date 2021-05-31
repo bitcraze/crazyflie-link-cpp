@@ -1,5 +1,7 @@
 #include "Crazyflie.h"
 
+using namespace bitcraze::crazyflieLinkCpp;
+
 Crazyflie::Crazyflie(const std::string& uri) : _con(uri), _conWrapperParamRead(_con),_conWrapperParamWrite(_con), _conWrapperToc(_con), _conWrapperAppchannel(_con)
 {
     _conWrapperToc.setPort(PARAM_PORT);
@@ -10,14 +12,33 @@ Crazyflie::Crazyflie(const std::string& uri) : _con(uri), _conWrapperParamRead(_
     _conWrapperToc.setChannel(TOC_CHANNEL);
     _conWrapperParamRead.setChannel(PARAM_READ_CHANNEL);
     _conWrapperParamWrite.setChannel(PARAM_WRITE_CHANNEL);
+    _conWrapperAppchannel.setChannel(APP_CHANNEL);
+
 }
+
+void Crazyflie::sendAppChannelData(const void* data, const size_t& dataLen)
+{
+    _conWrapperAppchannel.sendData(data, dataLen);
+}
+
+std::vector<uint8_t> Crazyflie::recvAppChannelData()
+{
+
+    Packet p = _conWrapperAppchannel.recvFilteredData(0);
+
+    std::vector<uint8_t> res;
+    std::copy(p.payload(), p.payload() + p.payloadSize(), std::back_inserter(res));
+    return res;
+}
+
+
 
 float Crazyflie::getFloat(uint16_t paramId) const
 {
     float res = 0;
 
     _conWrapperParamRead.sendData(&paramId, sizeof(paramId));
-    bitcraze::crazyflieLinkCpp::Packet p = _conWrapperParamRead.recvFilteredData(0);
+    Packet p = _conWrapperParamRead.recvFilteredData(0);
     std::memcpy(&res, p.payload() + PAYLOAD_VALUE_BEGINING_INDEX, sizeof(res));
 
     return res;
@@ -30,7 +51,7 @@ uint32_t Crazyflie::getUInt(uint16_t paramId) const
 
     _conWrapperParamRead.sendData(&paramId, sizeof(paramId));
 
-    bitcraze::crazyflieLinkCpp::Packet p = _conWrapperParamRead.recvFilteredData(0);
+   Packet p = _conWrapperParamRead.recvFilteredData(0);
  
     std::memcpy(&res, p.payload() + PAYLOAD_VALUE_BEGINING_INDEX, p.payloadSize() - PAYLOAD_VALUE_BEGINING_INDEX);
 
@@ -122,7 +143,7 @@ bool Crazyflie::setParam(uint16_t paramId, uint32_t newValue, const size_t& valu
     return true;
 }
 
-TocItem::TocItem(const bitcraze::crazyflieLinkCpp::Packet& p_recv)
+TocItem::TocItem(const Packet& p_recv)
 {
     _cmdNum = p_recv.payload()[0];
     _paramId = 0;
@@ -145,7 +166,7 @@ std::ostream &operator<<(std::ostream &out, const TocItem &tocItem)
 
 
 
-TocInfo::TocInfo(const bitcraze::crazyflieLinkCpp::Packet &p_recv) 
+TocInfo::TocInfo(const Packet &p_recv) 
 {
     memcpy(&_numberOfElements, &p_recv.payload()[1], sizeof(_numberOfElements));
     memcpy(&_crc, &p_recv.payload()[3], sizeof(_crc));
@@ -164,7 +185,7 @@ TocInfo Crazyflie::getTocInfo() const
     // ask for the toc info
     uint8_t cmd = CMD_TOC_INFO_V2;
     _conWrapperToc.sendData(&cmd, sizeof(uint8_t));
-    bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapperToc.recvFilteredData(0);
+   Packet p_recv = _conWrapperToc.recvFilteredData(0);
 
     return TocInfo(p_recv);
 }
@@ -175,7 +196,7 @@ TocItem Crazyflie::getItemFromToc(uint16_t id) const
 
     // ask for a param with the given id
     _conWrapperToc.sendData(&cmd, sizeof(uint8_t), &id, sizeof(id));
-    bitcraze::crazyflieLinkCpp::Packet p_recv = _conWrapperToc.recvFilteredData(0);
+   Packet p_recv = _conWrapperToc.recvFilteredData(0);
     return TocItem(p_recv);
 }
 
