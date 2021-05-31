@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <fstream> //for saving .csv file
 #include "ConnectionWrapper.h"
 
 #define PAYLOAD_VALUE_BEGINING_INDEX 3
@@ -77,16 +78,38 @@ public:
     Crazyflie(const std::string& uri);
     ~Crazyflie();
 
+    // GOOD API
+    uint32_t getUIntByName(const std::string& group, const std::string& name) const;
+    float getFloatByName(const std::string& group, const std::string& name) const;
+
+    // QUESTIONABLE API - use BY NAME
+    bool setParam(uint16_t paramId, float newValue);
+    bool setParam(uint16_t paramId, uint32_t newValue, const size_t& valueSize);
+
+    bool init(bool paramChangedCB);
+    //todo: add init ? bool init(paramChangedCB)
+    //todo: add callback for param changed
+    
+    //where is Console? 
+
+
+    void saveToc(std::string filename);  //save the TOC to a .csv file
+
+    // app channel read file via param change
+    //////////////////////////////////////////////////
+
+
+
+
+
+    //private ?
     uint32_t getUInt(uint16_t paramId) const;
     float getFloat(uint16_t paramId) const;
     float getFloatById(uint16_t paramId) const;
     uint32_t getUIntById(uint16_t paramId) const;
-    uint32_t getUIntByName(const std::string& group, const std::string& name) const;
-    float getFloatByName(const std::string& group, const std::string& name) const;
 
-    bool setParam(uint16_t paramId, float newValue);
-    bool setParam(uint16_t paramId, uint32_t newValue, const size_t& valueSize);
 
+    // does not help me
     TocInfo getTocInfo() const;
     TocItem getItemFromToc(uint16_t id) const;
     static std::pair<int, std::string> getAccessAndStrType(uint8_t type) ;
@@ -94,7 +117,7 @@ public:
     std::vector<TocItem> getToc();
     std::vector<uint8_t> recvAppChannelData();
 
-    void printToc();
+    void printToc(); //print the TOC to the console
 
 
     static std::string accessTypeToStr(int accessType) ;

@@ -118,6 +118,13 @@ add_executable(example_basicParamWrite
 target_link_libraries(example_basicParamWrite
   crazyflieLinkCpp
 )
+# example_basicSave
+add_executable(example_basicSave
+  examples/basicSave.cpp
+)
+target_link_libraries(example_basicSave
+  crazyflieLinkCpp
+)
 
 # example_appChannelTest
 add_executable(example_appChannelTest

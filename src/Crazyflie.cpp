@@ -211,6 +211,7 @@ std::vector<TocItem> Crazyflie::getToc()
     return tocItems;
 }
 
+//print the TOC with values!
 void Crazyflie::printToc()
 {
     auto tocItems = getToc(); 
@@ -218,8 +219,33 @@ void Crazyflie::printToc()
     {
         // tocItem
         auto accessAndType = getAccessAndStrType(tocItem._paramType);
-        std::cout << tocItem._paramId << ": " << accessTypeToStr(accessAndType.first) << ":" << accessAndType.second << "  " << tocItem._groupName << "." << tocItem._paramName << std::endl;
+        std::cout << tocItem._paramId << ": " << accessTypeToStr(accessAndType.first) << ":" << accessAndType.second << "  " << tocItem._groupName << "." << tocItem._paramName << "  val=";
+        if(accessAndType.second.find("int") != std::string::npos)
+            std::cout << getUIntById(tocItem._paramId) << std::endl;
+        else 
+            std::cout << getFloatById(tocItem._paramId) << std::endl;
     }
+}
+
+//save the TOC to a .csv file
+void Crazyflie::saveToc(std::string filename)
+{
+    std::ofstream tocParamsFile;
+    tocParamsFile.open(filename + ".csv");
+    // tocParamsFile << "ID,AccessType,AccessType,Group,Name,Value" << std::endl; // the parameters will be saved to the file like this
+    auto tocItems = getToc(); 
+    for (TocItem tocItem : tocItems)
+    {
+        // tocItem
+        auto accessAndType = getAccessAndStrType(tocItem._paramType);
+        tocParamsFile << tocItem._paramId << "," << accessTypeToStr(accessAndType.first) << "," << accessAndType.second << "," << tocItem._groupName << "," << tocItem._paramName << ",";
+        if(accessAndType.second.find("int") != std::string::npos)
+            tocParamsFile << getUIntById(tocItem._paramId) << std::endl;
+        else 
+            tocParamsFile << getFloatById(tocItem._paramId) << std::endl;
+    }
+    std::cout << "\nsuccessfully saved TOC to 'build/toc.csv'" << std::endl;
+    tocParamsFile.close();
 }
 
 std::string Crazyflie::accessTypeToStr(int accessType)
@@ -240,7 +266,6 @@ std::pair<int, std::string> Crazyflie::getAccessAndStrType(uint8_t type)
     {
         accessType = RW_ACCESS;
     }
-
     
     return std::pair<int, std::string>(accessType, PARAM_TYPES.find(type)->second.first);
 }
