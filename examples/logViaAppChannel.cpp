@@ -14,7 +14,6 @@ using namespace bitcraze::crazyflieLinkCpp;
 int main()
 {
     Crazyflie crazyflie("usb://0");
-    auto toc = crazyflie.getToc();
 
    
 
@@ -25,7 +24,7 @@ int main()
         if (element._groupName == "usd" && element._paramName == "logging")
         {
 
-            crazyflie.setParam(element._paramId, 0, 1);
+            crazyflie.setParamInCrazyflie(element._paramId, 0, 1);
             break;
         }
     }
@@ -35,7 +34,7 @@ int main()
 
         if (element._groupName == "usd" && element._paramName == "sendAppChannle")
         {
-            crazyflie.setParam(element._paramId, 1, 1);
+            crazyflie.setParamInCrazyflie(element._paramId, 1, 1);
             break;
         }
     }

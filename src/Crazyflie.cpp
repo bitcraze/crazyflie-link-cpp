@@ -28,7 +28,7 @@ std::vector<uint8_t> Crazyflie::recvAppChannelData()
     return res;
 }
 
-float Crazyflie::getFloat(uint16_t paramId) const
+float Crazyflie::getFloatFromCrazyflie(uint16_t paramId) const
 {
     float res = 0;
 
@@ -39,7 +39,7 @@ float Crazyflie::getFloat(uint16_t paramId) const
     return res;
 }
 
-uint32_t Crazyflie::getUInt(uint16_t paramId) const
+uint32_t Crazyflie::getUIntFromCrazyflie(uint16_t paramId) const
 {
     uint32_t res = 0;
     _conWrapperParamRead.sendData(&paramId, sizeof(paramId));
@@ -53,26 +53,26 @@ uint32_t Crazyflie::getUInt(uint16_t paramId) const
 
 float Crazyflie::getFloatByName(const std::string &group, const std::string &name) const
 {
-    return getFloat(_toc.getItemId(group, name));
+    return getFloatFromCrazyflie(_toc.getItemId(group, name));
 }
 
 uint32_t Crazyflie::getUIntByName(const std::string &group, const std::string &name) const
 {
-    return getUInt(_toc.getItemId(group, name));
+    return getUIntFromCrazyflie(_toc.getItemId(group, name));
 }
 
 Crazyflie::~Crazyflie()
 {
 }
 
-bool Crazyflie::setParam(uint16_t paramId, float newValue)
+bool Crazyflie::setParamInCrazyflie(uint16_t paramId, float newValue)
 {
     _conWrapperParamWrite.sendData(&paramId, sizeof(paramId), &newValue, sizeof(newValue));
 
     return true;
 }
 
-bool Crazyflie::setParam(uint16_t paramId, uint32_t newValue, const size_t &valueSize)
+bool Crazyflie::setParamInCrazyflie(uint16_t paramId, uint32_t newValue, const size_t &valueSize)
 {
     _conWrapperParamWrite.sendData(&paramId, sizeof(paramId), &newValue, valueSize);
 
@@ -92,11 +92,11 @@ void Crazyflie::initToc()
     for (uint16_t i = 0; i < num_of_elements; i++)
     {
         TocItem tocItem() ;
-        _toc.insert(getItemFromToc(i));
+        _toc.insert(getTocItemFromCrazyflie(i));
     }
 }
 
-TocItem Crazyflie::getItemFromToc(uint16_t id) const
+TocItem Crazyflie::getTocItemFromCrazyflie(uint16_t id) const
 {
     uint8_t cmd = CMD_TOC_ITEM_V2;
     // ask for a param with the given id
@@ -115,9 +115,9 @@ void Crazyflie::printToc()
     {
         std::cout << tocItem;
         if (to_string(tocItem._paramType).find("int") != std::string::npos)
-            std::cout << getUInt(tocItem._paramId) << std::endl;
+            std::cout << getUIntFromCrazyflie(tocItem._paramId) << std::endl;
         else
-            std::cout << getFloat(tocItem._paramId) << std::endl;
+            std::cout << getFloatFromCrazyflie(tocItem._paramId) << std::endl;
     }
     std::cout << "Printed " << tocItemsVector.size() << " items total" << std::endl;
 }
@@ -130,9 +130,9 @@ bool Crazyflie::init()
 
 bool Crazyflie::setParamByName(const std::string& group, const std::string& name, float newValue)
 {
-    return setParam(_toc.getItemId(group,name),newValue);
+    return setParamInCrazyflie(_toc.getItemId(group,name),newValue);
 }
 bool Crazyflie::setParamByName(const std::string& group, const std::string& name, uint32_t newValue, const size_t& valueSize)
 {
-    return setParam(_toc.getItemId(group,name),newValue, valueSize);
+    return setParamInCrazyflie(_toc.getItemId(group,name),newValue, valueSize);
 }
