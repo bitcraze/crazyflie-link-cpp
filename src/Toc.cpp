@@ -10,11 +10,11 @@ TocItem::TocItem(const bitcraze::crazyflieLinkCpp::Packet &p_recv)
     uint8_t typeAndAccessType = p_recv.payload()[3];
     _groupName = (const char *)(p_recv.payload()) + 4;
     _paramName = (const char *)(p_recv.payload()) + 4 + _groupName.length() + 1;
+    _paramType = typeAndAccessType & ~ACCESS_TYPE_BYTE;
 
     if ((bool)(typeAndAccessType & ACCESS_TYPE_BYTE) == (bool)AccessType::RO)
     {
         _paramAccessType = AccessType::RO;
-        _paramType = typeAndAccessType & ~ACCESS_TYPE_BYTE;
     }
     else
     {
@@ -22,19 +22,17 @@ TocItem::TocItem(const bitcraze::crazyflieLinkCpp::Packet &p_recv)
     }
 }
 
-
-bool TocItem::operator<(const TocItem& other) 
+bool TocItem::operator<(const TocItem &other)
 {
     return (_paramId) < (other._paramId);
 }
 
-bool TocItem::operator>(const TocItem& other) 
+bool TocItem::operator>(const TocItem &other)
 {
     return (_paramId) > (other._paramId);
 }
 
-
-std::string to_string(AccessType const& self)
+std::string to_string(AccessType const &self)
 {
     return AccessType::RO == self._accessType ? "RO" : "RW";
 }
@@ -56,11 +54,8 @@ AccessType &AccessType::operator=(const uint8_t &accessType)
 
 std::ostream &operator<<(std::ostream &out, const TocItem &tocItem)
 {
-    out << "paramId: " << (int)tocItem._paramId << std::endl;
-    out << "paramType: " << to_string(tocItem._paramType) << std::endl;
-    out << "paramAccessType: " << to_string(tocItem._paramAccessType) << std::endl;
-    out << "groupName: " << tocItem._groupName << std::endl;
-    out << "paramName: " << tocItem._paramName << std::endl;
+    out << tocItem._paramId << ": " << to_string(tocItem._paramAccessType) << ":" << to_string(tocItem._paramType) << "  " << tocItem._groupName << "." << tocItem._paramName << "  val=";
+
     return out;
 }
 
@@ -77,22 +72,22 @@ std::ostream &operator<<(std::ostream &out, const TocInfo &tocInfo)
     return out;
 }
 
-std::string to_string(ParamType const& self) 
+std::string to_string(ParamType const &self)
 {
     auto res = PARAM_TYPES.find(self._paramtype);
 
-    if(res != PARAM_TYPES.end())
+    if (res != PARAM_TYPES.end())
     {
         return res->second;
     }
-    return "? "+(int)self._paramtype;
+    return "? " + (int)self._paramtype;
 }
 
-ParamType& ParamType::operator=(const std::string& strParamType) 
+ParamType &ParamType::operator=(const std::string &strParamType)
 {
-    for(auto element : PARAM_TYPES)
+    for (auto element : PARAM_TYPES)
     {
-        if(element.second ==strParamType)
+        if (element.second == strParamType)
         {
             _paramtype = element.first;
             break;
@@ -101,7 +96,7 @@ ParamType& ParamType::operator=(const std::string& strParamType)
     return *this;
 }
 
-ParamType& ParamType::operator=(const uint8_t& paramType) 
+ParamType &ParamType::operator=(const uint8_t &paramType)
 {
     _paramtype = paramType;
     return *this;

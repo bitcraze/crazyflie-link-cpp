@@ -165,6 +165,7 @@ void Crazyflie::initToc()
     for (uint16_t i = 1; i <= num_of_elements; i++)
     {
         TocItem tocItem = getItemFromToc(i);
+        std::cout << tocItem << std::endl;
         _toc._tocItems.insert({{tocItem._groupName, tocItem._paramName}, tocItem});
     }
     
@@ -186,17 +187,17 @@ void Crazyflie::printToc()
     auto tocItems = _toc._tocItems;
     std::cout << "size: " << _toc._tocItems.size() << std::endl;
     std::cout << "size: " << _toc._tocInfo._numberOfElements << std::endl;
-    for (auto element : tocItems)
+    for (auto it = tocItems.begin(); it != tocItems.end() ; it++)
     {
-        TocItem tocItem = element.second;
+        TocItem tocItem = it->second;
         // tocItem
         // std::cout<< tocItem << std::endl;
-        // std::string strType = to_string(tocItem._paramType);
-        // std::cout << tocItem._paramId << ": " << to_string(tocItem._paramAccessType) << ":" << strType << "  " << tocItem._groupName << "." << tocItem._paramName << "  val=";
-        // if (strType.find("int") != std::string::npos)
-        //     std::cout << getUIntById(tocItem._paramId) << std::endl;
-        // else
-        //     std::cout << getFloatById(tocItem._paramId) << std::endl;
+        std::string strType = to_string(tocItem._paramType);
+        std::cout << tocItem._paramId << ": " << to_string(tocItem._paramAccessType) << ":" << strType << "  " << tocItem._groupName << "." << tocItem._paramName << "  val=";
+        if (strType.find("int") != std::string::npos)
+            std::cout << getUIntById(tocItem._paramId) << std::endl;
+        else
+            std::cout << getFloatById(tocItem._paramId) << std::endl;
     }
 }
 
