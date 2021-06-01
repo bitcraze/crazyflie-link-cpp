@@ -1,8 +1,9 @@
 #include "Toc.h"
 
-using namespace bitcraze::crazyflieLinkCpp;
+const uint8_t AccessType::RW = 0;
+const uint8_t AccessType::RO = 0;
 
-TocItem::TocItem(const Packet &p_recv)
+TocItem::TocItem(const bitcraze::crazyflieLinkCpp::Packet &p_recv)
 {
     _paramId = 0;
     memcpy(&_paramId, &p_recv.payload()[1], sizeof(_paramId));
@@ -20,6 +21,18 @@ TocItem::TocItem(const Packet &p_recv)
         _paramAccessType = AccessType::RW;
     }
 }
+
+
+bool TocItem::operator<(const TocItem& other) 
+{
+    return (_paramId) < (other._paramId);
+}
+
+bool TocItem::operator>(const TocItem& other) 
+{
+    return (_paramId) > (other._paramId);
+}
+
 
 std::string to_string(AccessType const& self)
 {
@@ -44,14 +57,14 @@ AccessType &AccessType::operator=(const uint8_t &accessType)
 std::ostream &operator<<(std::ostream &out, const TocItem &tocItem)
 {
     out << "paramId: " << (int)tocItem._paramId << std::endl;
-    out << "paramType: " << (int)tocItem._paramType << std::endl;
-    out << "paramAccessType: " << std::string(tocItem._paramAccessType) << std::endl;
+    out << "paramType: " << to_string(tocItem._paramType) << std::endl;
+    out << "paramAccessType: " << to_string(tocItem._paramAccessType) << std::endl;
     out << "groupName: " << tocItem._groupName << std::endl;
     out << "paramName: " << tocItem._paramName << std::endl;
     return out;
 }
 
-TocInfo::TocInfo(const Packet &p_recv)
+TocInfo::TocInfo(const bitcraze::crazyflieLinkCpp::Packet &p_recv)
 {
     memcpy(&_numberOfElements, &p_recv.payload()[1], sizeof(_numberOfElements));
     memcpy(&_crc, &p_recv.payload()[3], sizeof(_crc));
@@ -62,6 +75,36 @@ std::ostream &operator<<(std::ostream &out, const TocInfo &tocInfo)
     out << "numberOfElements: " << (int)tocInfo._numberOfElements << std::endl;
     out << "crc: " << (int)tocInfo._crc << std::endl;
     return out;
+}
+
+std::string to_string(ParamType const& self) 
+{
+    auto res = PARAM_TYPES.find(self._paramtype);
+
+    if(res != PARAM_TYPES.end())
+    {
+        return res->second;
+    }
+    return "?";
+}
+
+ParamType& ParamType::operator=(const std::string& strParamType) 
+{
+    for(auto element : PARAM_TYPES)
+    {
+        if(element.second ==strParamType)
+        {
+            _paramtype = element.first;
+            break;
+        }
+    }
+    return *this;
+}
+
+ParamType& ParamType::operator=(const uint8_t& paramType) 
+{
+    _paramtype = paramType;
+    return *this;
 }
 
 TocInfo::TocInfo()

@@ -58,7 +58,7 @@ uint32_t Crazyflie::getUInt(uint16_t paramId) const
 float Crazyflie::getFloatById(uint16_t paramId) const
 {
     auto tocItem = this->getItemFromToc(paramId);
-    std::string strType = this->getAccessAndStrType(tocItem._paramType).second;
+    std::string strType = to_string(tocItem._paramType);
 
     if ("float" == strType)
     {
@@ -75,7 +75,7 @@ uint32_t Crazyflie::getUIntById(uint16_t paramId) const
 {
 
     auto tocItem = this->getItemFromToc(paramId);
-    std::string strType = this->getAccessAndStrType(tocItem._paramType).second;
+    std::string strType = to_string(tocItem._paramType);
     if (strType.find("int") != std::string::npos)
     {
         return getUInt(paramId);
@@ -151,7 +151,7 @@ void Crazyflie::initToc()
     std::ifstream tocCsvFile(cfTocInfo._crc+".csv");
     if(tocCsvFile.good())
     {
-        tocCsvFile.getline();
+        
     }
 
     _toc._tocInfo = cfTocInfo;
@@ -177,23 +177,17 @@ TocItem Crazyflie::getItemFromToc(uint16_t id) const
     return TocItem(p_recv);
 }
 
-std::vector<TocItem> Crazyflie::getToc()
-{
-    std::vector<TocItem> tocItems;
-
-    return tocItems;
-}
-
 //print the TOC with values!
 void Crazyflie::printToc()
 {
-    auto tocItems = getToc();
-    for (TocItem tocItem : tocItems)
+    auto tocItems = _toc._tocItems;
+    for (auto element : tocItems)
     {
+        TocItem tocItem = element.second;
         // tocItem
-        auto accessAndType = getAccessAndStrType(tocItem._paramType);
-        std::cout << tocItem._paramId << ": " << accessTypeToStr(accessAndType.first) << ":" << accessAndType.second << "  " << tocItem._groupName << "." << tocItem._paramName << "  val=";
-        if (accessAndType.second.find("int") != std::string::npos)
+        std::string strType = to_string(tocItem._paramType);
+        std::cout << tocItem._paramId << ": " << to_string(tocItem._paramAccessType) << ":" << strType << "  " << tocItem._groupName << "." << tocItem._paramName << "  val=";
+        if (strType.find("int") != std::string::npos)
             std::cout << getUIntById(tocItem._paramId) << std::endl;
         else
             std::cout << getFloatById(tocItem._paramId) << std::endl;
@@ -211,9 +205,10 @@ void Crazyflie::saveToc(const std::string& filename) const
     {
         TocItem tocItem = element.second;
         // tocItem
-        auto accessAndType = getAccessAndStrType(tocItem._paramType);
-        tocParamsFile << tocItem._paramId << "," << accessTypeToStr(accessAndType.first) << "," << accessAndType.second << "," << tocItem._groupName << "," << tocItem._paramName << ",";
-        if (accessAndType.second.find("int") != std::string::npos)
+        std::string strType = to_string(tocItem._paramType);
+        std::string strAccessType = to_string(tocItem._paramAccessType);
+        tocParamsFile << tocItem._paramId << "," << strAccessType << "," << strType<< "," << tocItem._groupName << "," << tocItem._paramName << ",";
+        if (strAccessType.find("int") != std::string::npos)
             tocParamsFile << getUIntById(tocItem._paramId) << std::endl;
         else
             tocParamsFile << getFloatById(tocItem._paramId) << std::endl;
@@ -253,7 +248,9 @@ void Crazyflie::loadToc(const std::string& filename)
     {
         TocItem tocItem;
         tocItem._paramId = std::stoi(tocParamsFileLine[0]);
-        tocItem._paramType = tocParamsFileLine[0];
+        tocItem._paramAccessType = tocParamsFileLine[1];
+        tocItem._paramType = std::stoi(tocParamsFileLine[2]);
+        tocItem._paramType = std::stoi(tocParamsFileLine[2]);
         
      
     }
@@ -263,13 +260,6 @@ void Crazyflie::loadToc(const std::string& filename)
 }
 
 
-
-std::pair<int, std::string> Crazyflie::getAccessAndStrType(uint8_t type)
-{
-
-
-    return std::pair<int, std::string>(accessType, PARAM_TYPES.find(type)->second);
-}
 
 bool Crazyflie::init()
 {

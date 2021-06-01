@@ -81,7 +81,6 @@ public:
     TocItem getItemFromToc(uint16_t id) const;
     static std::pair<int, std::string> getAccessAndStrType(uint8_t type) ;
 
-    std::vector<TocItem> getToc();
     std::vector<uint8_t> recvAppChannelData();
 
     void printToc(); //print the TOC to the console
