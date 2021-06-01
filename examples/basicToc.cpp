@@ -16,8 +16,6 @@ int main()
     Crazyflie crazyflie("usb://0");
     crazyflie.init();
     crazyflie.printToc();
-    std::cout << "number six: "<< crazyflie.getItemFromToc(6) << std::endl;
-    std::cout << "number six val: "<< crazyflie.getUIntByName("imu_sensors", "BMP388") << std::endl;
 
     return 0;
 }
