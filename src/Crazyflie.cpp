@@ -149,9 +149,12 @@ void Crazyflie::initToc()
     TocInfo cfTocInfo(p_recv);
  
     std::ifstream tocCsvFile(cfTocInfo._crc+".csv");
-    if(tocCsvFile.good())
+    bool doesFileExist = tocCsvFile.good();
+    tocCsvFile.close();
+    if(doesFileExist)
     {
-        
+        loadToc(""+cfTocInfo._crc);
+        return;
     }
 
     _toc._tocInfo = cfTocInfo;
@@ -159,7 +162,7 @@ void Crazyflie::initToc()
 
     uint16_t num_of_elements = _toc._tocInfo._numberOfElements;
 
-    for (uint16_t i = 0; i < num_of_elements; i++)
+    for (uint16_t i = 1; i <= num_of_elements; i++)
     {
         TocItem tocItem = getItemFromToc(i);
         _toc._tocItems.insert({{tocItem._groupName, tocItem._paramName}, tocItem});
@@ -181,16 +184,19 @@ TocItem Crazyflie::getItemFromToc(uint16_t id) const
 void Crazyflie::printToc()
 {
     auto tocItems = _toc._tocItems;
+    std::cout << "size: " << _toc._tocItems.size() << std::endl;
+    std::cout << "size: " << _toc._tocInfo._numberOfElements << std::endl;
     for (auto element : tocItems)
     {
         TocItem tocItem = element.second;
         // tocItem
-        std::string strType = to_string(tocItem._paramType);
-        std::cout << tocItem._paramId << ": " << to_string(tocItem._paramAccessType) << ":" << strType << "  " << tocItem._groupName << "." << tocItem._paramName << "  val=";
-        if (strType.find("int") != std::string::npos)
-            std::cout << getUIntById(tocItem._paramId) << std::endl;
-        else
-            std::cout << getFloatById(tocItem._paramId) << std::endl;
+        // std::cout<< tocItem << std::endl;
+        // std::string strType = to_string(tocItem._paramType);
+        // std::cout << tocItem._paramId << ": " << to_string(tocItem._paramAccessType) << ":" << strType << "  " << tocItem._groupName << "." << tocItem._paramName << "  val=";
+        // if (strType.find("int") != std::string::npos)
+        //     std::cout << getUIntById(tocItem._paramId) << std::endl;
+        // else
+        //     std::cout << getFloatById(tocItem._paramId) << std::endl;
     }
 }
 

@@ -85,7 +85,7 @@ std::string to_string(ParamType const& self)
     {
         return res->second;
     }
-    return "?";
+    return "? "+(int)self._paramtype;
 }
 
 ParamType& ParamType::operator=(const std::string& strParamType) 
