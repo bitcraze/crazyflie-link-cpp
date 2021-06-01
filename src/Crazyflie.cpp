@@ -159,20 +159,36 @@ void Crazyflie::initToc()
 
     uint16_t num_of_elements = _toc._tocInfo._numberOfElements;
 
-    for (uint16_t i = 1; i <= num_of_elements; i++)
+    for (uint16_t i = 0; i < num_of_elements; i++)
     {
         TocItem tocItem = getItemFromToc(i);
         _toc._tocItems.insert({{tocItem._groupName, tocItem._paramName}, tocItem});
+        if(i == 6)
+        {
+            std::cout << "GREAT 6: "<< _toc._tocItems[{tocItem._groupName, tocItem._paramName}] << std::endl;
+        }
     }
+    for(auto element : _toc._tocItems)
+    {
+        if(element.second._paramId == 6)
+        std::cout << "NUM SIX: " << element.first.first << "." << element.first.second << " " << element.second << std::endl;
+    }
+    std::cout << "Amount of items in toc " << _toc._tocItems.size() << " items total" << std::endl;
+
+
 }
 
 TocItem Crazyflie::getItemFromToc(uint16_t id) const
 {
     uint8_t cmd = CMD_TOC_ITEM_V2;
-
     // ask for a param with the given id
     _conWrapperToc.sendData(&cmd, sizeof(uint8_t), &id, sizeof(id));
     Packet p_recv = _conWrapperToc.recvFilteredData(0);
+    if(id == 6)
+    {
+        std::cout <<"NUMBER 6: " << TocItem(p_recv) << std::endl;
+    }
+
     return TocItem(p_recv);
 }
 
@@ -182,6 +198,8 @@ void Crazyflie::printToc()
     std::vector<TocItem> tocItemsVector;
 
     auto tocItems = _toc._tocItems;
+    std::cout << "Amount of items in toc " << _toc._tocItems.size() << " items total" << std::endl;
+
     for (auto element : tocItems)
     {
         TocItem tocItem = element.second;
@@ -198,7 +216,9 @@ void Crazyflie::printToc()
             std::cout << getUInt(tocItem._paramId) << std::endl;
         else
             std::cout << getFloat(tocItem._paramId) << std::endl;
+
     }
+    std::cout << "Printed " << tocItemsVector.size() << " items total" << std::endl;
 }
 
 //save the TOC to a .csv file
