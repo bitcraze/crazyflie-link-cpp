@@ -2,7 +2,7 @@
 
 using namespace bitcraze::crazyflieLinkCpp;
 
-Crazyflie::Crazyflie(const std::string& uri) : _con(uri), _conWrapperParamRead(_con),_conWrapperParamWrite(_con), _conWrapperToc(_con), _conWrapperAppchannel(_con)
+Crazyflie::Crazyflie(const std::string &uri) : _con(uri), _conWrapperParamRead(_con), _conWrapperParamWrite(_con), _conWrapperToc(_con), _conWrapperAppchannel(_con)
 {
     _conWrapperToc.setPort(PARAM_PORT);
     _conWrapperParamRead.setPort(PARAM_PORT);
@@ -13,10 +13,9 @@ Crazyflie::Crazyflie(const std::string& uri) : _con(uri), _conWrapperParamRead(_
     _conWrapperParamRead.setChannel(PARAM_READ_CHANNEL);
     _conWrapperParamWrite.setChannel(PARAM_WRITE_CHANNEL);
     _conWrapperAppchannel.setChannel(APP_CHANNEL);
-
 }
 
-void Crazyflie::sendAppChannelData(const void* data, const size_t& dataLen)
+void Crazyflie::sendAppChannelData(const void *data, const size_t &dataLen)
 {
     _conWrapperAppchannel.sendData(data, dataLen);
 }
@@ -30,8 +29,6 @@ std::vector<uint8_t> Crazyflie::recvAppChannelData()
     std::copy(p.payload(), p.payload() + p.payloadSize(), std::back_inserter(res));
     return res;
 }
-
-
 
 float Crazyflie::getFloat(uint16_t paramId) const
 {
@@ -51,8 +48,8 @@ uint32_t Crazyflie::getUInt(uint16_t paramId) const
 
     _conWrapperParamRead.sendData(&paramId, sizeof(paramId));
 
-   Packet p = _conWrapperParamRead.recvFilteredData(0);
- 
+    Packet p = _conWrapperParamRead.recvFilteredData(0);
+
     std::memcpy(&res, p.payload() + PAYLOAD_VALUE_BEGINING_INDEX, p.payloadSize() - PAYLOAD_VALUE_BEGINING_INDEX);
 
     return res;
@@ -90,9 +87,9 @@ uint32_t Crazyflie::getUIntById(uint16_t paramId) const
     }
 }
 
-float Crazyflie::getFloatByName(const std::string& group, const std::string& name) const
+float Crazyflie::getFloatByName(const std::string &group, const std::string &name) const
 {
-    uint16_t numOfElements = this->getTocInfo()._numberOfElements;
+    uint16_t numOfElements = this->_toc._tocInfo._numberOfElements;
 
     for (uint16_t i = 0; i < numOfElements; i++)
     {
@@ -108,9 +105,9 @@ float Crazyflie::getFloatByName(const std::string& group, const std::string& nam
     return NOT_FOUND;
 }
 
-uint32_t Crazyflie::getUIntByName(const std::string& group, const std::string& name) const
+uint32_t Crazyflie::getUIntByName(const std::string &group, const std::string &name) const
 {
-    uint16_t numOfElements = this->getTocInfo()._numberOfElements;
+    uint16_t numOfElements = this->_toc._tocInfo._numberOfElements;
 
     for (uint16_t i = 0; i < numOfElements; i++)
     {
@@ -129,65 +126,45 @@ Crazyflie::~Crazyflie()
 {
 }
 
-bool Crazyflie::setParam(uint16_t paramId, float newValue) 
+bool Crazyflie::setParam(uint16_t paramId, float newValue)
 {
     _conWrapperParamWrite.sendData(&paramId, sizeof(paramId), &newValue, sizeof(newValue));
 
     return true;
 }
 
-bool Crazyflie::setParam(uint16_t paramId, uint32_t newValue, const size_t& valueSize) 
+bool Crazyflie::setParam(uint16_t paramId, uint32_t newValue, const size_t &valueSize)
 {
     _conWrapperParamWrite.sendData(&paramId, sizeof(paramId), &newValue, valueSize);
 
     return true;
 }
 
-TocItem::TocItem(const Packet& p_recv)
-{
-    _cmdNum = p_recv.payload()[0];
-    _paramId = 0;
-    memcpy(&_paramId, &p_recv.payload()[1], sizeof(_paramId));
-    _paramType = p_recv.payload()[3];
-    _groupName = (const char *)(p_recv.payload())+4;
-    _paramName = (const char *)(p_recv.payload())+ 4 + _groupName.length() + 1;
-}
-
-std::ostream &operator<<(std::ostream &out, const TocItem &tocItem)
-{
-    out << "cmdNum: " << (int)tocItem._cmdNum << std::endl;
-    out << "paramId: " << (int)tocItem._paramId << std::endl;
-    out << "paramType: " << (int)tocItem._paramType << std::endl;
-    out << "groupName: " << tocItem._groupName << std::endl;
-    out << "paramName: " << tocItem._paramName << std::endl;
-    return out;
-}
-
-
-
-
-TocInfo::TocInfo(const Packet &p_recv) 
-{
-    memcpy(&_numberOfElements, &p_recv.payload()[1], sizeof(_numberOfElements));
-    memcpy(&_crc, &p_recv.payload()[3], sizeof(_crc));
-}
-
-std::ostream &operator<<(std::ostream &out, const TocInfo &tocInfo)
-{
-    out << "numberOfElements: " << (int)tocInfo._numberOfElements << std::endl;
-    out << "crc: " << (int)tocInfo._crc << std::endl;
-    return out;
-}
-
-
-TocInfo Crazyflie::getTocInfo() const 
+void Crazyflie::initToc()
 {
     // ask for the toc info
     uint8_t cmd = CMD_TOC_INFO_V2;
     _conWrapperToc.sendData(&cmd, sizeof(uint8_t));
-   Packet p_recv = _conWrapperToc.recvFilteredData(0);
+    Packet p_recv = _conWrapperToc.recvFilteredData(0);
+    TocInfo cfTocInfo(p_recv);
+ 
+    std::ifstream tocCsvFile(cfTocInfo._crc+".csv");
+    if(tocCsvFile.good())
+    {
+        tocCsvFile.getline();
+    }
 
-    return TocInfo(p_recv);
+    _toc._tocInfo = cfTocInfo;
+
+
+    uint16_t num_of_elements = _toc._tocInfo._numberOfElements;
+
+    for (uint16_t i = 0; i < num_of_elements; i++)
+    {
+        TocItem tocItem = getItemFromToc(i);
+        _toc._tocItems.insert({{tocItem._groupName, tocItem._paramName}, tocItem});
+    }
+    
 }
 
 TocItem Crazyflie::getItemFromToc(uint16_t id) const
@@ -196,76 +173,107 @@ TocItem Crazyflie::getItemFromToc(uint16_t id) const
 
     // ask for a param with the given id
     _conWrapperToc.sendData(&cmd, sizeof(uint8_t), &id, sizeof(id));
-   Packet p_recv = _conWrapperToc.recvFilteredData(0);
+    Packet p_recv = _conWrapperToc.recvFilteredData(0);
     return TocItem(p_recv);
 }
 
 std::vector<TocItem> Crazyflie::getToc()
 {
     std::vector<TocItem> tocItems;
-    uint16_t num_of_elements = getTocInfo()._numberOfElements;
-    for (uint16_t i = 0; i < num_of_elements; i++)
-    {
-        tocItems.push_back(getItemFromToc(i));
-    }
+
     return tocItems;
 }
 
 //print the TOC with values!
 void Crazyflie::printToc()
 {
-    auto tocItems = getToc(); 
+    auto tocItems = getToc();
     for (TocItem tocItem : tocItems)
     {
         // tocItem
         auto accessAndType = getAccessAndStrType(tocItem._paramType);
         std::cout << tocItem._paramId << ": " << accessTypeToStr(accessAndType.first) << ":" << accessAndType.second << "  " << tocItem._groupName << "." << tocItem._paramName << "  val=";
-        if(accessAndType.second.find("int") != std::string::npos)
+        if (accessAndType.second.find("int") != std::string::npos)
             std::cout << getUIntById(tocItem._paramId) << std::endl;
-        else 
+        else
             std::cout << getFloatById(tocItem._paramId) << std::endl;
     }
 }
 
 //save the TOC to a .csv file
-void Crazyflie::saveToc(std::string filename)
+void Crazyflie::saveToc(const std::string& filename) const
 {
     std::ofstream tocParamsFile;
     tocParamsFile.open(filename + ".csv");
     // tocParamsFile << "ID,AccessType,AccessType,Group,Name,Value" << std::endl; // the parameters will be saved to the file like this
-    auto tocItems = getToc(); 
-    for (TocItem tocItem : tocItems)
+    auto tocItems = _toc._tocItems;
+    for (auto element : tocItems)
     {
+        TocItem tocItem = element.second;
         // tocItem
         auto accessAndType = getAccessAndStrType(tocItem._paramType);
         tocParamsFile << tocItem._paramId << "," << accessTypeToStr(accessAndType.first) << "," << accessAndType.second << "," << tocItem._groupName << "," << tocItem._paramName << ",";
-        if(accessAndType.second.find("int") != std::string::npos)
+        if (accessAndType.second.find("int") != std::string::npos)
             tocParamsFile << getUIntById(tocItem._paramId) << std::endl;
-        else 
+        else
             tocParamsFile << getFloatById(tocItem._paramId) << std::endl;
     }
     std::cout << "\nsuccessfully saved TOC to 'build/toc.csv'" << std::endl;
     tocParamsFile.close();
 }
-
-std::string Crazyflie::accessTypeToStr(int accessType)
+std::vector<std::string> getNextLineAndSplitIntoTokens(std::istream& str)
 {
-    return RO_ACCESS == accessType ? "RO" : "RW";
+    std::vector<std::string>   result;
+    std::string                line;
+    std::getline(str,line);
+
+    std::stringstream          lineStream(line);
+    std::string                cell;
+
+    while(std::getline(lineStream,cell, ','))
+    {
+        result.push_back(cell);
+    }
+    // This checks for a trailing comma with no data after it.
+    if (!lineStream && cell.empty())
+    {
+        // If there was a trailing comma then add an empty element.
+        result.push_back("");
+    }
+    return result;
 }
+//load the TOC from a .csv file
+void Crazyflie::loadToc(const std::string& filename)
+{
+    std::ifstream tocParamsFile;
+    tocParamsFile.open(filename + ".csv");
+   // tocParamsFile << "ID,AccessType,AccessType,Group,Name,Value" << std::endl; // the parameters will be saved to the file like this
+    std::vector<std::string> tocParamsFileLine;
+    while (!(tocParamsFileLine = getNextLineAndSplitIntoTokens(tocParamsFile)).empty())
+    {
+        TocItem tocItem;
+        tocItem._paramId = std::stoi(tocParamsFileLine[0]);
+        tocItem._paramType = tocParamsFileLine[0];
+        
+     
+    }
+
+    std::cout << "\nsuccessfully saved TOC to 'build/toc.csv'" << std::endl;
+    tocParamsFile.close();
+}
+
+
 
 std::pair<int, std::string> Crazyflie::getAccessAndStrType(uint8_t type)
 {
-    int accessType;
 
-    if ((bool)(type & ACCESS_TYPE_BYTE) == (bool)RO_ACCESS)
-    {
-        accessType = RO_ACCESS;
-        type = type & ~ACCESS_TYPE_BYTE;
-    }
-    else
-    {
-        accessType = RW_ACCESS;
-    }
-    
-    return std::pair<int, std::string>(accessType, PARAM_TYPES.find(type)->second.first);
+
+    return std::pair<int, std::string>(accessType, PARAM_TYPES.find(type)->second);
 }
+
+bool Crazyflie::init()
+{
+    initToc();
+    return true;
+}
+

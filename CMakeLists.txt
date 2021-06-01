@@ -41,6 +41,7 @@ add_library(crazyflieLinkCpp
   src/Version.cpp
   src/ConnectionWrapper.cpp
   src/Crazyflie.cpp
+  src/Toc.cpp
 )
 
 # target_include_directories(libCrazyflieLinkCpp
@@ -131,6 +132,14 @@ add_executable(example_appChannelTest
   examples/appChannelTest.cpp
 )
 target_link_libraries(example_appChannelTest
+  crazyflieLinkCpp
+)
+
+# example_logViaAppChannel
+add_executable(example_logViaAppChannel
+  examples/logViaAppChannel.cpp
+)
+target_link_libraries(example_logViaAppChannel
   crazyflieLinkCpp
 )
 

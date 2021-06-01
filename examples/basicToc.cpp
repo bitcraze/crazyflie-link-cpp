@@ -14,6 +14,7 @@ using namespace bitcraze::crazyflieLinkCpp;
 int main()
 {
     Crazyflie crazyflie("usb://0");
+    crazyflie.init();
     crazyflie.printToc();
 
     return 0;
