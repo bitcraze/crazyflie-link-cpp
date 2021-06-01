@@ -35,7 +35,6 @@ private:
     ConnectionWrapper _conWrapperAppchannel;
 
     Toc _toc;
-
     bool setParamInCrazyflie(uint16_t paramId, float newValue);
     bool setParamInCrazyflie(uint16_t paramId, uint32_t newValue, const size_t& valueSize);
 
@@ -49,6 +48,8 @@ public:
     ~Crazyflie();
 
     bool init();
+
+    bool isParamFloat(const std::string& group, const std::string& name) const;
 
     uint32_t getUIntByName(const std::string& group, const std::string& name) const;
     float getFloatByName(const std::string& group, const std::string& name) const;

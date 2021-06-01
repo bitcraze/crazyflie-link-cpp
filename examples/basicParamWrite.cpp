@@ -8,55 +8,28 @@ using namespace bitcraze::crazyflieLinkCpp;
 
 int main(int argc, char *argv[])
 {
-    if(argc < 5)
+    if(argc < 5 && argv)
     {
         std::cout << "<group name> <param name> <new value> <byte size>" << std::endl;
         return 0;
     }
     Crazyflie crazyflie("usb://0");
+    crazyflie.init();
     
-    std::string requestedGroupName = argv[1];
-    std::string requestedParamName = argv[2];
+    std::string group = argv[1];
+    std::string name = argv[2];
     size_t newValueSize = std::stoul(argv[4]);
-
-    uint16_t numOfElements = crazyflie.getTocInfo()._numberOfElements;
-
-    std::string strType ="";
-    for (uint16_t i = 0; i < numOfElements; i++)
+    if(crazyflie.isParamFloat(group, name))
     {
-        auto tocItem = crazyflie.getItemFromToc(i);
-        // std::string strType = crazyflie.getAccessAndStrType(tocItem._paramType).second;
-        // std::string strAccessType = crazyflie.accessTypeToStr(crazyflie.getAccessAndStrType(tocItem._paramType).first);
-        strType = crazyflie.getAccessAndStrType(tocItem._paramType).second;
-        if(tocItem._groupName == requestedGroupName && tocItem._paramName == requestedParamName)
-        {
-            
-            if("float" == strType)
-            {
-                cout << crazyflie.getFloatByName(requestedGroupName, requestedParamName) << endl;
-                cout << "input: " << std::stof(argv[3])<< endl;
-                crazyflie.setParam(tocItem._paramId, std::stof(argv[3]));
-            }
-            else
-            {
-                cout << crazyflie.getUIntByName(requestedGroupName, requestedParamName) << endl;
-                crazyflie.setParam(tocItem._paramId, std::stoul(argv[3]), newValueSize);
-            }
-           
-            break;
-        }
+        std::cout << "Initial value: " << crazyflie.getFloatByName(group, name) << std::endl;
+        crazyflie.setParamByName(group,name,std::stof(argv[3]));
+        std::cout << "New value: " << crazyflie.getFloatByName(group, name) << std::endl;
     }
-    cout << "Get by name:                \n";
-
-
-        if("float" == strType)
-        {
-            cout << crazyflie.getFloatByName(requestedGroupName, requestedParamName) << endl;
-        }
-        else
-        {
-            cout << crazyflie.getUIntByName(requestedGroupName, requestedParamName) << endl;
-        }
-
+    else
+    {
+        std::cout << "Initial value: " << crazyflie.getUIntByName(group, name) << std::endl;
+        crazyflie.setParamByName(group,name,std::stof(argv[3]), newValueSize);
+        std::cout << "New value: " << crazyflie.getUIntByName(group, name) << std::endl;
+    }
     return 0;
 }

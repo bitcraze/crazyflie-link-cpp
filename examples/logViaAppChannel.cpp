@@ -17,43 +17,43 @@ int main()
 
    
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    for (auto element : toc)
-    {
+    // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    // for (auto element : toc)
+    // {
 
-        if (element._groupName == "usd" && element._paramName == "logging")
-        {
+    //     if (element._groupName == "usd" && element._paramName == "logging")
+    //     {
 
-            crazyflie.setParamInCrazyflie(element._paramId, 0, 1);
-            break;
-        }
-    }
+    //         crazyflie.setParamInCrazyflie(element._paramId, 0, 1);
+    //         break;
+    //     }
+    // }
 
-    for (auto element : toc)
-    {
+    // for (auto element : toc)
+    // {
 
-        if (element._groupName == "usd" && element._paramName == "sendAppChannle")
-        {
-            crazyflie.setParamInCrazyflie(element._paramId, 1, 1);
-            break;
-        }
-    }
+    //     if (element._groupName == "usd" && element._paramName == "sendAppChannle")
+    //     {
+    //         crazyflie.setParamInCrazyflie(element._paramId, 1, 1);
+    //         break;
+    //     }
+    // }
 
-    std::vector<uint8_t> res;
-    do
-    {
+    // std::vector<uint8_t> res;
+    // do
+    // {
 
-        res = crazyflie.recvAppChannelData();
-        uint16_t sendData = 0;
-        crazyflie.sendAppChannelData(&sendData,sizeof(sendData));
-        for (auto element : res)
-        {
-            std::cout << (int)element;
-        }
+    //     res = crazyflie.recvAppChannelData();
+    //     uint16_t sendData = 0;
+    //     crazyflie.sendAppChannelData(&sendData,sizeof(sendData));
+    //     for (auto element : res)
+    //     {
+    //         std::cout << (int)element;
+    //     }
 
-        std::cout << std::endl;
+    //     std::cout << std::endl;
 
-    } while (res.size() > 0);
+    // } while (res.size() > 0);
 
     return 0;
 }

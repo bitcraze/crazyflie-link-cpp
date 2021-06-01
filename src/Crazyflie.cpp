@@ -136,3 +136,7 @@ bool Crazyflie::setParamByName(const std::string& group, const std::string& name
 {
     return setParamInCrazyflie(_toc.getItemId(group,name),newValue, valueSize);
 }
+bool Crazyflie::isParamFloat(const std::string& group, const std::string& name) const
+{
+    return to_string(_toc.getItem(group, name)._paramType) == "float";
+}
