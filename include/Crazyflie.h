@@ -37,24 +37,24 @@ private:
     ConnectionWrapper _conWrapperAppchannel;
 
 
-    void saveToc(const std::string& filename) const;  //save the TOC to a .csv file
-    void loadToc(const std::string& filename);  //save the TOC to a .csv file
+    Toc _toc;
+
 
     // app channel read file via param change
     //////////////////////////////////////////////////
 
 
 
-
+    // QUESTIONABLE API - use BY NAME
+    bool setParam(uint16_t paramId, float newValue);
+    bool setParam(uint16_t paramId, uint32_t newValue, const size_t& valueSize);
 
     //private ?
     uint32_t getUInt(uint16_t paramId) const;
     float getFloat(uint16_t paramId) const;
-    float getFloatById(uint16_t paramId) const;
-    uint32_t getUIntById(uint16_t paramId) const;
+
 
 public:
-    Toc _toc;
 
     Crazyflie(const std::string& uri);
     ~Crazyflie();
@@ -64,8 +64,8 @@ public:
     float getFloatByName(const std::string& group, const std::string& name) const;
 
     // QUESTIONABLE API - use BY NAME
-    bool setParam(uint16_t paramId, float newValue);
-    bool setParam(uint16_t paramId, uint32_t newValue, const size_t& valueSize);
+    bool setParamByName(const std::string& group, const std::string& name, float newValue);
+    bool setParamByName(const std::string& group, const std::string& name, uint32_t newValue, const size_t& valueSize);
 
     bool init();
     // bool init(bool paramChangedCB);
@@ -73,8 +73,6 @@ public:
     //todo: add callback for param changed
     
     //where is Console? 
-
-
 
     // does not help me
     void initToc();

@@ -119,3 +119,66 @@ TocItem::TocItem()
 TocInfo::~TocInfo()
 {
 }
+TocItem::TocItem(const TocItem& other)  
+{
+    _groupName = other._groupName;
+    _paramName = other._paramName;
+    _paramType = other._paramType;
+    _paramAccessType = other._paramAccessType;
+    _paramId = other._paramId;
+}
+void Toc::insert(const TocItem& tocItem)
+{
+    _tocItems.insert({{tocItem._groupName, tocItem._paramName},tocItem});
+}
+
+TocItem Toc::getItem(const std::string &groupName, const std::string &paramName) const
+{
+    auto res = _tocItemsCache.find({groupName, paramName});
+    if(res == _tocItemsCache.end())
+    {
+        res = _tocItems.find({groupName, paramName});
+        const_cast<std::map<StrPair,TocItem>&>(_tocItemsCache).insert(*res);
+    }
+    return res->second;
+}
+
+uint16_t Toc::getItemId(const std::string &groupName, const std::string &paramName) const
+{
+    return this->getItem(groupName, paramName)._paramId;
+}
+
+std::vector<TocItem> Toc::getAllTocItems() const
+{
+    std::vector<TocItem> tocItemsVector;
+    for (auto element : _tocItems)
+    {
+        TocItem tocItem = element.second;
+        tocItemsVector.push_back(tocItem);
+    }
+    std::sort(tocItemsVector.begin(), tocItemsVector.end());
+    return tocItemsVector;
+}
+
+std::vector<TocItem> Toc::getAllCachedTocItems() const
+{
+    std::vector<TocItem> tocItemsVector;
+    for (auto element : _tocItemsCache)
+    {
+        TocItem tocItem = element.second;
+        tocItemsVector.push_back(tocItem);
+    }
+    std::sort(tocItemsVector.begin(), tocItemsVector.end());
+    return tocItemsVector;
+}
+
+void Toc::clearCache()
+{
+    _tocItemsCache.clear();
+    _tocItems.clear();
+}
+
+void Toc::clearToc()
+{
+    _tocItemsCache.clear();
+}

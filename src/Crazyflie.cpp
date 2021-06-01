@@ -21,7 +21,6 @@ void Crazyflie::sendAppChannelData(const void *data, const size_t &dataLen)
 
 std::vector<uint8_t> Crazyflie::recvAppChannelData()
 {
-
     Packet p = _conWrapperAppchannel.recvFilteredData(0);
 
     std::vector<uint8_t> res;
@@ -42,7 +41,6 @@ float Crazyflie::getFloat(uint16_t paramId) const
 
 uint32_t Crazyflie::getUInt(uint16_t paramId) const
 {
-
     uint32_t res = 0;
     _conWrapperParamRead.sendData(&paramId, sizeof(paramId));
 
@@ -53,71 +51,14 @@ uint32_t Crazyflie::getUInt(uint16_t paramId) const
     return res;
 }
 
-float Crazyflie::getFloatById(uint16_t paramId) const
-{
-    auto tocItem = this->getItemFromToc(paramId);
-    std::string strType = to_string(tocItem._paramType);
-
-    if ("float" == strType)
-    {
-        return getFloat(paramId);
-    }
-    else
-    {
-        std::cout << "Didn't find anything!" << std::endl;
-        return NOT_FOUND;
-    }
-}
-
-uint32_t Crazyflie::getUIntById(uint16_t paramId) const
-{
-
-    auto tocItem = this->getItemFromToc(paramId);
-    std::string strType = to_string(tocItem._paramType);
-    if (strType.find("int") != std::string::npos)
-    {
-        return getUInt(paramId);
-    }
-    else
-    {
-        std::cout << "Didn't find anything!" << std::endl;
-        return NOT_FOUND;
-    }
-}
-
 float Crazyflie::getFloatByName(const std::string &group, const std::string &name) const
 {
-    uint16_t numOfElements = this->_toc._tocInfo._numberOfElements;
-
-    for (uint16_t i = 0; i < numOfElements; i++)
-    {
-        auto tocItem = this->getItemFromToc(i);
-
-        if (tocItem._groupName == group && tocItem._paramName == name)
-        {
-
-            return getFloatById(tocItem._paramId);
-        }
-    }
-    std::cout << "Didn't find anything!" << std::endl;
-    return NOT_FOUND;
+    return getFloat(_toc.getItemId(group, name));
 }
 
 uint32_t Crazyflie::getUIntByName(const std::string &group, const std::string &name) const
 {
-    uint16_t numOfElements = this->_toc._tocInfo._numberOfElements;
-
-    for (uint16_t i = 0; i < numOfElements; i++)
-    {
-        auto tocItem = this->getItemFromToc(i);
-
-        if (tocItem._groupName == group && tocItem._paramName == name)
-        {
-            return getUIntById(tocItem._paramId);
-        }
-    }
-    std::cout << "Didn't find anything!" << std::endl;
-    return NOT_FOUND;
+    return getUInt(_toc.getItemId(group, name));
 }
 
 Crazyflie::~Crazyflie()
@@ -142,31 +83,17 @@ void Crazyflie::initToc()
 {
     // ask for the toc info
     uint8_t cmd = CMD_TOC_INFO_V2;
-    _conWrapperToc.sendData(&cmd, sizeof(uint8_t));
+    _conWrapperToc.sendData(&cmd, sizeof(cmd));
     Packet p_recv = _conWrapperToc.recvFilteredData(0);
     TocInfo cfTocInfo(p_recv);
 
-    std::ifstream tocCsvFile(cfTocInfo._crc + ".csv");
-    bool doesFileExist = tocCsvFile.good();
-    tocCsvFile.close();
-    if (doesFileExist)
-    {
-        loadToc("" + cfTocInfo._crc);
-        return;
-    }
-
-    _toc._tocInfo = cfTocInfo;
-
-    uint16_t num_of_elements = _toc._tocInfo._numberOfElements;
+    uint16_t num_of_elements = cfTocInfo._numberOfElements;
 
     for (uint16_t i = 0; i < num_of_elements; i++)
     {
-        TocItem tocItem = getItemFromToc(i);
-        _toc._tocItems.insert({{tocItem._groupName, tocItem._paramName}, tocItem});
-        
+        TocItem tocItem() ;
+        _toc.insert(getItemFromToc(i));
     }
-
-
 }
 
 TocItem Crazyflie::getItemFromToc(uint16_t id) const
@@ -176,110 +103,36 @@ TocItem Crazyflie::getItemFromToc(uint16_t id) const
     _conWrapperToc.sendData(&cmd, sizeof(uint8_t), &id, sizeof(id));
     Packet p_recv = _conWrapperToc.recvFilteredData(0);
     
-
     return TocItem(p_recv);
 }
 
-//print the TOC with values!
+// //print the TOC with values!
 void Crazyflie::printToc()
 {
-    std::vector<TocItem> tocItemsVector;
+    auto tocItemsVector = _toc.getAllTocItems();
 
-    auto tocItems = _toc._tocItems;
-
-    for (auto element : tocItems)
-    {
-        TocItem tocItem = element.second;
-        tocItemsVector.push_back(tocItem);
-    }
-    std::sort(tocItemsVector.begin(), tocItemsVector.end());
     for (TocItem tocItem : tocItemsVector)
     {
-        // tocItem
-        std::string strType = to_string(tocItem._paramType);
-        std::string strAccessType = to_string(tocItem._paramAccessType);
         std::cout << tocItem;
-        if (strType.find("int") != std::string::npos)
+        if (to_string(tocItem._paramType).find("int") != std::string::npos)
             std::cout << getUInt(tocItem._paramId) << std::endl;
         else
             std::cout << getFloat(tocItem._paramId) << std::endl;
-
     }
     std::cout << "Printed " << tocItemsVector.size() << " items total" << std::endl;
-}
-
-//save the TOC to a .csv file
-void Crazyflie::saveToc(const std::string &filename) const
-{
-    std::vector<TocItem> tocItemsVector;
-    std::ofstream tocParamsFile;
-    tocParamsFile.open(filename + ".csv");
-    // tocParamsFile << "ID,AccessType,AccessType,Group,Name,Value" << std::endl; // the parameters will be saved to the file like this
-    auto tocItems = _toc._tocItems;
-    for (auto element : tocItems)
-    {
-        TocItem tocItem = element.second;
-        tocItemsVector.push_back(tocItem);
-    }
-    std::sort(tocItemsVector.begin(), tocItemsVector.end());
-    for (TocItem tocItem : tocItemsVector)
-    {
-        // tocItem
-        std::string strType = to_string(tocItem._paramType);
-        std::string strAccessType = to_string(tocItem._paramAccessType);
-        tocParamsFile << tocItem._paramId << "," << strAccessType << "," << strType << "," << tocItem._groupName << "," << tocItem._paramName << ",";
-        if (strAccessType.find("int") != std::string::npos)
-            tocParamsFile << getUIntById(tocItem._paramId) << std::endl;
-        else
-            tocParamsFile << getFloatById(tocItem._paramId) << std::endl;
-    }
-    std::cout << "\nsuccessfully saved TOC to 'build/toc.csv'" << std::endl;
-    tocParamsFile.close();
-}
-
-std::vector<std::string> getNextLineAndSplitIntoTokens(std::istream &str)
-{
-    std::vector<std::string> result;
-    std::string line;
-    std::getline(str, line);
-
-    std::stringstream lineStream(line);
-    std::string cell;
-
-    while (std::getline(lineStream, cell, ','))
-    {
-        result.push_back(cell);
-    }
-    // This checks for a trailing comma with no data after it.
-    if (!lineStream && cell.empty())
-    {
-        // If there was a trailing comma then add an empty element.
-        result.push_back("");
-    }
-    return result;
-}
-//load the TOC from a .csv file
-void Crazyflie::loadToc(const std::string &filename)
-{
-    std::ifstream tocParamsFile;
-    tocParamsFile.open(filename + ".csv");
-    // tocParamsFile << "ID,AccessType,AccessType,Group,Name,Value" << std::endl; // the parameters will be saved to the file like this
-    std::vector<std::string> tocParamsFileLine;
-    while (!(tocParamsFileLine = getNextLineAndSplitIntoTokens(tocParamsFile)).empty())
-    {
-        TocItem tocItem;
-        tocItem._paramId = std::stoi(tocParamsFileLine[0]);
-        tocItem._paramAccessType = tocParamsFileLine[1];
-        tocItem._paramType = std::stoi(tocParamsFileLine[2]);
-        tocItem._paramType = std::stoi(tocParamsFileLine[2]);
-    }
-
-    std::cout << "\nsuccessfully saved TOC to 'build/toc.csv'" << std::endl;
-    tocParamsFile.close();
 }
 
 bool Crazyflie::init()
 {
     initToc();
     return true;
+}
+
+bool Crazyflie::setParamByName(const std::string& group, const std::string& name, float newValue)
+{
+    return setParam(_toc.getItemId(group,name),newValue);
+}
+bool Crazyflie::setParamByName(const std::string& group, const std::string& name, uint32_t newValue, const size_t& valueSize)
+{
+    return setParam(_toc.getItemId(group,name),newValue, valueSize);
 }

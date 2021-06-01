@@ -3,12 +3,12 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <vector>
 #include "Packet.hpp"
 
 #define ACCESS_TYPE_BYTE 64
 
 typedef std::pair<std::string, std::string> StrPair;
-
 
 const std::map<uint8_t, std::string>
     PARAM_TYPES = {
@@ -50,8 +50,9 @@ struct TocItem
     ParamType _paramType;
     AccessType _paramAccessType;
     uint16_t _paramId;
-    bool operator>(const TocItem& other) const;
-    bool operator<(const TocItem& other) const;
+    bool operator>(const TocItem &other) const;
+    bool operator<(const TocItem &other) const;
+    TocItem(const TocItem& other);
     TocItem(const bitcraze::crazyflieLinkCpp::Packet &p_recv);
     TocItem();
     ~TocItem();
@@ -68,10 +69,19 @@ struct TocInfo
     friend std::ostream &operator<<(std::ostream &out, const TocInfo &tocInfo);
 };
 
-
-struct Toc
+class Toc
 {
+private:
     std::map<StrPair, TocItem> _tocItems;
+    std::map<StrPair, TocItem> _tocItemsCache;
     TocInfo _tocInfo;
+
+public:
+    void insert(const TocItem &tocItem);
     TocItem getItem(const std::string &groupName, const std::string &paramName) const;
+    uint16_t getItemId(const std::string &groupName, const std::string &paramName) const;
+    std::vector<TocItem> getAllTocItems() const;
+    std::vector<TocItem> getAllCachedTocItems() const;
+    void clearCache();
+    void clearToc();
 };
