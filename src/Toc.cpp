@@ -7,7 +7,9 @@ TocItem::TocItem(const bitcraze::crazyflieLinkCpp::Packet &p_recv)
 {
     _paramId = 0;
     memcpy(&_paramId, &p_recv.payload()[1], sizeof(_paramId));
-    uint8_t typeAndAccessType = p_recv.payload()[3];
+    uint8_t typeAndAccessType = 0;
+    memcpy(&typeAndAccessType, &p_recv.payload()[3], sizeof(typeAndAccessType));
+    
     _groupName = (const char *)(p_recv.payload()) + 4;
     _paramName = (const char *)(p_recv.payload()) + 4 + _groupName.length() + 1;
     _paramType = typeAndAccessType & ~ACCESS_TYPE_BYTE;

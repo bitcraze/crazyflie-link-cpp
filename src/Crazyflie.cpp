@@ -44,7 +44,6 @@ uint32_t Crazyflie::getUInt(uint16_t paramId) const
 {
 
     uint32_t res = 0;
-
     _conWrapperParamRead.sendData(&paramId, sizeof(paramId));
 
     Packet p = _conWrapperParamRead.recvFilteredData(0);
@@ -195,10 +194,10 @@ void Crazyflie::printToc()
         std::string strType = to_string(tocItem._paramType);
         std::string strAccessType = to_string(tocItem._paramAccessType);
         std::cout << tocItem;
-        if (strAccessType.find("int") != std::string::npos)
-            std::cout << getUIntById(tocItem._paramId) << std::endl;
+        if (strType.find("int") != std::string::npos)
+            std::cout << getUInt(tocItem._paramId) << std::endl;
         else
-            std::cout << getFloatById(tocItem._paramId) << std::endl;
+            std::cout << getFloat(tocItem._paramId) << std::endl;
     }
 }
 
