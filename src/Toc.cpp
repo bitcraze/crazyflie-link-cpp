@@ -22,14 +22,14 @@ TocItem::TocItem(const bitcraze::crazyflieLinkCpp::Packet &p_recv)
     }
 }
 
-bool TocItem::operator<(const TocItem &other)
+bool TocItem::operator<(const TocItem &other) const
 {
-    return (_paramId) < (other._paramId);
+    return ((unsigned)_paramId) < ((unsigned)other._paramId);
 }
 
-bool TocItem::operator>(const TocItem &other)
+bool TocItem::operator>(const TocItem &other) const
 {
-    return (_paramId) > (other._paramId);
+    return ((unsigned)_paramId) > ((unsigned)other._paramId);
 }
 
 std::string to_string(AccessType const &self)

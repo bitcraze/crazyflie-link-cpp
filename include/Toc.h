@@ -50,8 +50,8 @@ struct TocItem
     ParamType _paramType;
     AccessType _paramAccessType;
     uint16_t _paramId;
-    bool operator>(const TocItem& other);
-    bool operator<(const TocItem& other);
+    bool operator>(const TocItem& other) const;
+    bool operator<(const TocItem& other) const;
     TocItem(const bitcraze::crazyflieLinkCpp::Packet &p_recv);
     TocItem();
     ~TocItem();
