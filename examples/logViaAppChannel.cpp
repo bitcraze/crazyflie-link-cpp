@@ -7,6 +7,7 @@
 #include <queue>
 #include <vector>
 #include <thread>
+
 #include "Crazyflie.h"
 
 using namespace bitcraze::crazyflieLinkCpp;
@@ -29,6 +30,11 @@ int main()
     do
     {
         result = crazyflie.recvAppChannelData();
+        if(result.empty())
+        {
+            std::cout << "Error Receiving from crazyflie" <<std::endl;
+            break;
+        }
         uint8_t packetCode = result[0];
         std::cout << (int)packetCode << "-> ";
         std::vector<uint8_t> response;
@@ -55,6 +61,7 @@ int main()
                 response[0] = 2;
                 std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
                 crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t)); 
+
                 break;
             }
             currMemAddress += result.size() - sizeof(currMemAddress) - sizeof(uint8_t);
@@ -66,9 +73,10 @@ int main()
         case 2:
             std::copy_n(result.begin() + 1, sizeof(ackRequestMemAddress), (uint8_t *)&ackRequestMemAddress);
 
-            std::cout << "Ack Request Mem Address: " << ackRequestMemAddress << std::endl;
             if (ackRequestMemAddress == currMemAddress)
             {
+                std::cout << "Ack Request Mem Address: " << ackRequestMemAddress << std::endl;
+
                 response[0] = 0;
             }
             else
@@ -91,6 +99,7 @@ int main()
 
     } while (currMemAddress < dataSize);
     outputFile.close();
+
 
     std::chrono::duration<double> delta =  std::chrono::steady_clock::now() - start;
     std::cout << "Time [sec]: " << delta.count() << std::endl;
