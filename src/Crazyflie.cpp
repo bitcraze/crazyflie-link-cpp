@@ -91,7 +91,7 @@ void Crazyflie::initToc()
 
     for (uint16_t i = 0; i < num_of_elements; i++)
     {
-        TocItem tocItem() ;
+        TocItem tocItem();
         _toc.insert(getTocItemFromCrazyflie(i));
     }
 }
@@ -102,7 +102,7 @@ TocItem Crazyflie::getTocItemFromCrazyflie(uint16_t id) const
     // ask for a param with the given id
     _conWrapperToc.sendData(&cmd, sizeof(uint8_t), &id, sizeof(id));
     Packet p_recv = _conWrapperToc.recvFilteredData(0);
-    
+
     return TocItem(p_recv);
 }
 
@@ -128,15 +128,38 @@ bool Crazyflie::init()
     return true;
 }
 
-bool Crazyflie::setParamByName(const std::string& group, const std::string& name, float newValue)
+bool Crazyflie::setParamByName(const std::string &group, const std::string &name, float newValue)
 {
-    return setParamInCrazyflie(_toc.getItemId(group,name),newValue);
+    return setParamInCrazyflie(_toc.getItemId(group, name), newValue);
 }
-bool Crazyflie::setParamByName(const std::string& group, const std::string& name, uint32_t newValue, const size_t& valueSize)
+bool Crazyflie::setParamByName(const std::string &group, const std::string &name, uint32_t newValue, const size_t &valueSize)
 {
-    return setParamInCrazyflie(_toc.getItemId(group,name),newValue, valueSize);
+    return setParamInCrazyflie(_toc.getItemId(group, name), newValue, valueSize);
 }
-bool Crazyflie::isParamFloat(const std::string& group, const std::string& name) const
+bool Crazyflie::isParamFloat(const std::string &group, const std::string &name) const
 {
-    return to_string(_toc.getItem(group, name)._paramType) == "float";
+    return _toc.getItem(group, name).isFloat();
+}
+
+std::vector<std::pair<TocItem, ParamValue>> Crazyflie::getTocAndValues() const
+{
+    std::vector<std::pair<TocItem, ParamValue>> res;
+
+    auto tocItems = _toc.getAllTocItems();
+
+    for (TocItem tocItem : tocItems)
+    {
+        ParamValue val;
+        if (tocItem.isFloat())
+        {
+            val._floatVal = this->getFloatFromCrazyflie(tocItem._paramId);
+        }
+        else
+        {
+            val._floatVal = this->getUIntFromCrazyflie(tocItem._paramId);
+        }
+
+        res.emplace_back(tocItem, val);
+    }
+    return res;
 }

@@ -7,8 +7,15 @@
 #include "Packet.hpp"
 
 #define ACCESS_TYPE_BYTE 64
+#define FLOAT_PARAM_TYPE 0x06
 
 typedef std::pair<std::string, std::string> StrPair;
+
+union ParamValue
+{
+    float _floatVal;
+    uint32_t _uintVal;
+};
 
 const std::map<uint8_t, std::string>
     PARAM_TYPES = {
@@ -39,6 +46,8 @@ struct ParamType
 {
     uint8_t _paramtype;
     friend std::string to_string(ParamType const &self);
+    bool operator==(uint8_t val) const;
+    bool operator==(const std::string& val) const;
     ParamType &operator=(const std::string &strParamType);
     ParamType &operator=(const uint8_t &paramType);
 };
@@ -50,6 +59,8 @@ struct TocItem
     ParamType _paramType;
     AccessType _paramAccessType;
     uint16_t _paramId;
+
+    bool isFloat() const;
     bool operator>(const TocItem &other) const;
     bool operator<(const TocItem &other) const;
     TocItem(const TocItem& other);
@@ -78,8 +89,8 @@ private:
 
 public:
     void insert(const TocItem &tocItem);
-    TocItem getItem(const std::string &groupName, const std::string &paramName) const;
-    uint16_t getItemId(const std::string &groupName, const std::string &paramName) const;
+    TocItem getItem(const std::string &groupName, const std::string &paramName, bool caching = true) const;
+    uint16_t getItemId(const std::string &groupName, const std::string &paramName, bool caching = true) const;
     std::vector<TocItem> getAllTocItems() const;
     std::vector<TocItem> getAllCachedTocItems() const;
     void clearCache();

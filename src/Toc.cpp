@@ -132,20 +132,24 @@ void Toc::insert(const TocItem& tocItem)
     _tocItems.insert({{tocItem._groupName, tocItem._paramName},tocItem});
 }
 
-TocItem Toc::getItem(const std::string &groupName, const std::string &paramName) const
+TocItem Toc::getItem(const std::string &groupName, const std::string &paramName, bool caching) const
 {
     auto res = _tocItemsCache.find({groupName, paramName});
     if(res == _tocItemsCache.end())
     {
         res = _tocItems.find({groupName, paramName});
-        const_cast<std::map<StrPair,TocItem>&>(_tocItemsCache).insert(*res);
+
+        if(caching)
+        {
+            const_cast<std::map<StrPair,TocItem>&>(_tocItemsCache).insert(*res);
+        }
     }
     return res->second;
 }
 
-uint16_t Toc::getItemId(const std::string &groupName, const std::string &paramName) const
+uint16_t Toc::getItemId(const std::string &groupName, const std::string &paramName, bool caching) const
 {
-    return this->getItem(groupName, paramName)._paramId;
+    return this->getItem(groupName, paramName, caching)._paramId;
 }
 
 std::vector<TocItem> Toc::getAllTocItems() const
@@ -181,4 +185,21 @@ void Toc::clearCache()
 void Toc::clearToc()
 {
     _tocItemsCache.clear();
+}
+
+
+bool TocItem::isFloat() const
+{
+    return _paramType == FLOAT_PARAM_TYPE;
+}
+
+
+bool ParamType::operator==(const std::string& val) const
+{
+    return to_string(*this) == val; 
+}
+
+bool ParamType::operator==(uint8_t val) const
+{
+    return _paramtype == val;
 }
