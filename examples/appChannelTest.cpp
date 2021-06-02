@@ -14,47 +14,28 @@ using namespace bitcraze::crazyflieLinkCpp;
 int main()
 {
     Crazyflie crazyflie("usb://0");
-    // auto toc = crazyflie.getToc();
 
-   
+    crazyflie.init();
 
-    // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    // for (auto element : toc)
-    // {
+    crazyflie.setParamByName("usd", "logging", 0, 1);
+    crazyflie.setParamByName("usd", "sendAppChannle", 1, 1);
 
-    //     if (element._groupName == "usd" && element._paramName == "logging")
-    //     {
+    std::vector<uint8_t> res;
+    do
+    {
+        res = crazyflie.recvAppChannelData();
 
-    //         crazyflie.setParam(element._paramId, 0, 1);
-    //         break;
-    //     }
-    // }
+        uint16_t sendData = 0;
+        crazyflie.sendAppChannelData(&sendData, sizeof(sendData));
 
-    // for (auto element : toc)
-    // {
+        for (auto element : res)
+        {
+            std::cout << (int)element;
+        }
+        std::cout << std::endl;
 
-    //     if (element._groupName == "usd" && element._paramName == "sendAppChannle")
-    //     {
-    //         crazyflie.setParam(element._paramId, 1, 1);
-    //         break;
-    //     }
-    // }
+    } while (res.size() > 0);
 
-    // std::vector<uint8_t> res;
-    // do
-    // {
-
-    //     res = crazyflie.recvAppChannelData();
-    //     uint16_t sendData = 0;
-    //     crazyflie.sendAppChannelData(&sendData,sizeof(sendData));
-    //     for (auto element : res)
-    //     {
-    //         std::cout << (int)element;
-    //     }
-
-    //     std::cout << std::endl;
-
-    // } while (res.size() > 0);
-
+ 
     return 0;
 }
