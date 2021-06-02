@@ -104,14 +104,6 @@ target_link_libraries(example_basicToc
   crazyflieLinkCpp
 )
 
-# example_basicParam
-add_executable(example_basicParam
-  examples/basicParam.cpp
-)
-target_link_libraries(example_basicParam
-  crazyflieLinkCpp
-)
-
 # example_basicParamWrite
 add_executable(example_basicParamWrite
   examples/basicParamWrite.cpp
@@ -119,6 +111,7 @@ add_executable(example_basicParamWrite
 target_link_libraries(example_basicParamWrite
   crazyflieLinkCpp
 )
+
 # example_basicSave
 add_executable(example_basicSave
   examples/basicSave.cpp
@@ -140,6 +133,14 @@ add_executable(example_logViaAppChannel
   examples/logViaAppChannel.cpp
 )
 target_link_libraries(example_logViaAppChannel
+  crazyflieLinkCpp
+)
+
+# example_basicParamCSV
+add_executable(example_basicParamCSV
+  examples/basicParamCSV.cpp
+)
+target_link_libraries(example_basicParamCSV
   crazyflieLinkCpp
 )
 

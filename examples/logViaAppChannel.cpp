@@ -15,45 +15,25 @@ int main()
 {
     Crazyflie crazyflie("usb://0");
 
-   
+    crazyflie.init();
 
-    // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    // for (auto element : toc)
-    // {
+    crazyflie.setParamByName("usd", "logging", 0, 1);
+    crazyflie.setParamByName("usd", "sendAppChannle", 1, 1);
+    std::vector<uint8_t> res;
+    do
+    {
+        res = crazyflie.recvAppChannelData();
 
-    //     if (element._groupName == "usd" && element._paramName == "logging")
-    //     {
+        uint16_t sendData = 0;
+        crazyflie.sendAppChannelData(&sendData, sizeof(sendData));
 
-    //         crazyflie.setParamInCrazyflie(element._paramId, 0, 1);
-    //         break;
-    //     }
-    // }
+        for (auto element : res)
+        {
+            std::cout << (int)element;
+        }
+        std::cout << std::endl;
 
-    // for (auto element : toc)
-    // {
-
-    //     if (element._groupName == "usd" && element._paramName == "sendAppChannle")
-    //     {
-    //         crazyflie.setParamInCrazyflie(element._paramId, 1, 1);
-    //         break;
-    //     }
-    // }
-
-    // std::vector<uint8_t> res;
-    // do
-    // {
-
-    //     res = crazyflie.recvAppChannelData();
-    //     uint16_t sendData = 0;
-    //     crazyflie.sendAppChannelData(&sendData,sizeof(sendData));
-    //     for (auto element : res)
-    //     {
-    //         std::cout << (int)element;
-    //     }
-
-    //     std::cout << std::endl;
-
-    // } while (res.size() > 0);
+    } while (res.size() > 0);
 
     return 0;
 }
