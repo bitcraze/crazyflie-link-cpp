@@ -30,10 +30,11 @@ int main()
     {
         result = crazyflie.recvAppChannelData();
         uint8_t packetCode = result[0];
-        std::cout << "packet code: " << (int)packetCode << std::endl;
+        std::cout << (int)packetCode << "-> ";
         std::vector<uint8_t> response;
         response.resize(6);
         unsigned int ackRequestMemAddress = 0;
+        uint32_t crazyflieCurrMemAddress = 0;
 
         switch (packetCode)
         {
@@ -45,7 +46,17 @@ int main()
             break;
 
         case 1:
-            std::copy_n(result.begin() + 1, sizeof(currMemAddress), (uint8_t *)&currMemAddress);
+            std::copy_n(result.begin() + 1, sizeof(crazyflieCurrMemAddress), (uint8_t *)&crazyflieCurrMemAddress);
+            //send not all data recieved
+            if(crazyflieCurrMemAddress != currMemAddress)
+            {
+                std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
+                
+                response[0] = 2;
+                std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
+                crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t)); 
+                break;
+            }
             currMemAddress += result.size() - sizeof(currMemAddress) - sizeof(uint8_t);
             std::cout << "Current Memory Address: " << (unsigned int)currMemAddress << std::endl;
             outputFile.write(reinterpret_cast<char *>(&result[5]), result.size() - 5);
@@ -62,10 +73,11 @@ int main()
             }
             else
             {
+                std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
+
                 response[0] = 2;
             }
             std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
-            std::cout << currMemAddress << std::endl;
             crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t)); //data msg ack
             break;
 
