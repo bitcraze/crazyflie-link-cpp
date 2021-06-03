@@ -56,11 +56,9 @@ int main()
     uint32_t currMemAddress = 0;
     std::queue<uint32_t> lostMemAddresses;
     uint32_t dataSize = 0;
-    std::fstream outputFile("log.txt", std::ifstream::binary |std::ios::out | std::ios::app);
+    std::ofstream outputFile("log.txt", std::ifstream::binary | std::ios::out | std::ios::app);
     auto start = std::chrono::steady_clock::now();
-    uint8_t buffer[2000] = {0};
     size_t fileSize = 0;
-    char* fileHolder = nullptr;
     do
     {
         uint8_t bytesRecieved = crazyflie.recvAppChannelData(&msgRecieved, sizeof(msgRecieved));
@@ -95,7 +93,9 @@ int main()
 
         case 1:
             crazyflieCurrMemAddress = msgRecieved._sequence;
-            std::copy_n(msgRecieved._data, sizeof(dataRecivedSize), &buffer[crazyflieCurrMemAddress%2000]);
+            outputFile.seekp(crazyflieCurrMemAddress);
+            outputFile.write((const char *)msgRecieved._data, dataRecivedSize);
+
             if (crazyflieCurrMemAddress != currMemAddress)
             {
                 lostMemAddresses.push(currMemAddress);
@@ -113,16 +113,10 @@ int main()
                 lostMemAddresses.push(ackRequestMemAddress);
                 currMemAddress = ackRequestMemAddress;
             }
-            if(lostMemAddresses.empty())
+            if (lostMemAddresses.empty())
             {
                 response._msgType = 0;
                 response._sequence = currMemAddress;
-                fileSize += sizeof(buffer);
-                fileHolder = new char[fileSize];
-                outputFile.read(fileHolder,fileSize);
-                outputFile.write((const char *)buffer,fileSize);
-                std::memset(buffer, 0, sizeof(buffer));
-                delete[] fileHolder;
             }
             else
             {
