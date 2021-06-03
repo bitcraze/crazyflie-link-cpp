@@ -42,7 +42,7 @@ class LoggingCrazyflieWrapper
 {
 private:
     Crazyflie *_crazyflie;
-    PacketDataPtr* _buffer = {nullptr};
+    uint8_t** _buffer = {nullptr};
     std::string _outputFilePath;
 
 public:

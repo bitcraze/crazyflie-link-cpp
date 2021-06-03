@@ -2,6 +2,14 @@
 #include <list>
 #include <chrono>
 
+#define DEBUG_PRINT(var) (std::cout << #var << ": " << var << std::endl)
+#define DEBUG_PRINT_WITH_CAST(var, cast) (std::cout << #var << ": " << (cast)var << std::endl)
+#define DEBUG_PAUSE()  \
+    {                  \
+        int i = 0;     \
+        std::cin >> i; \
+    }
+
 using namespace bitcraze::crazyflieLinkCpp;
 
 LoggingCrazyflieWrapper::LoggingCrazyflieWrapper(Crazyflie &crazyflie, const std::string &outputFilePath)
@@ -22,18 +30,18 @@ void LoggingCrazyflieWrapper::start()
     LoggingMsg msgRecieved;
     uint32_t dataSize = 0;
     uint32_t sizeOfBuffer = 0;
-    uint32_t currPos = 0;
+    uint32_t currBufferPos = 0;
     uint32_t previousAckRequestLoc = 0;
-    
+
     std::ofstream outputFile;
     if (!_outputFilePath.empty())
         outputFile.open(_outputFilePath, std::ifstream::binary | std::ios::out | std::ios::app);
     auto start = std::chrono::steady_clock::now();
     bool isFinished = false;
+
     while (!isFinished)
     {
         int8_t dataRecivedSize = this->recv(msgRecieved);
-        uint8_t currChunkIndex = 0;
         if (dataRecivedSize < 0)
         {
             std::cout << "Error Receiving from crazyflie" << std::endl;
@@ -42,6 +50,7 @@ void LoggingCrazyflieWrapper::start()
         std::cout << (int)msgRecieved._msgType << "-> ";
         unsigned int ackRequestMemAddress = 0;
         uint32_t crazyflieCurrMemAddress = 0;
+
         // std::cout << "bytes received: " << (int)bytesRecieved << std::endl;
         if (_crazyflie->isRunning() == false)
         {
@@ -53,23 +62,30 @@ void LoggingCrazyflieWrapper::start()
         case (int)CrazyflieMsgType::DATA_SIZE_MSG:
             dataSize = msgRecieved._sequence;
             sizeOfBuffer = dataSize / 25;
-
-            _buffer = (PacketDataPtr *)new PacketDataPtr[sizeOfBuffer];
+            DEBUG_PRINT(sizeOfBuffer);
+            DEBUG_PAUSE();
+            _buffer = (uint8_t **)new uint8_t *[sizeOfBuffer];
+            for (uint32_t i = 0; i < sizeOfBuffer; i++)
+            {
+                _buffer[i] = nullptr;
+            }
             std::cout << "Data size: " << dataSize << std::endl;
             this->sendResponse(ResponseMsgType::SUCCESS);
             break;
 
         case (int)CrazyflieMsgType::DATA_MSG:
             crazyflieCurrMemAddress = msgRecieved._sequence;
-            currChunkIndex = (crazyflieCurrMemAddress) / 25;
-
-            if (nullptr != _buffer[currChunkIndex])
+            currBufferPos = (crazyflieCurrMemAddress) / 25;
+            DEBUG_PRINT(crazyflieCurrMemAddress);
+            DEBUG_PRINT(currBufferPos);
+            DEBUG_PAUSE();
+            if (nullptr != _buffer[currBufferPos])
             {
                 break;
             }
-
-            _buffer[currChunkIndex] = (PacketDataPtr) new PacketData();
-            std::copy_n(msgRecieved._data, sizeof(msgRecieved._data), *_buffer[currChunkIndex]);
+            
+            _buffer[currBufferPos] = (uint8_t *)new uint8_t[sizeof(PacketData)];
+            std::copy_n((uint8_t *)msgRecieved._data, dataRecivedSize, (uint8_t *)*(_buffer + currBufferPos));
 
             if (!_outputFilePath.empty())
             {
@@ -83,25 +99,36 @@ void LoggingCrazyflieWrapper::start()
         case (int)CrazyflieMsgType::ACK_REQUEST:
             ackRequestMemAddress = msgRecieved._sequence;
 
-            currPos = std::find(_buffer+previousAckRequestLoc, _buffer + 80, nullptr) - _buffer;
-            
-            if (currPos != previousAckRequestLoc+80)
+            currBufferPos = std::find(_buffer + previousAckRequestLoc, _buffer + 80, nullptr) - _buffer;
+
+            if (currBufferPos * 25 != previousAckRequestLoc + 80)
             {
-                this->sendResponse(ResponseMsgType::NOT_ALL_DATA_RECEIVED, currPos);
+
+                this->sendResponse(ResponseMsgType::NOT_ALL_DATA_RECEIVED, currBufferPos);
+                std::cout << "Ack failed " << currBufferPos << std::endl;
             }
-            else if (currPos + dataRecivedSize != ackRequestMemAddress)
+            else if (currBufferPos * 25 + dataRecivedSize != ackRequestMemAddress)
             {
                 std::cout << "Something Went Wrong in the Ack " << msgRecieved._msgType << std::endl;
                 return;
             }
-            else if( currPos + dataRecivedSize == dataSize)
+            else if (currBufferPos * 25 + dataRecivedSize == dataSize)
             {
                 std::cout << "Finished!" << msgRecieved._msgType << std::endl;
                 isFinished = true;
+                for (uint32_t i = 0; i < dataSize; i++)
+                {
+                    delete _buffer[i];
+                    _buffer[i] = nullptr;
+                }
+                delete[] _buffer;
+                _buffer = nullptr;
                 break;
             }
             else
             {
+                std::cout << "Ack successful " << msgRecieved._sequence << std::endl;
+
                 this->sendResponse(ResponseMsgType::SUCCESS, crazyflieCurrMemAddress + dataRecivedSize);
                 previousAckRequestLoc = crazyflieCurrMemAddress + dataRecivedSize;
             }
