@@ -42,6 +42,7 @@ add_library(crazyflieLinkCpp
   src/ConnectionWrapper.cpp
   src/Crazyflie.cpp
   src/Toc.cpp
+  src/LoggingCrazyflieWrapper.cpp
 )
 
 # target_include_directories(libCrazyflieLinkCpp
