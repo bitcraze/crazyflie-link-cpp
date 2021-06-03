@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Crazyflie.h"
-
+#include <deque>
 
 enum class CrazyflieMsgType
 {
@@ -18,7 +18,8 @@ enum class ResponseMsgType
     CLIENT_NOT_RUNNING
 };
 
-
+typedef uint8_t PacketData[25];
+typedef PacketData *PacketDataPtr;
 
 #pragma pack(push, 1)
 struct LoggingMsg
@@ -33,19 +34,23 @@ struct LoggingMsg
         uint8_t _header[5];
     };
 
-    uint8_t _data[25];
+    PacketData _data;
 };
 #pragma pack(pop)
 
 class LoggingCrazyflieWrapper
 {
 private:
-    Crazyflie* _crazyflie;
+    Crazyflie *_crazyflie;
+    PacketDataPtr* _buffer = {nullptr};
     std::string _outputFilePath;
 
 public:
     void start();
-    LoggingCrazyflieWrapper(Crazyflie& crazyflie, const std::string& outputFilePath = "");
+    LoggingCrazyflieWrapper(Crazyflie &crazyflie, const std::string &outputFilePath = "");
     ~LoggingCrazyflieWrapper();
-};
+    void sendResponse(const ResponseMsgType &responseType, uint32_t data) const;
+    void sendResponse(const ResponseMsgType &responseType) const;
 
+    int8_t recv(LoggingMsg &loggingMsg) const; //returns amount of data bytes recieved. if return < 0 then an error occured
+};
