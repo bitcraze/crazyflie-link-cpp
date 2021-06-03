@@ -196,10 +196,14 @@ bool TocItem::isFloat() const
 
 bool ParamType::operator==(const std::string& val) const
 {
-    return to_string(*this) == val; 
+    return std::string(*this) == val; 
 }
 
 bool ParamType::operator==(uint8_t val) const
 {
     return _paramtype == val;
+}
+ParamType::operator std::string() const
+{
+    return to_string(*this);
 }

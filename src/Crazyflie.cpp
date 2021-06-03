@@ -3,6 +3,7 @@ using namespace bitcraze::crazyflieLinkCpp;
 
 Crazyflie::Crazyflie(const std::string &uri) : _con(uri), _conWrapperParamRead(_con), _conWrapperParamWrite(_con), _conWrapperToc(_con), _conWrapperAppchannel(_con)
 {
+    _isRunning = false;
     _conWrapperToc.setPort(PARAM_PORT);
     _conWrapperParamRead.setPort(PARAM_PORT);
     _conWrapperParamWrite.setPort(PARAM_PORT);
@@ -23,8 +24,25 @@ std::vector<uint8_t> Crazyflie::recvAppChannelData()
 {
     Packet p = _conWrapperAppchannel.recvFilteredData(0);
     std::vector<uint8_t> res;
+
+    if(!p)
+    {
+        return res;
+    }
     std::copy(p.payload(), p.payload() + p.payloadSize(), std::back_inserter(res));
     return res;
+}
+
+size_t Crazyflie::recvAppChannelData(void* dest, const size_t& dataLen)
+{
+    Packet p = _conWrapperAppchannel.recvFilteredData(0);
+    std::vector<uint8_t> res;
+    size_t sizeToWrite = std::max(dataLen,p.payloadSize());
+    if(p)
+    {
+        std::copy_n(p.payload(), sizeToWrite, (uint8_t*)dest);
+    }
+    return sizeToWrite;
 }
 
 float Crazyflie::getFloatFromCrazyflie(uint16_t paramId) const
@@ -124,7 +142,12 @@ void Crazyflie::printToc()
 bool Crazyflie::init()
 {
     initToc();
+    _isRunning = true;
     return true;
+}
+bool Crazyflie::isRunning() const
+{
+    return _isRunning;
 }
 
 bool Crazyflie::setParamByName(const std::string &group, const std::string &name, float newValue)

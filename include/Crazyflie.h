@@ -30,7 +30,7 @@ private:
     ConnectionWrapper _conWrapperParamWrite;
     ConnectionWrapper _conWrapperToc;
     ConnectionWrapper _conWrapperAppchannel;
-
+    bool _isRunning;
     Toc _toc;
     bool setParamInCrazyflie(uint16_t paramId, float newValue);
     bool setParamInCrazyflie(uint16_t paramId, uint32_t newValue, const size_t &valueSize);
@@ -43,7 +43,7 @@ private:
 public:
     Crazyflie(const std::string &uri);
     ~Crazyflie();
-
+    bool isRunning() const;
     bool init();
 
     bool isParamFloat(const std::string &group, const std::string &name) const;
@@ -59,6 +59,8 @@ public:
 
     void sendAppChannelData(const void *data, const size_t &dataLen);
     std::vector<uint8_t> recvAppChannelData();
+    //returns the amount of bytes it wrote
+    size_t recvAppChannelData(void* dest, const size_t& dataLen);
 
     //todo: add callback for param changed
     //todo: console

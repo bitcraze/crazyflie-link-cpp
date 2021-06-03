@@ -11,6 +11,38 @@
 
 using namespace bitcraze::crazyflieLinkCpp;
 
+enum class CrazyflieMsgType
+{
+    DATA_SIZE_MSG,
+    DATA_MSG,
+    ACK_REQUEST
+};
+
+enum class ResponseMsgType
+{
+    SUCCESS,
+    WRONG_TYPE,
+    NOT_ALL_DATA_RECEIVED,
+    CLIENT_NOT_RUNNING
+};
+
+#pragma pack(push, 1)
+struct LoggingMsg
+{
+    union
+    {
+        struct
+        {
+            uint8_t _msgType;
+            uint32_t _sequence;
+        };
+        uint8_t _header[5];
+    };
+
+    uint8_t _data[25];
+};
+#pragma pack(pop)
+
 int main()
 {
     Crazyflie crazyflie("usb://0");
@@ -20,80 +52,102 @@ int main()
     crazyflie.setParamByName("usd", "logging", 0, 1);
     crazyflie.setParamByName("usd", "sendAppChannle", 1, 1);
 
-    std::vector<uint8_t> result;
+    LoggingMsg msgRecieved;
     uint32_t currMemAddress = 0;
+    std::queue<uint32_t> lostMemAddresses;
     uint32_t dataSize = 0;
-    std::ofstream outputFile("log.txt");
+    std::fstream outputFile("log.txt", std::ifstream::binary |std::ios::out | std::ios::app);
     auto start = std::chrono::steady_clock::now();
-
+    uint8_t buffer[2000] = {0};
+    size_t fileSize = 0;
+    char* fileHolder = nullptr;
     do
     {
-        result = crazyflie.recvAppChannelData();
-        uint8_t packetCode = result[0];
-        std::cout << (int)packetCode << "-> ";
-        std::vector<uint8_t> response;
-        response.resize(6);
+        uint8_t bytesRecieved = crazyflie.recvAppChannelData(&msgRecieved, sizeof(msgRecieved));
+        if (0 == bytesRecieved)
+        {
+            std::cout << "Error Receiving from crazyflie" << std::endl;
+            break;
+        }
+
+        std::cout << (int)msgRecieved._msgType << "-> ";
+        LoggingMsg response;
+        size_t responseSize = 0;
         unsigned int ackRequestMemAddress = 0;
         uint32_t crazyflieCurrMemAddress = 0;
+        // std::cout << "bytes received: " << (int)bytesRecieved << std::endl;
+        uint8_t dataRecivedSize = bytesRecieved - sizeof(response._header);
 
-        switch (packetCode)
+        if (crazyflie.isRunning() == false)
+        {
+            response._msgType = 3;
+            crazyflie.sendAppChannelData(&response, sizeof(uint8_t));
+            return 0;
+        }
+        switch (msgRecieved._msgType)
         {
         case 0:
-            std::copy_n(result.begin() + 1, sizeof(dataSize), (uint8_t *)&dataSize);
+            dataSize = msgRecieved._sequence;
             std::cout << "Data size: " << dataSize << std::endl;
-            response[0] = 0;
-            crazyflie.sendAppChannelData(&response[0], sizeof(uint8_t)); //size msg ack
+            response._msgType = 0;
+            responseSize = sizeof(uint8_t);
             break;
 
         case 1:
-            std::copy_n(result.begin() + 1, sizeof(crazyflieCurrMemAddress), (uint8_t *)&crazyflieCurrMemAddress);
-            //send not all data recieved
-            if(crazyflieCurrMemAddress != currMemAddress)
+            crazyflieCurrMemAddress = msgRecieved._sequence;
+            std::copy_n(msgRecieved._data, sizeof(dataRecivedSize), &buffer[crazyflieCurrMemAddress%2000]);
+            if (crazyflieCurrMemAddress != currMemAddress)
             {
-                std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
-                
-                response[0] = 2;
-                std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
-                crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t)); 
-                break;
+                lostMemAddresses.push(currMemAddress);
+                std::cout << "Lost Address: " << (unsigned int)crazyflieCurrMemAddress << std::endl;
             }
-            currMemAddress += result.size() - sizeof(currMemAddress) - sizeof(uint8_t);
+            currMemAddress = crazyflieCurrMemAddress + dataRecivedSize;
             std::cout << "Current Memory Address: " << (unsigned int)currMemAddress << std::endl;
-            outputFile.write(reinterpret_cast<char *>(&result[5]), result.size() - 5);
-
             break;
 
         case 2:
-            std::copy_n(result.begin() + 1, sizeof(ackRequestMemAddress), (uint8_t *)&ackRequestMemAddress);
+            ackRequestMemAddress = msgRecieved._sequence;
 
-            std::cout << "Ack Request Mem Address: " << ackRequestMemAddress << std::endl;
-            if (ackRequestMemAddress == currMemAddress)
+            if (ackRequestMemAddress != currMemAddress)
             {
-                response[0] = 0;
+                lostMemAddresses.push(ackRequestMemAddress);
+                currMemAddress = ackRequestMemAddress;
+            }
+            if(lostMemAddresses.empty())
+            {
+                response._msgType = 0;
+                response._sequence = currMemAddress;
+                fileSize += sizeof(buffer);
+                fileHolder = new char[fileSize];
+                outputFile.read(fileHolder,fileSize);
+                outputFile.write((const char *)buffer,fileSize);
+                std::memset(buffer, 0, sizeof(buffer));
+                delete[] fileHolder;
             }
             else
             {
-                std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
-
-                response[0] = 2;
+                response._msgType = 2;
+                response._sequence = lostMemAddresses.front();
+                lostMemAddresses.pop();
             }
-            std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
-            crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t)); //data msg ack
+            responseSize = sizeof(response._header);
+
             break;
 
         default:
             std::cout << "Incorrect Msg type" << currMemAddress << std::endl;
-            response[0] = 1;
-            crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t));
+            response._msgType = 1;
+            responseSize = sizeof(uint8_t);
 
             break;
         }
+        crazyflie.sendAppChannelData(&response, responseSize);
 
     } while (currMemAddress < dataSize);
     outputFile.close();
 
-    std::chrono::duration<double> delta =  std::chrono::steady_clock::now() - start;
+    std::chrono::duration<double> delta = std::chrono::steady_clock::now() - start;
     std::cout << "Time [sec]: " << delta.count() << std::endl;
-    std::cout << "rate[bytes/sec] : " << dataSize/(delta.count()) <<std::endl;
+    std::cout << "rate[bytes/sec] : " << dataSize / (delta.count()) << std::endl;
     return 0;
 }

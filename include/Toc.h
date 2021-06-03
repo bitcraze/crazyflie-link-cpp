@@ -45,6 +45,7 @@ struct AccessType
 struct ParamType
 {
     uint8_t _paramtype;
+    operator std::string() const;
     friend std::string to_string(ParamType const &self);
     bool operator==(uint8_t val) const;
     bool operator==(const std::string& val) const;
