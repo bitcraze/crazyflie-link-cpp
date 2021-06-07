@@ -12,7 +12,7 @@
 
 using namespace bitcraze::crazyflieLinkCpp;
 
-int main()
+int main(int argc, char *argv[])
 {
     Crazyflie crazyflie("usb://0");
 
@@ -25,18 +25,25 @@ int main()
     uint32_t currMemAddress = 0;
     uint32_t dataSize = 0;
     std::ofstream outputFile("log.txt");
+    if(argc < 2)
+    {
+        std::cout << "<Ack Delay int>" << std::endl;
+        return 0;
+    }
+
     auto start = std::chrono::steady_clock::now();
+    unsigned int ackDelay = std::stoul(argv[1]);
 
     do
     {
         result = crazyflie.recvAppChannelData();
         if(result.empty())
         {
-            std::cout << "Error Receiving from crazyflie" <<std::endl;
+            // std::cout << "Error Receiving from crazyflie" <<std::endl;
             break;
         }
         uint8_t packetCode = result[0];
-        std::cout << (int)packetCode << "-> ";
+        // std::cout << (int)packetCode << "-> ";
         std::vector<uint8_t> response;
         response.resize(6);
         unsigned int ackRequestMemAddress = 0;
@@ -46,7 +53,7 @@ int main()
         {
         case 0:
             std::copy_n(result.begin() + 1, sizeof(dataSize), (uint8_t *)&dataSize);
-            std::cout << "Data size: " << dataSize << std::endl;
+            // std::cout << "Data size: " << dataSize << std::endl;
             response[0] = 0;
             crazyflie.sendAppChannelData(&response[0], sizeof(uint8_t)); //size msg ack
             break;
@@ -56,32 +63,35 @@ int main()
             //send not all data recieved
             if(crazyflieCurrMemAddress != currMemAddress)
             {
-                std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
+                // std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
                 
-                response[0] = 2;
-                std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
-                crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t)); 
+                //response[0] = 2;
+                //std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
+                //crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t));
+                // ackDelay += 5; 
+
 
                 break;
             }
             currMemAddress += result.size() - sizeof(currMemAddress) - sizeof(uint8_t);
-            std::cout << "Current Memory Address: " << (unsigned int)currMemAddress << std::endl;
+            // std::cout << "Current Memory Address: " << (unsigned int)currMemAddress << std::endl;
             outputFile.write(reinterpret_cast<char *>(&result[5]), result.size() - 5);
 
             break;
 
         case 2:
             std::copy_n(result.begin() + 1, sizeof(ackRequestMemAddress), (uint8_t *)&ackRequestMemAddress);
-
+            std::this_thread::sleep_for(std::chrono::microseconds(ackDelay));
+            // ackDelay -= 5;
             if (ackRequestMemAddress == currMemAddress)
             {
-                std::cout << "Ack Request Mem Address: " << ackRequestMemAddress << std::endl;
+                // std::cout << "Ack Request Mem Address: " << ackRequestMemAddress << std::endl;
 
                 response[0] = 0;
             }
             else
             {
-                std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
+                // std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
 
                 response[0] = 2;
             }
@@ -90,7 +100,7 @@ int main()
             break;
 
         default:
-            std::cout << "Incorrect Msg type" << currMemAddress << std::endl;
+            // std::cout << "Incorrect Msg type" << currMemAddress << std::endl;
             response[0] = 1;
             crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t));
 
@@ -102,7 +112,10 @@ int main()
 
 
     std::chrono::duration<double> delta =  std::chrono::steady_clock::now() - start;
-    std::cout << "Time [sec]: " << delta.count() << std::endl;
-    std::cout << "rate[bytes/sec] : " << dataSize/(delta.count()) <<std::endl;
+    // std::cout << "Time [sec]: " << delta.count() << std::endl;
+    // std::cout << "rate[bytes/sec] : " << dataSize/(delta.count()) <<std::endl;
+    std::cout << dataSize/(delta.count()) <<std::endl;
+    crazyflie.setParamByName("usd", "logging", 1, 1);
+
     return 0;
 }
