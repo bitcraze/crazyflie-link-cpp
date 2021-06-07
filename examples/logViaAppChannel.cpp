@@ -10,9 +10,11 @@
 
 #include "Crazyflie.h"
 
+#define ACK_DELAY_MICRO_SEC 30
+
 using namespace bitcraze::crazyflieLinkCpp;
 
-int main(int argc, char *argv[])
+int main()
 {
     Crazyflie crazyflie("usb://0");
 
@@ -25,14 +27,8 @@ int main(int argc, char *argv[])
     uint32_t currMemAddress = 0;
     uint32_t dataSize = 0;
     std::ofstream outputFile("log.txt");
-    if(argc < 2)
-    {
-        std::cout << "<Ack Delay int>" << std::endl;
-        return 0;
-    }
-
+  
     auto start = std::chrono::steady_clock::now();
-    unsigned int ackDelay = std::stoul(argv[1]);
 
     do
     {
@@ -81,7 +77,7 @@ int main(int argc, char *argv[])
 
         case 2:
             std::copy_n(result.begin() + 1, sizeof(ackRequestMemAddress), (uint8_t *)&ackRequestMemAddress);
-            std::this_thread::sleep_for(std::chrono::microseconds(ackDelay));
+            std::this_thread::sleep_for(std::chrono::microseconds(ACK_DELAY_MICRO_SEC));
             // ackDelay -= 5;
             if (ackRequestMemAddress == currMemAddress)
             {
@@ -115,7 +111,6 @@ int main(int argc, char *argv[])
     // std::cout << "Time [sec]: " << delta.count() << std::endl;
     // std::cout << "rate[bytes/sec] : " << dataSize/(delta.count()) <<std::endl;
     std::cout << dataSize/(delta.count()) <<std::endl;
-    crazyflie.setParamByName("usd", "logging", 1, 1);
 
     return 0;
 }
