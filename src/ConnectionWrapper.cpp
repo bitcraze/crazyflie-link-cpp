@@ -6,6 +6,7 @@
 
 using namespace bitcraze::crazyflieLinkCpp;
 
+
 ConnectionWrapper& ConnectionWrapper::operator=(bitcraze::crazyflieLinkCpp::Connection& con)
 {
     _conPtr = &con;

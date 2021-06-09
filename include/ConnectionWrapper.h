@@ -5,7 +5,6 @@
 
 #define PAYLOAD_MAX_SIZE CRTP_MAXSIZE - 2
 
-
 struct TocItemMessage
 {
     uint8_t _cmd;

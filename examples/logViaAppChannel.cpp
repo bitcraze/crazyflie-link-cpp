@@ -59,14 +59,6 @@ int main()
             //send not all data recieved
             if(crazyflieCurrMemAddress != currMemAddress)
             {
-                // std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
-                
-                //response[0] = 2;
-                //std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
-                //crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t));
-                // ackDelay += 5; 
-
-
                 break;
             }
             currMemAddress += result.size() - sizeof(currMemAddress) - sizeof(uint8_t);
@@ -78,7 +70,7 @@ int main()
         case 2:
             std::copy_n(result.begin() + 1, sizeof(ackRequestMemAddress), (uint8_t *)&ackRequestMemAddress);
             std::this_thread::sleep_for(std::chrono::microseconds(ACK_DELAY_MICRO_SEC));
-            // ackDelay -= 5;
+
             if (ackRequestMemAddress == currMemAddress)
             {
                 // std::cout << "Ack Request Mem Address: " << ackRequestMemAddress << std::endl;
@@ -91,6 +83,7 @@ int main()
 
                 response[0] = 2;
             }
+
             std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
             crazyflie.sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t)); //data msg ack
             break;
