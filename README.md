@@ -1,4 +1,4 @@
-# Crazyflie C++ Link (and Lib)
+# Crazyflie C++ Lib (and Link)
 
 This repo has two uses: First it is a "link" library meaning it could link c++ implementation of functions that work with the crazyflie 
 drone with python, so that a programmer could use this library to write code in python that uses the functions written in here. The second reason is to be a library which you could include into your c++ project and run the functions in here to code yourself a program for the crazyflie.
@@ -11,7 +11,7 @@ drone with python, so that a programmer could use this library to write code in 
 
 * `examples` - example files which you can run
 
-* `include/crazflieLinkCpp` - contains all header files for crazyflie lib
+* `include` - contains all header files for crazyflie lib
 
 ### For Visual Studio Editting Best Experience
 
@@ -21,7 +21,7 @@ drone with python, so that a programmer could use this library to write code in 
 4. Allow intelisense for c/c++
 5. Allow intelisense for CMakeLists (let the compiler guess which g++ version to use) 
 
-### Build and install development version of the python binding
+### Build and install development version of the python binding (optional)
 
 **Building the python binding requires python>=3.6**, cmake and Ninja. Ninja and CMake can be installed with pip on Windows and Mac (```pip install cmake ninja```), or using apt-get on Ubuntu/debian (```apt-get install cmake ninja-build```).
 
