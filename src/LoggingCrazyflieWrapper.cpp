@@ -42,10 +42,10 @@ void LoggingCrazyflieWrapper::start(bool withDebugging)
         uint8_t packetCode = result[0];
         if (withDebugging)
             std::cout << (int)packetCode << "-> ";
-        std::vector<uint8_t> response;
-        response.resize(6);
+        uint8_t response[5] = {0};
         unsigned int ackRequestMemAddress = 0;
         uint32_t crazyflieCurrMemAddress = 0;
+
 
         switch (packetCode)
         {
@@ -90,15 +90,15 @@ void LoggingCrazyflieWrapper::start(bool withDebugging)
                 response[0] = 2;
             }
 
-            std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
-            _crazyflie->sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t)); //data msg ack
+            std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response + 1);
+            _crazyflie->sendAppChannelData(response, sizeof(response)); //data msg ack
             break;
 
         default:
             if (withDebugging)
                 std::cout << "Incorrect Msg type" << currMemAddress << std::endl;
             response[0] = 1;
-            _crazyflie->sendAppChannelData(response.data(), sizeof(uint8_t));
+            _crazyflie->sendAppChannelData(response, sizeof(uint8_t));
 
             break;
         }
@@ -118,21 +118,3 @@ void LoggingCrazyflieWrapper::start(bool withDebugging)
     }
 }
 
-void LoggingCrazyflieWrapper::sendResponse(const ResponseMsgType &responseType, uint32_t data) const
-{
-    uint8_t response[5];
-    response[0] = (int)responseType;
-    std::copy_n((uint8_t *)&data, sizeof(uint32_t), response + 1);
-    _crazyflie->sendAppChannelData(&response, sizeof(response));
-}
-
-void LoggingCrazyflieWrapper::sendResponse(const ResponseMsgType &responseType) const
-{
-    uint8_t response = (int)responseType;
-    _crazyflie->sendAppChannelData(&response, sizeof(response));
-}
-
-int8_t LoggingCrazyflieWrapper::recv(LoggingMsg &loggingMsg) const
-{
-    return _crazyflie->recvAppChannelData(&loggingMsg, sizeof(loggingMsg)) - sizeof(loggingMsg._header);
-}
