@@ -1,14 +1,9 @@
 #include "LoggingCrazyflieWrapper.h"
 #include <list>
 #include <chrono>
+#include <thread>
 
-#define DEBUG_PRINT(var) (std::cout << #var << ": " << var << std::endl)
-#define DEBUG_PRINT_WITH_CAST(var, cast) (std::cout << #var << ": " << (cast)var << std::endl)
-#define DEBUG_PAUSE()  \
-    {                  \
-        int i = 0;     \
-        std::cin >> i; \
-    }
+#define ACK_DELAY_MICRO_SEC 30
 
 using namespace bitcraze::crazyflieLinkCpp;
 
@@ -22,129 +17,105 @@ LoggingCrazyflieWrapper::~LoggingCrazyflieWrapper()
 {
 }
 
-void LoggingCrazyflieWrapper::start()
+void LoggingCrazyflieWrapper::start(bool withDebugging)
 {
+
     _crazyflie->setParamByName("usd", "logging", 0, 1);
     _crazyflie->setParamByName("usd", "sendAppChannle", 1, 1);
 
-    LoggingMsg msgRecieved;
+    std::vector<uint8_t> result;
+    uint32_t currMemAddress = 0;
     uint32_t dataSize = 0;
-    uint32_t sizeOfBuffer = 0;
-    uint32_t currBufferPos = 0;
-    uint32_t previousAckRequestLoc = 0;
+    std::ofstream outputFile(_outputFilePath);
 
-    std::ofstream outputFile;
-    if (!_outputFilePath.empty())
-        outputFile.open(_outputFilePath, std::ifstream::binary | std::ios::out | std::ios::app);
     auto start = std::chrono::steady_clock::now();
-    bool isFinished = false;
 
-    while (!isFinished)
+    do
     {
-        int8_t dataRecivedSize = this->recv(msgRecieved);
-        if (dataRecivedSize < 0)
+        result = _crazyflie->recvAppChannelData();
+        if (result.empty())
         {
-            std::cout << "Error Receiving from crazyflie" << std::endl;
+            if (withDebugging)
+                std::cout << "Error Receiving from crazyflie" << std::endl;
             break;
         }
-        std::cout << (int)msgRecieved._msgType << "-> ";
+        uint8_t packetCode = result[0];
+        if (withDebugging)
+            std::cout << (int)packetCode << "-> ";
+        std::vector<uint8_t> response;
+        response.resize(6);
         unsigned int ackRequestMemAddress = 0;
         uint32_t crazyflieCurrMemAddress = 0;
 
-        // std::cout << "bytes received: " << (int)bytesRecieved << std::endl;
-        if (_crazyflie->isRunning() == false)
+        switch (packetCode)
         {
-            this->sendResponse(ResponseMsgType::CLIENT_NOT_RUNNING);
-            return;
-        }
-        switch (msgRecieved._msgType)
-        {
-        case (int)CrazyflieMsgType::DATA_SIZE_MSG:
-            dataSize = msgRecieved._sequence;
-            sizeOfBuffer = dataSize / 25;
-            DEBUG_PRINT(sizeOfBuffer);
-            DEBUG_PAUSE();
-            _buffer = (uint8_t **)new uint8_t *[sizeOfBuffer];
-            for (uint32_t i = 0; i < sizeOfBuffer; i++)
-            {
-                _buffer[i] = nullptr;
-            }
-            std::cout << "Data size: " << dataSize << std::endl;
-            this->sendResponse(ResponseMsgType::SUCCESS);
+        case 0:
+            std::copy_n(result.begin() + 1, sizeof(dataSize), (uint8_t *)&dataSize);
+            if (withDebugging)
+                std::cout << "Data size: " << dataSize << std::endl;
+            response[0] = 0;
+            _crazyflie->sendAppChannelData(&response[0], sizeof(uint8_t)); //size msg ack
             break;
 
-        case (int)CrazyflieMsgType::DATA_MSG:
-            crazyflieCurrMemAddress = msgRecieved._sequence;
-            currBufferPos = (crazyflieCurrMemAddress) / 25;
-            DEBUG_PRINT(crazyflieCurrMemAddress);
-            DEBUG_PRINT(currBufferPos);
-            DEBUG_PAUSE();
-            if (nullptr != _buffer[currBufferPos])
+        case 1:
+            std::copy_n(result.begin() + 1, sizeof(crazyflieCurrMemAddress), (uint8_t *)&crazyflieCurrMemAddress);
+            //send not all data recieved
+            if (crazyflieCurrMemAddress != currMemAddress)
             {
                 break;
             }
-            
-            _buffer[currBufferPos] = (uint8_t *)new uint8_t[sizeof(PacketData)];
-            std::copy_n((uint8_t *)msgRecieved._data, dataRecivedSize, (uint8_t *)*(_buffer + currBufferPos));
+            currMemAddress += result.size() - sizeof(currMemAddress) - sizeof(uint8_t);
+            if (withDebugging)
+                std::cout << "Current Memory Address: " << (unsigned int)currMemAddress << std::endl;
+            outputFile.write(reinterpret_cast<char *>(&result[5]), result.size() - 5);
 
-            if (!_outputFilePath.empty())
-            {
-                outputFile.seekp(crazyflieCurrMemAddress);
-                outputFile.write((const char *)msgRecieved._data, dataRecivedSize);
-            }
-
-            std::cout << "Current Memory Address: " << (unsigned int)crazyflieCurrMemAddress << std::endl;
             break;
 
-        case (int)CrazyflieMsgType::ACK_REQUEST:
-            ackRequestMemAddress = msgRecieved._sequence;
+        case 2:
+            std::copy_n(result.begin() + 1, sizeof(ackRequestMemAddress), (uint8_t *)&ackRequestMemAddress);
+            std::this_thread::sleep_for(std::chrono::microseconds(ACK_DELAY_MICRO_SEC));
 
-            currBufferPos = std::find(_buffer + previousAckRequestLoc, _buffer + 80, nullptr) - _buffer;
+            if (ackRequestMemAddress == currMemAddress)
+            {
+                if (withDebugging)
+                    std::cout << "Ack Request Mem Address: " << ackRequestMemAddress << std::endl;
 
-            if (currBufferPos * 25 != previousAckRequestLoc + 80)
-            {
-
-                this->sendResponse(ResponseMsgType::NOT_ALL_DATA_RECEIVED, currBufferPos);
-                std::cout << "Ack failed " << currBufferPos << std::endl;
-            }
-            else if (currBufferPos * 25 + dataRecivedSize != ackRequestMemAddress)
-            {
-                std::cout << "Something Went Wrong in the Ack " << msgRecieved._msgType << std::endl;
-                return;
-            }
-            else if (currBufferPos * 25 + dataRecivedSize == dataSize)
-            {
-                std::cout << "Finished!" << msgRecieved._msgType << std::endl;
-                isFinished = true;
-                for (uint32_t i = 0; i < dataSize; i++)
-                {
-                    delete _buffer[i];
-                    _buffer[i] = nullptr;
-                }
-                delete[] _buffer;
-                _buffer = nullptr;
-                break;
+                response[0] = 0;
             }
             else
             {
-                std::cout << "Ack successful " << msgRecieved._sequence << std::endl;
+                if (withDebugging)
+                    std::cout << "Wrong Memory Address: " << (unsigned int)currMemAddress << std::endl;
 
-                this->sendResponse(ResponseMsgType::SUCCESS, crazyflieCurrMemAddress + dataRecivedSize);
-                previousAckRequestLoc = crazyflieCurrMemAddress + dataRecivedSize;
+                response[0] = 2;
             }
+
+            std::copy_n((uint8_t *)&currMemAddress, sizeof(currMemAddress), response.begin() + 1);
+            _crazyflie->sendAppChannelData(response.data(), sizeof(uint8_t) + sizeof(uint32_t)); //data msg ack
             break;
 
         default:
-            std::cout << "Incorrect Msg type: " << msgRecieved._msgType << std::endl;
-            this->sendResponse(ResponseMsgType::WRONG_TYPE);
+            if (withDebugging)
+                std::cout << "Incorrect Msg type" << currMemAddress << std::endl;
+            response[0] = 1;
+            _crazyflie->sendAppChannelData(response.data(), sizeof(uint8_t));
+
             break;
         }
-    }
-    if (!_outputFilePath.empty())
-        outputFile.close();
+
+    } while (currMemAddress < dataSize);
+    outputFile.close();
+
     std::chrono::duration<double> delta = std::chrono::steady_clock::now() - start;
-    std::cout << "Time [sec]: " << delta.count() << std::endl;
-    std::cout << "rate[bytes/sec] : " << dataSize / (delta.count()) << std::endl;
+    if (withDebugging)
+    {
+        std::cout << "Time [sec]: " << delta.count() << std::endl;
+        std::cout << "rate[bytes/sec] : " << dataSize / (delta.count()) << std::endl;
+    }
+    else
+    {
+        std::cout << dataSize / (delta.count()) << std::endl;
+    }
 }
 
 void LoggingCrazyflieWrapper::sendResponse(const ResponseMsgType &responseType, uint32_t data) const

@@ -46,7 +46,7 @@ private:
     std::string _outputFilePath;
 
 public:
-    void start();
+    void start(bool withDebugging = false);
     LoggingCrazyflieWrapper(Crazyflie &crazyflie, const std::string &outputFilePath = "");
     ~LoggingCrazyflieWrapper();
     void sendResponse(const ResponseMsgType &responseType, uint32_t data) const;
