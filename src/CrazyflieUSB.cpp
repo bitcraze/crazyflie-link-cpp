@@ -2,7 +2,7 @@
 
 #include <sstream>
 #include <stdexcept>
-
+#include <iostream>
 #include <libusb.h>
 
 namespace bitcraze {
@@ -63,15 +63,30 @@ bool CrazyflieUSB::send(
 size_t CrazyflieUSB::recv(uint8_t *buffer, size_t max_length, unsigned int timeout)
 {
     int transferred;
-
     // Read result
     int status = libusb_bulk_transfer(
         dev_handle_,
         /* endpoint*/ (0x81 | LIBUSB_ENDPOINT_IN),
         buffer,
-        max_length,
+        max_length, 
         &transferred,
         /*timeout*/ timeout);
+    if(Debug::passFlag)
+    {
+        if(status == -7)
+        {
+            Debug::countError++;
+        }
+        else if(status == 0)
+        {
+            Debug::countSuccess++;
+        }
+        else
+        {
+            std::cout << status << std::endl;
+        }
+        std::cout << "errors: " << Debug::countError << "       Successes: " << Debug::countSuccess << std::endl;
+    }
     if (status != LIBUSB_SUCCESS && status != LIBUSB_ERROR_TIMEOUT) {
         throw std::runtime_error(libusb_error_name(status));
     }

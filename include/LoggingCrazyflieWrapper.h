@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Crazyflie.h"
+#include "debug.h"
 
 enum CrazyflieMsgType
 {

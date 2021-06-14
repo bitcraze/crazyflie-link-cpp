@@ -9,3 +9,11 @@
         int i = 0;     \
         std::cin >> i; \
     }
+
+class Debug
+{
+    public:
+    static bool passFlag;
+    static int countSuccess;
+    static int countError;
+};
