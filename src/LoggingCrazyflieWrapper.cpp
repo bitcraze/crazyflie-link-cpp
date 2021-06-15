@@ -22,7 +22,7 @@ void LoggingCrazyflieWrapper::start(bool withDebugging)
 
     _crazyflie->setParamByName("usd", "logging", 0, 1);
     _crazyflie->setParamByName("usd", "sendAppChannle", 1, 1);
-
+    Debug::passFlag = true;
     std::vector<uint8_t> result;
     uint32_t currMemAddress = 0;
     uint32_t dataSize = 0;
