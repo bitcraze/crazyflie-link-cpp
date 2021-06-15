@@ -6,13 +6,11 @@
 
 using namespace bitcraze::crazyflieLinkCpp;
 
-
-ConnectionWrapper& ConnectionWrapper::operator=(bitcraze::crazyflieLinkCpp::Connection& con)
+ConnectionWrapper &ConnectionWrapper::operator=(bitcraze::crazyflieLinkCpp::Connection &con)
 {
     _conPtr = &con;
     return *this;
 }
-
 
 ConnectionWrapper::ConnectionWrapper(Connection &con) : _conPtr(&con)
 {
@@ -24,15 +22,16 @@ ConnectionWrapper::~ConnectionWrapper()
 
 bool isBigEndian()
 {
-    union {
+    union
+    {
         uint32_t i;
         char c[4];
     } bint = {0x01020304};
 
-    return bint.c[0] == 1; 
+    return bint.c[0] == 1;
 }
 
-void ConnectionWrapper::sendData(const void* data1, const size_t& data1_len, const void* data2, const size_t& data2_len) const
+void ConnectionWrapper::sendData(const void *data1, const size_t &data1_len, const void *data2, const size_t &data2_len) const
 {
     Packet p;
     p.setChannel(_channel);
@@ -41,26 +40,26 @@ void ConnectionWrapper::sendData(const void* data1, const size_t& data1_len, con
 
     if (IS_BIG_ENDIAN)
     {
-        std::reverse_copy((uint8_t*)data1 + data1_len, (uint8_t*)data1, p.payload());
+        std::reverse_copy((uint8_t *)data1 + data1_len, (uint8_t *)data1, p.payload());
         if (data2_len > 0)
         {
-            std::reverse_copy((uint8_t*)data2 + data2_len, (uint8_t*)data2, p.payload() + data1_len);
+            std::reverse_copy((uint8_t *)data2 + data2_len, (uint8_t *)data2, p.payload() + data1_len);
         }
     }
     else
     {
-        std::copy( (uint8_t*)data1, (uint8_t*)data1 + data1_len, p.payload());
+        std::copy((uint8_t *)data1, (uint8_t *)data1 + data1_len, p.payload());
         if (data2_len > 0)
         {
-            std::copy( (uint8_t*)data2, (uint8_t*)data2 + data2_len, p.payload() + data1_len);
+            std::copy((uint8_t *)data2, (uint8_t *)data2 + data2_len, p.payload() + data1_len);
         }
     }
     _conPtr->send(p);
 }
 
-
 Packet ConnectionWrapper::recvFilteredData(int timeout, int port, int channel) const
 {
+    std::cout << _conPtr->statistics() << std::endl;
     while (true)
     {
         Packet p = _conPtr->recv(timeout);

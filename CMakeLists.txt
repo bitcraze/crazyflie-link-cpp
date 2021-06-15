@@ -145,14 +145,3 @@ target_link_libraries(example_basicParamCSV
   crazyflieLinkCpp
 )
 
-# Python bindings
-add_subdirectory(pybind11)
-
-pybind11_add_module(cflinkcpp
-  src/python_bindings.cpp
-)
-
-target_link_libraries(cflinkcpp
-  PRIVATE
-    crazyflieLinkCpp
-)
