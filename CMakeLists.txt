@@ -21,7 +21,30 @@ endif()
 
 # dependencies
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/tools/build)
-find_package(libusb REQUIRED)
+
+if (WIN32)
+  # build libusb
+  include_directories(
+    libusb/msvc
+  )
+  add_library(libusb
+    libusb/libusb/core.c
+    libusb/libusb/descriptor.c
+    libusb/libusb/os/events_windows.c
+    libusb/libusb/hotplug.c
+    libusb/libusb/io.c
+    libusb/libusb/strerror.c
+    libusb/libusb/sync.c
+    libusb/libusb/os/threads_windows.c
+    libusb/libusb/os/windows_common.c
+    libusb/libusb/os/windows_usbdk.c
+    libusb/libusb/os/windows_winusb.c
+  )
+  set(LIBUSB_INCLUDE_DIR libusb/libusb)
+  set(LIBUSB_LIBRARY libusb)
+else()
+  find_package(libusb REQUIRED)
+endif()
 
 include_directories(
   include
