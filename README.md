@@ -1,4 +1,4 @@
-# Crazyflie C++ Lib (and Link)
+# Crazyflie C++ Lib 
 
 A library which you could include into your c++ project and run the functions in here to code yourself a program for the crazyflie. A c++ version of [crazyflie-lib-python](https://github.com/bitcraze/crazyflie-lib-python)
 
