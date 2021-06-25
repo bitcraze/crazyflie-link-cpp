@@ -20,7 +20,7 @@ endif()
 
 
 # dependencies
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/tools/build)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/tools/build)
 
 if (WIN32)
   # build libusb
