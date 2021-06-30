@@ -45,6 +45,14 @@ public:
     }
   }
 
+  Packet(uint8_t port, uint8_t channel, uint8_t payloadSize)
+  {
+    setPort(port);
+    setChannel(channel);
+    setPayloadSize(payloadSize);
+    seq_ = 0;
+  }
+
   bool valid() const
   {
     return size_ >= 1;
@@ -108,6 +116,28 @@ public:
   const uint8_t *payload() const
   {
     return &data_[1];
+  }
+
+  template<class T>
+  void setPayloadAt(uint8_t idx, T data)
+  {
+    memcpy(&payload()[idx], &data, sizeof(T));
+  }
+
+  template <class T>
+  T payloadAt(uint8_t idx) const
+  {
+    T data;
+    memcpy(&data, &payload()[idx], sizeof(T));
+    return data;
+  }
+
+  // Only C++ 17 would allow to overload payloadAt properly
+  // Use this version with a different name instead
+  std::string payloadAtString(uint8_t idx) const
+  {
+    std::string str((const char *)&payload()[idx], (size_t)payloadSize()-idx);
+    return str;
   }
 
   const uint8_t* raw() const
