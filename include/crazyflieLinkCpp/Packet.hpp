@@ -136,7 +136,9 @@ public:
   // Use this version with a different name instead
   std::string payloadAtString(uint8_t idx) const
   {
-    std::string str((const char *)&payload()[idx], (size_t)payloadSize()-idx);
+    auto c_str = (const char *)&payload()[idx];
+    size_t length = strnlen(c_str, payloadSize() - idx);
+    std::string str(c_str, length);
     return str;
   }
 
