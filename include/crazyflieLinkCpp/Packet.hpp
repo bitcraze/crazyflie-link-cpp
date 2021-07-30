@@ -142,6 +142,11 @@ public:
     return str;
   }
 
+  void setPayloadAtString(uint8_t idx, const std::string& data)
+  {
+    memcpy(&payload()[idx], data.c_str(), data.size()+1);
+  }
+
   const uint8_t* raw() const
   {
     return &data_[0];
