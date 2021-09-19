@@ -118,8 +118,13 @@ public:
     return &data_[1];
   }
 
+  void setPayloadAt(uint8_t idx, const uint8_t* data, size_t length)
+  {
+    memcpy(&payload()[idx], data, length);
+  }
+
   template<class T>
-  void setPayloadAt(uint8_t idx, T data)
+  void setPayloadAt(uint8_t idx, const T& data)
   {
     memcpy(&payload()[idx], &data, sizeof(T));
   }
