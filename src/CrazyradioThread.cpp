@@ -194,6 +194,7 @@ void CrazyradioThread::run()
                         {
                             p = con->queue_send_.top();
                             con->queue_send_.pop();
+                            --con->statistics_.enqueued_count;
                         } else if (!con->useAutoPing_)
                         {
                             continue;
@@ -209,9 +210,11 @@ void CrazyradioThread::run()
                         con->safelinkUp_ = !con->safelinkUp_;
                         if (con->retry_) {
                             con->retry_ = Packet();
+                            --con->statistics_.enqueued_count;
                         }
                     } else {
                         con->retry_ = p;
+                        ++con->statistics_.enqueued_count;
                     }
 
                     if (ack && ack.size() > 0 && (ack.data()[0] & 0x04) == (con->safelinkDown_ << 2)) {
@@ -233,6 +236,7 @@ void CrazyradioThread::run()
                         radio.sendPacketNoAck(p.raw(), p.size());
                         ++con->statistics_.sent_count;
                         con->queue_send_.pop();
+                        --con->statistics_.enqueued_count;
                     }
                     else
                     {
@@ -241,6 +245,7 @@ void CrazyradioThread::run()
                         if (ack)
                         {
                             con->queue_send_.pop();
+                            --con->statistics_.enqueued_count;
                         }
                     }
                 }
