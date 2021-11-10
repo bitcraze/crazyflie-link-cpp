@@ -73,12 +73,6 @@ add_library(crazyflieLinkCpp
 #     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/crazyflie_cpp>
 # )
 
-# Apple macOS libraries
-if (APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation")
-  set(CMAKE_MODULE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation")
-endif()
-
 # Link pthread on Linux and Mac only
 if (NOT MSVC)
 target_link_libraries(crazyflieLinkCpp
@@ -91,6 +85,9 @@ target_link_libraries(crazyflieLinkCpp
   PRIVATE
     ${LIBUSB_LIBRARY}
 )
+if (APPLE)
+target_link_options(crazyflieLinkCpp PUBLIC "-lobjc -framework IOKit -framework CoreFoundation")
+endif()
 set_property(TARGET crazyflieLinkCpp PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # C++ example application
