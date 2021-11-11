@@ -1,0 +1,32 @@
+cmake_minimum_required (VERSION 3.5)
+project(<your-project-name>)
+
+#NOTE: For Linux Only
+
+# disable pybind11 because we're only using c++ 
+option(BUILD_PYTHON_BINDINGS OFF)
+
+# disable crazyflie-link-cpp examples
+#option(BUILD_CPP_EXAMPLES OFF)
+
+# crazyflie-link-cpp dependencies
+add_subdirectory(crazyflie-link-cpp)
+
+add_library(<yourLibraryName>
+  <your source code>.cpp
+  ...
+)
+# make your header files public
+target_include_directories(<yourLibraryName> PUBLIC
+  <path/to/headers> # eg. `include/`
+)
+target_link_libraries(<yourLibraryName> PRIVATE crazyflieLinkCpp)
+
+# Runnable files
+add_executable(<executableFileName>
+  path/to/script.cpp
+)
+target_link_libraries(executableFileName
+  <yourLibraryName>
+)
+#...
