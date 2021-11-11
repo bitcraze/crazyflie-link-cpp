@@ -49,11 +49,6 @@ else()
   find_package(libusb REQUIRED)
 endif()
 
-include_directories(
-  include
-  ${LIBUSB_INCLUDE_DIR}
-)
-
 # C++ library
 
 add_library(crazyflieLinkCpp
@@ -66,6 +61,11 @@ add_library(crazyflieLinkCpp
   src/CrazyflieUSBThread.cpp
   src/Version.cpp
 )
+
+#libraries that link with the crazyflieLinkCpp will have access to the 
+# 'include/' directory 
+target_include_directories(crazyflieLinkCpp PUBLIC include/ ${LIBUSB_LIBRARY})
+
 
 # target_include_directories(libCrazyflieLinkCpp
 #   PUBLIC
