@@ -130,7 +130,7 @@ endif()
 
 if (BUILD_PYTHON_BINDINGS)
   # Python bindings
-  add_subdirectory(pybind11)
+  add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
 
   pybind11_add_module(cflinkcpp
     src/python_bindings.cpp
