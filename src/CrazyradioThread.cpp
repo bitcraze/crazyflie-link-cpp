@@ -164,9 +164,11 @@ void CrazyradioThread::run()
             {
                 radio.setDatarate(con->datarate_);
             }
-            if (!radio.ackEnabled())
+            // Enable ack if broadcast is false
+            // Disable ack if broadcast is true
+            if (radio.ackEnabled() == con->broadcast_)
             {
-                radio.setAckEnabled(true);
+                radio.setAckEnabled(!con->broadcast_);
             }
 
             // prepare to send result
