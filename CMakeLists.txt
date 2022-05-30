@@ -75,8 +75,8 @@ add_library(crazyflieLinkCpp
 
 # Apple macOS libraries
 if (APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation")
-  set(CMAKE_MODULE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation")
+  set(CMAKE_EXE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation -framework Security")
+  set(CMAKE_MODULE_LINKER_FLAGS "-lobjc -framework IOKit -framework CoreFoundation -framework Security")
 endif()
 
 # Link pthread on Linux and Mac only
