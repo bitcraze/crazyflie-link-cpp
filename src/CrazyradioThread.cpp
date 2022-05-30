@@ -118,6 +118,8 @@ void CrazyradioThread::runWithErrorHandler()
 void CrazyradioThread::run()
 {
     Crazyradio radio(dev_);
+    const auto version = radio.version();
+    bool supports_broadcasts = version.second >= 0x55;
 
     const uint8_t enableSafelink[] = {0xFF, 0x05, 1};
     const uint8_t ping[] = {0xFF};
@@ -169,6 +171,13 @@ void CrazyradioThread::run()
             if (radio.ackEnabled() == con->broadcast_)
             {
                 radio.setAckEnabled(!con->broadcast_);
+            }
+            if (con->broadcast_ && !supports_broadcasts) {
+                std::stringstream sstr;
+                sstr << "Issue with connection " << con->uri_ << "."; 
+                sstr << " Your radio with firmware " << version.first << "." << version.second 
+                     << " does not support broadcast communication. Please upgrade your Crazyradio firmware!";
+                throw std::runtime_error(sstr.str());
             }
 
             // prepare to send result
