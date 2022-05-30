@@ -84,7 +84,7 @@ Connection::Connection(const std::string &uri)
         if (match[7].length() > 0) {
             std::stringstream sstr(match[7].str().substr(1));
             std::string keyvalue;
-            const std::regex params_regex("(safelink|autoping|ackfilter)=([0|1])");
+            const std::regex params_regex("(safelink|autoping|ackfilter|broadcast)=([0|1])");
             while (getline(sstr, keyvalue, '&')) {
                 std::smatch match;
                 if (!std::regex_match(keyvalue, match, params_regex)) {
@@ -102,6 +102,9 @@ Connection::Connection(const std::string &uri)
                 }
                 if (match[1].str() == "ackfilter" && match[2].str() == "0") {
                     impl_->useAckFilter_ = false;
+                }
+                if (match[1].str() == "broadcast" && match[2].str() == "1") {
+                    impl_->broadcast_ = true;
                 }
             }
         }

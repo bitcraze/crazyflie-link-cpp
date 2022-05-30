@@ -342,7 +342,8 @@ void USBManager::addConnection(std::shared_ptr<ConnectionImpl> connection)
         for (auto con : radioThread.second.connections_) {
             if (   con->channel_ == connection->channel_
                 && con->address_ == connection->address_ 
-                && con->datarate_ == connection->datarate_) {
+                && con->datarate_ == connection->datarate_
+                && con->broadcast_ == false && connection->broadcast_ == false) {
                 std::stringstream sstr;
                 sstr << "Connection " << connection->uri_ << " is using the same settings as an existing connection!";
                 throw std::runtime_error(sstr.str());
