@@ -10,6 +10,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Compile static libraries with hidden visibility
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
 if (MSVC)
   # Avoid min/max macros in Windows.h (pulled in from libusb)
   add_definitions(-DNOMINMAX)
