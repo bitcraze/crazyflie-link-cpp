@@ -74,8 +74,16 @@ PYBIND11_MODULE(cflinkcpp, m) {
 
   //
   py::class_<Connection::Statistics>(m, "ConnectionStatistics")
-      .def_readonly("sent_count", &Connection::Statistics::sent_count)
-      .def_readonly("ack_count", &Connection::Statistics::ack_count)
+        .def_property_readonly("sent_count",
+        [](const Connection::Statistics &s) {
+          return std::atomic_load(&s.sent_count);
+        }
+      )
+      .def_property_readonly("ack_count",
+        [](const Connection::Statistics &s) {
+          return std::atomic_load(&s.ack_count);
+        }
+      )
       .def("__repr__", &toString<Connection::Statistics>);
 
   // Connection
