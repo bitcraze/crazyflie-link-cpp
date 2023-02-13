@@ -147,7 +147,30 @@ void CrazyradioThread::run()
             break;
         }
 
+        bool all_queues_empty = true;
+        bool any_outstanding_broadcasts = false;
         for (auto con : connections_copy) {
+            if (!con->queue_send_.empty() || con->retry_) {
+                all_queues_empty = false;
+                if (con->broadcast_) {
+                    any_outstanding_broadcasts = true;
+                    break;
+                }
+            }
+        }
+
+        for (auto con : connections_copy) {
+
+            // if this queue has nothing to do and we can't even send a ping, skip
+            if (con->queue_send_.empty() && !con->retry_ && (!con->useAutoPing_ || !all_queues_empty)) {
+                continue;
+            }
+
+            // if there are outstanding broadcasts, skip all non-broadcasting connections
+            if (any_outstanding_broadcasts && !con->broadcast_) {
+                continue;
+            }
+
         // for (auto con : connections_) {
             // const std::lock_guard<std::mutex> con_lock(con->alive_mutex_);
             // if (!con->alive_) {
@@ -199,6 +222,7 @@ void CrazyradioThread::run()
 
                     if (con->retry_) {
                         p = con->retry_;
+                        --con->statistics_.enqueued_count;
                     } else {
                         const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
                         if (!con->queue_send_.empty())
@@ -206,9 +230,12 @@ void CrazyradioThread::run()
                             p = con->queue_send_.top();
                             con->queue_send_.pop();
                             --con->statistics_.enqueued_count;
-                        } else if (!con->useAutoPing_)
+                        } else if (!con->useAutoPing_ || !all_queues_empty)
                         {
                             continue;
+                        } else {
+                            // We are now proceeding with sending the ping
+                            ++con->statistics_.sent_ping_count;
                         }
                     }
 
@@ -221,7 +248,6 @@ void CrazyradioThread::run()
                         con->safelinkUp_ = !con->safelinkUp_;
                         if (con->retry_) {
                             con->retry_ = Packet();
-                            --con->statistics_.enqueued_count;
                         }
                     } else {
                         con->retry_ = p;
@@ -260,10 +286,11 @@ void CrazyradioThread::run()
                         }
                     }
                 }
-                else if (con->useAutoPing_)
+                else if (con->useAutoPing_ && all_queues_empty)
                 {
                     ack = radio.sendPacket(ping, sizeof(ping));
                     ++con->statistics_.sent_count;
+                    ++con->statistics_.sent_ping_count;
                 }
             }
 
