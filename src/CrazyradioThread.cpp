@@ -199,6 +199,7 @@ void CrazyradioThread::run()
 
                     if (con->retry_) {
                         p = con->retry_;
+                        --con->statistics_.enqueued_count;
                     } else {
                         const std::lock_guard<std::mutex> lock(con->queue_send_mutex_);
                         if (!con->queue_send_.empty())
@@ -209,6 +210,9 @@ void CrazyradioThread::run()
                         } else if (!con->useAutoPing_)
                         {
                             continue;
+                        } else {
+                            // We are now proceeding with sending the ping
+                            ++con->statistics_.sent_ping_count;
                         }
                     }
 
@@ -221,7 +225,6 @@ void CrazyradioThread::run()
                         con->safelinkUp_ = !con->safelinkUp_;
                         if (con->retry_) {
                             con->retry_ = Packet();
-                            --con->statistics_.enqueued_count;
                         }
                     } else {
                         con->retry_ = p;
@@ -264,6 +267,7 @@ void CrazyradioThread::run()
                 {
                     ack = radio.sendPacket(ping, sizeof(ping));
                     ++con->statistics_.sent_count;
+                    ++con->statistics_.sent_ping_count;
                 }
             }
 
