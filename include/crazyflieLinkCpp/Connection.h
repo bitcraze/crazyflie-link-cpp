@@ -84,6 +84,12 @@ public:
 
   void send(const Packet& p);
 
+  // Updated receive function that can be non-blocking, fully blocking, or use a timeout
+  static constexpr unsigned int TimeoutNone = 0;
+  static constexpr unsigned int TimeoutBlock = std::numeric_limits<unsigned int>::max();
+  Packet receive(unsigned int timeout_in_ms);
+
+  // Deprecated receive that can be fully blocking (timeout_in_ms == 0), or use a timeout
   Packet recv(unsigned int timeout_in_ms);
 
   void close();

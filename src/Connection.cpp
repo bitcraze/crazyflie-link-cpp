@@ -262,13 +262,15 @@ void Connection::send(const Packet& p)
   ++impl_->statistics_.enqueued_count;
 }
 
-Packet Connection::recv(unsigned int timeout_in_ms)
+Packet Connection::receive(unsigned int timeout_in_ms)
 {
   std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
   if (!impl_->runtime_error_.empty()) {
     throw std::runtime_error(impl_->runtime_error_);
   }
-  if (timeout_in_ms == 0) {
+  if (timeout_in_ms == Connection::TimeoutNone) {
+    /* nothing needs to be done */
+  } else if (timeout_in_ms == Connection::TimeoutBlock) {
     impl_->queue_recv_cv_.wait(lk, [this] { return !impl_->queue_recv_.empty(); });
   } else {
     std::chrono::milliseconds duration(timeout_in_ms);
@@ -283,6 +285,12 @@ Packet Connection::recv(unsigned int timeout_in_ms)
     impl_->queue_recv_.pop();
   }
   return result;
+}
+
+Packet Connection::recv(unsigned int timeout_in_ms)
+{
+  unsigned int timeout_in_ms_new = timeout_in_ms == 0 ? Connection::TimeoutBlock : timeout_in_ms;
+  return receive(timeout_in_ms_new);
 }
 
 std::ostream& operator<<(std::ostream& out, const Connection& p)
