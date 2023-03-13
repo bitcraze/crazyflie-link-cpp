@@ -30,15 +30,23 @@ public:
 
     Statistics(const Statistics& other)
     {
+      *this = other;
+    }
+
+    Statistics& operator=(const Statistics& other)
+    {
       std::atomic_store(&sent_count, std::atomic_load(&other.sent_count));
+      std::atomic_store(&sent_ping_count, std::atomic_load(&other.sent_ping_count));
       std::atomic_store(&receive_count, std::atomic_load(&other.receive_count));
       std::atomic_store(&enqueued_count, std::atomic_load(&other.enqueued_count));
-      std::atomic_store(&ack_count, std::atomic_load(&other.ack_count));
+      std::atomic_store(&ack_count, std::atomic_load(&other.ack_count));      
+      return *this;
     }
     
     void reset()
     {
       sent_count = 0;
+      sent_ping_count = 0;
       receive_count = 0;
       enqueued_count = 0;
       ack_count = 0;
@@ -49,6 +57,7 @@ public:
     {
       out << "Statistics(";
       out << "sent_count=" << s.sent_count;
+      out << "sent_ping_count=" << s.sent_ping_count;
       out << ",receive_count=" << s.receive_count;
       out << ",enqueued_count=" << s.enqueued_count;
       out << ",ack_count=" << s.ack_count;
@@ -59,6 +68,7 @@ public:
     }
 
     std::atomic_size_t sent_count;
+    std::atomic_size_t sent_ping_count;
     std::atomic_size_t receive_count;
     std::atomic_size_t enqueued_count;
     std::atomic_size_t ack_count;
@@ -96,7 +106,7 @@ public:
 
   const std::string& uri() const;
 
-  Connection::Statistics statistics();
+  const Connection::Statistics statistics() const;
 
   friend std::ostream& operator<<(std::ostream& out, const Connection& p);
 

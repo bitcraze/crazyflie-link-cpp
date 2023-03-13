@@ -305,7 +305,7 @@ const std::string& Connection::uri() const
   return impl_->uri_;
 }
 
-Connection::Statistics Connection::statistics()
+const Connection::Statistics Connection::statistics() const
 {
   if (!impl_->runtime_error_.empty()) {
     throw std::runtime_error(impl_->runtime_error_);
