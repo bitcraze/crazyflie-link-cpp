@@ -79,18 +79,20 @@ jobs:
         with:
           submodules: true
 
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
       - name: Install dependencies
         run: |
-          brew install python@${{ matrix.python }} sdl2 libusb
-          brew link --overwrite python@${{ matrix.python }}
-          pip3 install cmake ninja wheel
+          pip install wheel
 
       - name: Build
         run: |
           python --version
           python3 --version
-          python${{ matrix.python }} --version
-          python3 setup.py bdist_wheel
+          python setup.py bdist_wheel
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
@@ -130,7 +132,7 @@ jobs:
           path: "dist/*.whl"
 
   Publish:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [Source, Linux, MacOS, Windows]
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.guard == 'do-release' }}
 
