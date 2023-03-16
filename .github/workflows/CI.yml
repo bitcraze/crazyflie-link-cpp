@@ -72,7 +72,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.8', '3.9', '3.10', '3.11']
+        python: ['3.8', '3.9', '3.10']
 
     steps:
       - uses: actions/checkout@v2
@@ -85,14 +85,10 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install dependencies
-        run: |
-          pip install cmake ninja wheel
+        run: pip install cmake ninja wheel
 
       - name: Build
-        run: |
-          python --version
-          python3 --version
-          python setup.py bdist_wheel
+        run: python setup.py bdist_wheel
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
@@ -106,7 +102,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.8', '3.9', '3.10', '3.11']
+        python: ['3.8', '3.9', '3.10']
 
     steps:
       - uses: actions/checkout@v3
@@ -119,8 +115,7 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install dependencies
-        run: |
-          pip install wheel
+        run: pip install wheel
 
       - name: Build
         run: python setup.py bdist_wheel
