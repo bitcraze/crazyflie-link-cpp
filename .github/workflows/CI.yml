@@ -86,7 +86,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install wheel
+          pip install cmake ninja wheel
 
       - name: Build
         run: |
