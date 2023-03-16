@@ -86,7 +86,11 @@ jobs:
           pip3 install cmake ninja wheel
 
       - name: Build
-        run: python3 setup.py bdist_wheel
+        run: |
+          python --version
+          python3 --version
+          python${{ matrix.python }} --version
+          python3 setup.py bdist_wheel
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
