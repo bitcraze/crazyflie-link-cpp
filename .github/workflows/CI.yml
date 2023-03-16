@@ -20,7 +20,7 @@ on:
 
 jobs:
   Source:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -46,7 +46,7 @@ jobs:
         path: "dist/*.tar.gz"
 
   Linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Source
 
     steps:
@@ -67,7 +67,7 @@ jobs:
         path: "dist/*.whl"
 
   MacOS:
-    runs-on: macos-10.15
+    runs-on: macos-12
     needs: Source
 
     strategy:
@@ -95,7 +95,7 @@ jobs:
           path: "dist/*.whl"
 
   Windows:
-    runs-on: windows-2019
+    runs-on: windows-2022
     needs: Source
 
     strategy:
