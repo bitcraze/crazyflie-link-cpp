@@ -7,7 +7,7 @@
 #include <ostream>
 #include <vector>
 #include <memory>
-
+#include <limits>
 #include "Packet.hpp"
 
 #define BROADCAST_ADDRESS 0xFFE7E7E7E7
