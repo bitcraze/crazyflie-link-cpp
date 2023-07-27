@@ -129,6 +129,14 @@ if (BUILD_CPP_EXAMPLES)
   target_link_libraries(example_broadcast
     crazyflieLinkCpp
   )
+
+  # example_broadcast_and_console
+  add_executable(example_broadcast_and_console
+    examples/broadcast_and_console.cpp
+  )
+  target_link_libraries(example_broadcast_and_console
+    crazyflieLinkCpp
+  )
 endif()
 
 if (BUILD_PYTHON_BINDINGS)
