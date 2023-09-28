@@ -20,7 +20,7 @@ on:
 
 jobs:
   Source:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -46,8 +46,12 @@ jobs:
         path: "dist/*.tar.gz"
 
   Linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Source
+
+    strategy:
+      matrix:
+        python: ['3.8', '3.9', '3.10', '3.11']
 
     steps:
     - uses: actions/checkout@v3
@@ -57,8 +61,11 @@ jobs:
     - name: Pull builder image
       run: docker pull quay.io/pypa/manylinux2014_x86_64
 
+    - name: Python version
+      run: python --version
+
     - name: Build wheels
-      run: tools/build/build-wheels.sh
+      run: tools/build/build-wheels.sh ${{ matrix.python }}
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v3
@@ -67,40 +74,12 @@ jobs:
         path: "dist/*.whl"
 
   MacOS:
-    runs-on: macos-10.15
+    runs-on: macos-12
     needs: Source
 
     strategy:
       matrix:
-        python: [3.8, 3.9]
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-
-      - name: Install dependencies
-        run: |
-          brew install python@${{ matrix.python }} sdl2 libusb
-          brew link --overwrite python@${{ matrix.python }}
-          pip3 install cmake ninja wheel
-
-      - name: Build
-        run: python3 setup.py bdist_wheel
-
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: macos-build
-          path: "dist/*.whl"
-
-  Windows:
-    runs-on: windows-2019
-    needs: Source
-
-    strategy:
-      matrix:
-        python: [3.6, 3.7, 3.8, 3.9]
+        python: ['3.8', '3.9', '3.10', '3.11']
 
     steps:
       - uses: actions/checkout@v3
@@ -113,8 +92,37 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install dependencies
-        run: |
-          pip install wheel
+        run: pip install cmake ninja wheel
+
+      - name: Build
+        run: python setup.py bdist_wheel
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-build
+          path: "dist/*.whl"
+
+  Windows:
+    runs-on: windows-2022
+    needs: Source
+
+    strategy:
+      matrix:
+        python: ['3.8', '3.9']
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install dependencies
+        run: pip install wheel
 
       - name: Build
         run: python setup.py bdist_wheel
@@ -126,7 +134,7 @@ jobs:
           path: "dist/*.whl"
 
   Publish:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [Source, Linux, MacOS, Windows]
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.guard == 'do-release' }}
 

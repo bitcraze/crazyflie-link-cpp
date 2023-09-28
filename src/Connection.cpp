@@ -262,23 +262,6 @@ void Connection::send(const Packet& p)
   ++impl_->statistics_.enqueued_count;
 }
 
-// Packet Connection::recv()
-// {
-//   std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
-//   if (!impl_->runtime_error_.empty()) {
-//     throw std::runtime_error(impl_->runtime_error_);
-//   }
-
-//   Packet result;
-//   if (impl_->queue_recv_.empty()) {
-//     return result;
-//   } else {
-//     result = impl_->queue_recv_.top();
-//     impl_->queue_recv_.pop();
-//   }
-//   return result;
-// }
-
 Packet Connection::receive(unsigned int timeout_in_ms)
 {
   std::unique_lock<std::mutex> lk(impl_->queue_recv_mutex_);
