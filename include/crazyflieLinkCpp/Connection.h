@@ -57,7 +57,7 @@ public:
     {
       out << "Statistics(";
       out << "sent_count=" << s.sent_count;
-      out << "sent_ping_count=" << s.sent_ping_count;
+      out << ",sent_ping_count=" << s.sent_ping_count;
       out << ",receive_count=" << s.receive_count;
       out << ",enqueued_count=" << s.enqueued_count;
       out << ",ack_count=" << s.ack_count;
@@ -65,6 +65,18 @@ public:
       out << ")";
 
       return out;
+    }
+
+    friend Statistics operator-(const Statistics& lhs, const Statistics& rhs)
+    {
+      Statistics result;
+      result.sent_count = lhs.sent_count - rhs.sent_count;
+      result.sent_ping_count = lhs.sent_ping_count - rhs.sent_ping_count;
+      result.receive_count = lhs.receive_count - rhs.receive_count;
+      result.enqueued_count = lhs.enqueued_count - rhs.enqueued_count;
+      result.ack_count = lhs.ack_count - rhs.ack_count;
+
+      return result;
     }
 
     std::atomic_size_t sent_count;
@@ -107,6 +119,8 @@ public:
   const std::string& uri() const;
 
   const Connection::Statistics statistics() const;
+
+  const Connection::Statistics statisticsDelta();
 
   friend std::ostream& operator<<(std::ostream& out, const Connection& p);
 

@@ -19,6 +19,7 @@ public:
     int devid_;
 
     Connection::Statistics statistics_;
+    Connection::Statistics statistics_previous_;
 
     bool isRadio_;
 

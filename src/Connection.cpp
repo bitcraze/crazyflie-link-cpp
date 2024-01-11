@@ -313,5 +313,16 @@ const Connection::Statistics Connection::statistics() const
   return impl_->statistics_;
 }
 
+const Connection::Statistics Connection::statisticsDelta()
+{
+  if (!impl_->runtime_error_.empty()) {
+    throw std::runtime_error(impl_->runtime_error_);
+  }
+  auto current = impl_->statistics_;
+  auto result = current - impl_->statistics_previous_;
+  impl_->statistics_previous_ = current;
+  return result;
+}
+
 } // namespace crazyflieLinkCpp
 } // namespace bitcraze
