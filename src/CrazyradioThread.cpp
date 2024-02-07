@@ -149,11 +149,9 @@ void CrazyradioThread::run()
             break;
         }
 
-        bool all_queues_empty = true;
         bool any_outstanding_broadcasts = false;
         for (auto con : connections_copy) {
             if (!con->queue_send_.empty() || con->retry_) {
-                all_queues_empty = false;
                 if (con->broadcast_) {
                     any_outstanding_broadcasts = true;
                     break;
@@ -164,7 +162,7 @@ void CrazyradioThread::run()
         for (auto con : connections_copy) {
 
             // if this queue has nothing to do and we can't even send a ping, skip
-            if (con->queue_send_.empty() && !con->retry_ && (!con->useAutoPing_ || !all_queues_empty)) {
+            if (con->queue_send_.empty() && !con->retry_ && !con->useAutoPing_) {
                 continue;
             }
 
@@ -232,7 +230,7 @@ void CrazyradioThread::run()
                             p = con->queue_send_.top();
                             con->queue_send_.pop();
                             --con->statistics_.enqueued_count;
-                        } else if (!con->useAutoPing_ || !all_queues_empty)
+                        } else if (!con->useAutoPing_)
                         {
                             continue;
                         } else {
@@ -288,7 +286,7 @@ void CrazyradioThread::run()
                         }
                     }
                 }
-                else if (con->useAutoPing_ && all_queues_empty)
+                else if (con->useAutoPing_)
                 {
                     ack = radio.sendPacket(ping, sizeof(ping));
                     ++con->statistics_.sent_count;
