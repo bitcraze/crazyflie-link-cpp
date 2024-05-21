@@ -177,23 +177,28 @@ void CrazyradioThread::run()
             //     continue;
             // }
             // reconfigure radio if needed
+            bool radio_reconfigured = false;
             if (radio.address() != con->address_)
             {
                 radio.setAddress(con->address_);
+                radio_reconfigured = true;
             }
             if (radio.channel() != con->channel_)
             {
                 radio.setChannel(con->channel_);
+                radio_reconfigured = true;
             }
             if (radio.datarate() != con->datarate_)
             {
                 radio.setDatarate(con->datarate_);
+                radio_reconfigured = true;
             }
             // Enable ack if broadcast is false
             // Disable ack if broadcast is true
             if (radio.ackEnabled() == con->broadcast_)
             {
                 radio.setAckEnabled(!con->broadcast_);
+                radio_reconfigured = true;
             }
             if (con->broadcast_ && !supports_broadcasts) {
                 std::stringstream sstr;
@@ -201,6 +206,12 @@ void CrazyradioThread::run()
                 sstr << " Your radio with firmware " << version.first << "." << version.second 
                      << " does not support broadcast communication. Please upgrade your Crazyradio firmware!";
                 throw std::runtime_error(sstr.str());
+            }
+
+            // have to wait a bit before sending the next broadcast
+            // to avoid queues on the firmware to overflow
+            if (con->broadcast_ && !radio_reconfigured) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
 
             // prepare to send result
