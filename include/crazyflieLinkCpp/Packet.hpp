@@ -47,6 +47,7 @@ public:
 
   Packet(uint8_t port, uint8_t channel, uint8_t payloadSize)
   {
+    data_[0] = 0xFF;
     setPort(port);
     setChannel(channel);
     setPayloadSize(payloadSize);
