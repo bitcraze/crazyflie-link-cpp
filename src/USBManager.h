@@ -3,6 +3,8 @@
 #include <map>
 #include <vector>
 #include <mutex>
+#include <string>
+
 
 #include <libusb.h>
 
