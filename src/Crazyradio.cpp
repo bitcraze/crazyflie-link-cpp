@@ -10,14 +10,15 @@ namespace crazyflieLinkCpp {
 
 enum
 {
-    SET_RADIO_CHANNEL   = 0x01,
-    SET_RADIO_ADDRESS   = 0x02,
-    SET_DATA_RATE       = 0x03,
-    SET_RADIO_POWER     = 0x04,
-    SET_RADIO_ARD       = 0x05,
-    SET_RADIO_ARC       = 0x06,
-    ACK_ENABLE          = 0x10,
-    SET_CONT_CARRIER    = 0x20,
+    SET_RADIO_CHANNEL           = 0x01,
+    SET_RADIO_ADDRESS           = 0x02,
+    SET_DATA_RATE               = 0x03,
+    SET_RADIO_POWER             = 0x04,
+    SET_RADIO_ARD               = 0x05,
+    SET_RADIO_ARC               = 0x06,
+    ACK_ENABLE                  = 0x10,
+    SET_CONT_CARRIER            = 0x20,
+    SET_PACKET_LOSS_SIMULATION  = 0x30,
     // SCANN_CHANNELS      = 0x21,
     LAUNCH_BOOTLOADER   = 0xFF,
 };
@@ -113,6 +114,15 @@ void Crazyradio::setAckEnabled(bool enable)
 void Crazyradio::setContCarrier(bool active)
 {
     sendVendorSetup(SET_CONT_CARRIER, active, 0, NULL, 0);
+}
+
+void Crazyradio::setPacketLossSimulation(uint8_t packet_loss_percent, uint8_t ack_loss_percent)
+{
+    unsigned char a[2];
+    a[1] = ack_loss_percent;
+    a[0] = packet_loss_percent;
+
+    sendVendorSetup(SET_PACKET_LOSS_SIMULATION, 0, 0, a, 2);
 }
 
 Crazyradio::Ack Crazyradio::sendPacket(

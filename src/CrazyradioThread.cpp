@@ -118,6 +118,21 @@ void CrazyradioThread::runWithErrorHandler()
 void CrazyradioThread::run()
 {
     Crazyradio radio(dev_);
+
+    const char* packet_loss_env = std::getenv("CRAZYRADIO2_PACKET_LOSS_SIM");
+    const char* ack_loss_env = std::getenv("CRAZYRADIO2_ACK_LOSS_SIM");
+    if (packet_loss_env || ack_loss_env) {
+        uint8_t packet_loss = 0;
+        uint8_t ack_loss = 0;
+        if (packet_loss_env) {
+            packet_loss = atoi(packet_loss_env);
+        }
+        if (ack_loss_env) {
+            ack_loss = atoi(ack_loss_env);
+        }
+        radio.setPacketLossSimulation(packet_loss, ack_loss);
+    }
+
     const auto version = radio.version();
     bool supports_broadcasts = 
            (version.first == 0x99 && version.second >= 0x55) // Crazyradio PA with latest official firmware

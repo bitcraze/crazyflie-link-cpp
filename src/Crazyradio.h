@@ -146,6 +146,11 @@ public:
     void setContCarrier(
         bool active);
 
+    // only available for Crazyradio 2.0 with firmware 5.0 and greater
+    void setPacketLossSimulation(
+        uint8_t packet_loss_percent,
+        uint8_t ack_loss_percent);
+    
     Ack sendPacket(
         const uint8_t* data,
         uint32_t length);
