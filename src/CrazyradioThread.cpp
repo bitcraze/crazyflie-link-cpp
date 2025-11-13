@@ -121,7 +121,7 @@ void CrazyradioThread::run()
     const auto version = radio.version();
     bool supports_broadcasts = 
            (version.first == 0x99 && version.second >= 0x55) // Crazyradio PA with latest official firmware
-        || (version.first == 3 && version.second >= 2); // Crazyradio 2.0;
+        || (version.first >= 5); // Crazyradio 2.0 with first working firmware
 
     const uint8_t enableSafelink[] = {0xFF, 0x05, 1};
     const uint8_t ping[] = {0xFF};
