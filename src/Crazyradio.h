@@ -11,7 +11,7 @@
 namespace bitcraze {
 namespace crazyflieLinkCpp {
 
-#define ACK_MAXSIZE 33
+#define ACK_MAXSIZE 34
 
 class Crazyradio
   : public USBDevice
@@ -39,13 +39,18 @@ public:
         Ack()
             : data_()
             , size_(0)
+            , inline_mode_(false)
         {
             data_[0] = 0;
         }
 
         bool ack() const
         {
-            return getBitBieldValue<uint8_t, 0, 1>(data_[0]);
+            if (!inline_mode_) {
+                return getBitBieldValue<uint8_t, 0, 1>(data_[0]);
+            } else {
+                return getBitBieldValue<uint8_t, 0, 1>(data_[1]);
+            }
         }
 
         operator bool() const
@@ -55,17 +60,37 @@ public:
 
         bool powerDet() const
         {
-            return getBitBieldValue<uint8_t, 1, 1>(data_[0]);
+            if (!inline_mode_) {
+                return getBitBieldValue<uint8_t, 1, 1>(data_[0]);
+            } else {
+                return getBitBieldValue<uint8_t, 1, 1>(data_[1]);
+            }
+        }
+
+        bool invalidSettings() const {
+            if (!inline_mode_) {
+                return false;
+            } else {
+                return getBitBieldValue<uint8_t, 2, 2>(data_[1]);
+            }
         }
 
         uint8_t retry() const
         {
-            return getBitBieldValue<uint8_t, 2, 4>(data_[0]);
+            if (!inline_mode_) {
+                return getBitBieldValue<uint8_t, 2, 4>(data_[0]);
+            } else {
+                return getBitBieldValue<uint8_t, 4, 7>(data_[1]);
+            }
         }
 
         const uint8_t* data() const
         {
-            return &data_[1];
+            if (!inline_mode_) {
+                return &data_[1];
+            } else {
+                return &data_[2];
+            }
         }
 
         uint8_t size() const
@@ -92,6 +117,7 @@ public:
     private:
         std::array<uint8_t, ACK_MAXSIZE> data_;
         size_t size_;
+        bool inline_mode_;
     };
 
 public:
@@ -139,6 +165,9 @@ public:
     void setAckEnabled(
         bool enable);
 
+    void setInlineMode(
+        bool enable);
+
     bool ackEnabled() const {
         return ackEnabled_;
     }
@@ -162,6 +191,14 @@ public:
     void send2PacketsNoAck(
         const uint8_t* data,
         uint32_t totalLength);
+
+    Ack sendPacketInline(
+        const uint8_t* data,
+        uint32_t length,
+        Datarate datarate,
+        uint8_t channel,
+        uint64_t address,
+        bool ackEnabled);
 
 private:
     uint8_t channel_;

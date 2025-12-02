@@ -138,10 +138,16 @@ void CrazyradioThread::run()
            (version.first == 0x99 && version.second >= 0x55) // Crazyradio PA with latest official firmware
         || (version.first >= 5); // Crazyradio 2.0 with first working firmware
 
+    bool supports_inline_mode = false;//(version.first >= 5);
+
     const uint8_t enableSafelink[] = {0xFF, 0x05, 1};
     const uint8_t ping[] = {0xFF};
 
     std::set<std::shared_ptr<ConnectionImpl>> connections_copy;
+
+    if (supports_inline_mode) {
+        radio.setInlineMode(true);
+    }
 
     while (true)
     {
@@ -192,41 +198,43 @@ void CrazyradioThread::run()
             //     continue;
             // }
             // reconfigure radio if needed
-            bool radio_reconfigured = false;
-            if (radio.address() != con->address_)
-            {
-                radio.setAddress(con->address_);
-                radio_reconfigured = true;
-            }
-            if (radio.channel() != con->channel_)
-            {
-                radio.setChannel(con->channel_);
-                radio_reconfigured = true;
-            }
-            if (radio.datarate() != con->datarate_)
-            {
-                radio.setDatarate(con->datarate_);
-                radio_reconfigured = true;
-            }
-            // Enable ack if broadcast is false
-            // Disable ack if broadcast is true
-            if (radio.ackEnabled() == con->broadcast_)
-            {
-                radio.setAckEnabled(!con->broadcast_);
-                radio_reconfigured = true;
-            }
-            if (con->broadcast_ && !supports_broadcasts) {
-                std::stringstream sstr;
-                sstr << "Issue with connection " << con->uri_ << "."; 
-                sstr << " Your radio with firmware " << version.first << "." << version.second 
-                     << " does not support broadcast communication. Please upgrade your Crazyradio firmware!";
-                throw std::runtime_error(sstr.str());
-            }
+            if (!supports_inline_mode) {
+                bool radio_reconfigured = false;
+                if (radio.address() != con->address_)
+                {
+                    radio.setAddress(con->address_);
+                    radio_reconfigured = true;
+                }
+                if (radio.channel() != con->channel_)
+                {
+                    radio.setChannel(con->channel_);
+                    radio_reconfigured = true;
+                }
+                if (radio.datarate() != con->datarate_)
+                {
+                    radio.setDatarate(con->datarate_);
+                    radio_reconfigured = true;
+                }
+                // Enable ack if broadcast is false
+                // Disable ack if broadcast is true
+                if (radio.ackEnabled() == con->broadcast_)
+                {
+                    radio.setAckEnabled(!con->broadcast_);
+                    radio_reconfigured = true;
+                }
+                if (con->broadcast_ && !supports_broadcasts) {
+                    std::stringstream sstr;
+                    sstr << "Issue with connection " << con->uri_ << "."; 
+                    sstr << " Your radio with firmware " << version.first << "." << version.second 
+                        << " does not support broadcast communication. Please upgrade your Crazyradio firmware!";
+                    throw std::runtime_error(sstr.str());
+                }
 
-            // have to wait a bit before sending the next broadcast
-            // to avoid queues on the firmware to overflow
-            if (con->broadcast_ && !radio_reconfigured) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                // have to wait a bit before sending the next broadcast
+                // to avoid queues on the firmware to overflow
+                if (con->broadcast_ && !radio_reconfigured) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                }
             }
 
             // prepare to send result
@@ -235,7 +243,11 @@ void CrazyradioThread::run()
             // initialize safelink if needed
             if (con->useSafelink_) {
                 if (!con->safelinkInitialized_) {
-                    ack = radio.sendPacket(enableSafelink, sizeof(enableSafelink));
+                    if (!supports_inline_mode) {
+                        ack = radio.sendPacket(enableSafelink, sizeof(enableSafelink));
+                    } else {
+                        ack = radio.sendPacketInline(enableSafelink, sizeof(enableSafelink), con->datarate_, con->channel_, con->address_, !con->broadcast_);
+                    }
                     ++con->statistics_.sent_count;
                     if (ack) {
                         con->safelinkInitialized_ = true;
@@ -266,7 +278,11 @@ void CrazyradioThread::run()
                     }
 
                     p.setSafelink(con->safelinkUp_ << 1 | con->safelinkDown_);
-                    ack = radio.sendPacket(p.raw(), p.size());
+                    if (!supports_inline_mode) {
+                        ack = radio.sendPacket(p.raw(), p.size());
+                    } else {
+                        ack = radio.sendPacketInline(p.raw(), p.size(), con->datarate_, con->channel_, con->address_, !con->broadcast_);
+                    }
                     ++con->statistics_.sent_count;
 
                     if (ack)
@@ -296,14 +312,22 @@ void CrazyradioThread::run()
                     const auto p = con->queue_send_.top();
                     if (con->broadcast_)
                     {
-                        radio.sendPacketNoAck(p.raw(), p.size());
+                        if (!supports_inline_mode) {
+                            radio.sendPacketNoAck(p.raw(), p.size());
+                        } else {
+                            radio.sendPacketInline(p.raw(), p.size(), con->datarate_, con->channel_, con->address_, !con->broadcast_);
+                        }
                         ++con->statistics_.sent_count;
                         con->queue_send_.pop();
                         --con->statistics_.enqueued_count;
                     }
                     else
                     {
-                        ack = radio.sendPacket(p.raw(), p.size());
+                        if (!supports_inline_mode) {
+                            ack = radio.sendPacket(p.raw(), p.size());
+                        } else {
+                            ack = radio.sendPacketInline(p.raw(), p.size(), con->datarate_, con->channel_, con->address_, !con->broadcast_);
+                        }
                         ++con->statistics_.sent_count;
                         if (ack)
                         {
@@ -314,7 +338,11 @@ void CrazyradioThread::run()
                 }
                 else if (con->useAutoPing_)
                 {
-                    ack = radio.sendPacket(ping, sizeof(ping));
+                    if (!supports_inline_mode) {
+                        ack = radio.sendPacket(ping, sizeof(ping));
+                    } else {
+                        ack = radio.sendPacketInline(ping, sizeof(ping), con->datarate_, con->channel_, con->address_, !con->broadcast_);
+                    }
                     ++con->statistics_.sent_count;
                     ++con->statistics_.sent_ping_count;
                 }
