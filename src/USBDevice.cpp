@@ -68,7 +68,7 @@ void USBDevice::sendVendorSetup(
         /*timeout*/ 1000);
     if (transferred < 0) {
         // if negative, see LIBUSB_ERROR enum
-        throw std::runtime_error(libusb_error_name(transferred));
+        throw std::runtime_error("sendVendorSetup(" + std::to_string((int)request) + "): " + std::string(libusb_error_name(transferred)));
     }
 }
 

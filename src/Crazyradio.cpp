@@ -153,7 +153,7 @@ Crazyradio::Ack Crazyradio::sendPacket(
     //     return;
     // }
     if (status != LIBUSB_SUCCESS) {
-        throw std::runtime_error(libusb_error_name(status));
+        throw std::runtime_error("sendPacket: " + std::string(libusb_error_name(status)));
     }
     if (length != (uint32_t)transferred) {
         std::stringstream sstr;
@@ -200,7 +200,7 @@ void Crazyradio::sendPacketNoAck(
     //     return;
     // }
     if (status != LIBUSB_SUCCESS) {
-        throw std::runtime_error(libusb_error_name(status));
+        throw std::runtime_error("sendPacketNoAck: " + std::string(libusb_error_name(status)));
     }
     if (length != (uint32_t)transferred) {
         std::stringstream sstr;
@@ -228,7 +228,7 @@ void Crazyradio::send2PacketsNoAck(
     //     return;
     // }
     if (status != LIBUSB_SUCCESS) {
-        throw std::runtime_error(libusb_error_name(status));
+        throw std::runtime_error("send2PacketsNoAck: " + std::string(libusb_error_name(status)));
     }
     if (totalLength != (uint32_t)transferred) {
         std::stringstream sstr;
