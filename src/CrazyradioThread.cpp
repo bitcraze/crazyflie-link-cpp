@@ -118,12 +118,26 @@ void CrazyradioThread::runWithErrorHandler()
 void CrazyradioThread::run()
 {
     Crazyradio radio(dev_);
+    const auto version = radio.version();
 
-    const char* packet_loss_env = std::getenv("CRAZYRADIO2_PACKET_LOSS_SIM");
-    const char* ack_loss_env = std::getenv("CRAZYRADIO2_ACK_LOSS_SIM");
-    if (packet_loss_env || ack_loss_env) {
+    const bool is_supported_crazyradio2 = (version.first >= 5 && version.second >= 1) && // Crazyradio 2.0 with first working firmware
+                                          (version.first != 0x99); // but not a Crazyradio PA
+
+    const bool is_supported = (version.first == 0x99 && version.second >= 0x55) // Crazyradio PA with latest official firmware
+        || is_supported_crazyradio2;
+
+    if (!is_supported) {
+        std::stringstream sstr;
+        sstr << " Your radio with firmware " << version.first << "." << version.second 
+            << " does not support broadcast communication. Please upgrade your Crazyradio firmware!";
+        throw std::runtime_error(sstr.str());
+    }
+
+    if (is_supported_crazyradio2) {
         uint8_t packet_loss = 0;
         uint8_t ack_loss = 0;
+        const char* packet_loss_env = std::getenv("CRAZYRADIO2_PACKET_LOSS_SIM");
+        const char* ack_loss_env = std::getenv("CRAZYRADIO2_ACK_LOSS_SIM");
         if (packet_loss_env) {
             packet_loss = atoi(packet_loss_env);
         }
@@ -133,12 +147,7 @@ void CrazyradioThread::run()
         radio.setPacketLossSimulation(packet_loss, ack_loss);
     }
 
-    const auto version = radio.version();
-    bool supports_broadcasts = 
-           (version.first == 0x99 && version.second >= 0x55) // Crazyradio PA with latest official firmware
-        || (version.first >= 5); // Crazyradio 2.0 with first working firmware
-
-    bool supports_inline_mode = false;//(version.first >= 5);
+    const bool supports_inline_mode = is_supported_crazyradio2;
 
     const uint8_t enableSafelink[] = {0xFF, 0x05, 1};
     const uint8_t ping[] = {0xFF};
@@ -221,13 +230,6 @@ void CrazyradioThread::run()
                 {
                     radio.setAckEnabled(!con->broadcast_);
                     radio_reconfigured = true;
-                }
-                if (con->broadcast_ && !supports_broadcasts) {
-                    std::stringstream sstr;
-                    sstr << "Issue with connection " << con->uri_ << "."; 
-                    sstr << " Your radio with firmware " << version.first << "." << version.second 
-                        << " does not support broadcast communication. Please upgrade your Crazyradio firmware!";
-                    throw std::runtime_error(sstr.str());
                 }
 
                 // have to wait a bit before sending the next broadcast
