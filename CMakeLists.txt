@@ -95,6 +95,10 @@ target_link_libraries(crazyflieLinkCpp
     ${LIBUSB_LIBRARY}
 )
 set_property(TARGET crazyflieLinkCpp PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_target_properties(crazyflieLinkCpp PROPERTIES
+  CXX_VISIBILITY_PRESET default
+  VISIBILITY_INLINES_HIDDEN OFF
+)
 
 # C++ example application
 if (BUILD_CPP_EXAMPLES)
